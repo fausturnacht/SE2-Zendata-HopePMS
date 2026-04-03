@@ -32,7 +32,7 @@ It closely follows the Stitch wireframe (desktop + mobile views) with clean acad
 ### Wireframes (Stitch AI)
 
 #### Desktop View
-![Login Page - Desktop Wireframe](images/login-desktop.png)
+![Login Page - Desktop Wireframe](https://github.com/fausturnacht/SE2-Zendata-HopePMS/edit/feature/ui-login-page/docs/ui-login-page.md)
 
 #### Mobile View
-![Login Page - Mobile Wireframe](images/login-mobile.png)
+![Login Page - Mobile Wireframe](https://github.com/fausturnacht/SE2-Zendata-HopePMS/blob/feature/ui-login-page/docs/login-page-mobileview.png)
