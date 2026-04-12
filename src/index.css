@@ -38,7 +38,7 @@
 @theme {
   fontFamily: {
     headline: ['Manrope', 'sans-serif'],
-    body: ['Inter', 'sans-serif'],
-    label: ['Inter', 'sans-serif'],
+      body: ['Inter', 'sans-serif'],
+      label: ['Inter', 'sans-serif'],
   }
 }
