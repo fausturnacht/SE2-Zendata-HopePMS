@@ -1,100 +1,85 @@
-import { useAuth } from '../hooks/useAuth';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
-  const { user, isLoading, signOut } = useAuth();
+  const [loading, setLoading] = useState(false);
 
-  const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        // This directs Supabase where to send the user after they click their Google account
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
     if (error) {
-      console.error('Google sign in error:', error.message);
+      console.error('Error with Google Login:', error.message);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#f7f9fb] text-[#2a3439] font-body">
-      <header className="shrink-0 bg-[#f7f9fb] px-6 py-4 border-b border-[#d9e4ea] lg:px-8">
-        <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-4">
-            <span className="text-xl font-bold tracking-tighter text-[#0053db] font-headline uppercase">HOPE, INC.</span>
-            <div className="hidden md:block h-6 w-px bg-[#717c82]/30" />
-            <p className="hidden md:block text-sm font-semibold text-[#2a3439] opacity-70">Product Management System</p>
-          </div>
-        </div>
+    <div className="flex min-h-screen flex-col bg-[#F8F9FA] font-sans">
+      {/* Header */}
+      <header className="flex items-center border-b border-gray-200 bg-white px-6 py-4">
+        <h1 className="text-xl font-bold tracking-tight text-blue-600">HOPE, INC.</h1>
+        <div className="mx-4 h-6 border-l border-gray-300"></div>
+        <span className="text-sm font-medium text-gray-500">Product Management System</span>
       </header>
 
-      <div className="relative flex-1 flex flex-col min-h-0">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-          <div className="absolute top-0 right-0 mt-[-8rem] mr-[-8rem] w-[420px] h-[420px] rounded-full bg-[#0053db]/6 blur-[120px]" />
-          <div className="absolute bottom-0 left-0 mb-[-8rem] ml-[-6rem] w-[320px] h-[320px] rounded-full bg-[#605c78]/6 blur-[100px]" />
-        </div>
+      {/* Main Content */}
+      <main className="flex flex-grow flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-[24px] bg-white p-10 shadow-[0_2px_10px_rgb(0,0,0,0.04)]">
+          <h2 className="text-2xl font-semibold text-gray-900">Sign In</h2>
+          <p className="mt-2 text-sm text-gray-500">Log in with your Google account</p>
 
-        <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-10 sm:py-14 lg:py-16 overflow-y-auto w-full">
-          <div className="relative w-full max-w-[420px]">
-          <div className="text-center mb-8 space-y-2 md:hidden">
-            <h1 className="text-2xl font-bold tracking-tight font-headline">Product Management System</h1>
-            <p className="text-sm text-[#566166]">Access your curator dashboard</p>
-          </div>
-
-          <div className="bg-white academic-glass border border-[#d9e4ea]/80 rounded-3xl p-6 sm:p-8 shadow-[0_20px_40px_rgba(42,52,57,0.06)]">
-            <div className="mb-8 text-center md:text-left">
-              <h2 className="text-2xl font-extrabold tracking-tight text-[#2a3439]">Sign In</h2>
-              <p className="mt-2 text-sm text-[#566166]">Log in with your Google account</p>
-            </div>
-
-            {isLoading ? (
-              <div className="rounded-[2rem] border border-[#d9e4ea] bg-[#f7f9fb] px-6 py-8 text-center text-sm text-[#566166]">
-                Loading authentication status…
-              </div>
-            ) : user ? (
-              <div className="space-y-4 text-center">
-                <p className="text-sm text-[#2a3439]">You are signed in as</p>
-                <p className="font-semibold text-[#2a3439]">{user.email ?? user.id}</p>
-                <button
-                  type="button"
-                  onClick={signOut}
-                  className="w-full rounded-2xl border border-[#d9e4ea] bg-[#f7f9fb] px-4 py-4 text-sm font-semibold text-[#2a3439] transition hover:bg-[#e8eff3]"
-                >
-                  Sign out
-                </button>
-              </div>
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-[#F8F9FA] px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? (
+              <span>Redirecting...</span>
             ) : (
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                className="w-full flex items-center justify-center gap-3 rounded-2xl border border-[#a9b4b9]/20 bg-[#f0f4f7] px-4 py-4 text-sm font-semibold text-[#2a3439] transition hover:bg-[#e8eff3] active:scale-[0.98]"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              <>
+                <svg className="h-5 w-5" viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
                 </svg>
                 Continue with Google
-              </button>
+              </>
             )}
-
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#717c82] font-bold opacity-60">Secure Academic Environment</p>
-          </div>
+          </button>
         </div>
-        </main>
-      </div>
+        
+        <p className="mt-8 text-xs font-semibold tracking-widest text-gray-400">
+          SECURE ACADEMIC ENVIRONMENT
+        </p>
+      </main>
 
-      <footer className="shrink-0 bg-[#f7f9fb] border-t border-[#a9b4b9]/15 py-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 text-center md:flex-row md:items-center md:justify-between md:text-left">
-          <div className="flex flex-col items-center gap-2 md:flex-row md:items-center md:gap-4">
-            <span className="font-headline text-sm font-semibold text-[#506076]">New Era University</span>
-            <span className="hidden md:inline text-[10px] uppercase tracking-[0.2em] text-[#506076]/40">© 2024</span>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-6 text-[10px] uppercase tracking-[0.2em] text-[#566166] md:justify-end">
-            <a className="transition hover:text-[#0053db]" href="#">Privacy Policy</a>
-            <a className="transition hover:text-[#0053db]" href="#">Institutional Terms</a>
-            <a className="transition hover:text-[#0053db]" href="#">Research Archive</a>
-          </div>
+      {/* Footer */}
+      <footer className="flex items-center justify-between px-8 py-6 text-xs text-gray-400">
+        <div>New Era University © 2026</div>
+        <div className="flex gap-6">
+          <a href="#" className="hover:text-gray-600 transition-colors">PRIVACY POLICY</a>
+          <a href="#" className="hover:text-gray-600 transition-colors">INSTITUTIONAL TERMS</a>
+          <a href="#" className="hover:text-gray-600 transition-colors">RESEARCH ARCHIVE</a>
         </div>
       </footer>
     </div>
