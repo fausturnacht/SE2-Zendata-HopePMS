@@ -7,22 +7,42 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const processAuth = async () => {
-      // Supabase automatically reads the Google token from the URL
-      const { data: { session }, error } = await supabase.auth.getSession();
+      // Get the session from Google
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (error) {
-        console.error('Authentication failed:', error.message);
+      if (sessionError || !session) {
         navigate('/login', { replace: true });
         return;
       }
 
-      if (session) {
-        // Success! Send them to the main system
-        navigate('/products', { replace: true });
-      } else {
-        // If something weird happened and there's no session, kick them back to login
+      // LOGIN GUARD: Check the user's status in the database
+      // Using 'userid' to match specific table schema
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('record_status')
+        .eq('userid', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError.message);
+        // Fallback to login if the database check fails
         navigate('/login', { replace: true });
+        return;
       }
+
+      // The Bouncer: Kick them out if INACTIVE
+      if (profile?.record_status === 'INACTIVE') {
+        await supabase.auth.signOut();
+        // Send them back to login with a hidden error state
+        navigate('/login', { 
+          replace: true, 
+          state: { error: "Account pending approval. Please contact an administrator to activate your access." } 
+        });
+        return;
+      }
+
+      // If they are ACTIVE, let them into the system
+      navigate('/products', { replace: true });
     };
 
     processAuth();
@@ -32,8 +52,8 @@ export default function AuthCallback() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8F9FA] font-sans">
       <div className="flex flex-col items-center space-y-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
-        <h2 className="text-xl font-semibold text-gray-900">Authenticating...</h2>
-        <p className="text-sm text-gray-500">Securing your academic environment</p>
+        <h2 className="text-xl font-semibold text-gray-900">Verifying Access...</h2>
+        <p className="text-sm text-gray-500">Checking security clearances</p>
       </div>
     </div>
   );
