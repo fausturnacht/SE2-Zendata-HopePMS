@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -42,7 +42,7 @@ export default function AuthCallback() {
       }
 
       // If they are ACTIVE, let them into the system
-      navigate('/products', { replace: true });
+      navigate('/dashboard', { replace: true });
     };
 
     processAuth();
