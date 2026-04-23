@@ -49,12 +49,57 @@ export default function AuthCallback() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8F9FA] font-sans">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
-        <h2 className="text-xl font-semibold text-gray-900">Verifying Access...</h2>
-        <p className="text-sm text-gray-500">Checking security clearances</p>
-      </div>
+    <div className="bg-surface text-on-surface flex flex-col items-center justify-center min-h-screen ivory-gradient selection:bg-primary-container selection:text-on-primary-container">
+      <style>
+        {`
+          .loader {
+            border: 3px solid #f0f4f7;
+            border-top: 3px solid #1353d8;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          .ivory-gradient {
+            background: linear-gradient(180deg, #f7f9fb 0%, #f0f4f7 100%);
+          }
+        `}
+      </style>
+      <main className="flex flex-col items-center justify-center space-y-12 px-6">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="p-5 bg-surface-container-lowest rounded-xl shadow-[0px_40px_40px_rgba(42,52,57,0.06)] border border-outline-variant/10">
+            <span className="material-symbols-outlined text-primary text-6xl">account_balance</span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tighter text-on-surface uppercase">
+            HOPE PMS
+          </h1>
+        </div>
+        <div className="flex flex-col items-center space-y-8">
+          <div className="loader"></div>
+          <div className="text-center space-y-2">
+            <p className="text-on-surface-variant font-medium tracking-tight">
+              Initializing Secure Environment...
+            </p>
+            <div className="flex items-center justify-center space-x-2">
+              <span className="material-symbols-outlined text-primary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                verified
+              </span>
+              <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-on-secondary-fixed-variant">
+                ACADEMIC INSTITUTION VERIFIED
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer className="fixed bottom-12 w-full text-center">
+        <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-outline-variant">
+          INSTITUTIONAL ACCESS ONLY
+        </p>
+      </footer>
     </div>
   );
 }
