@@ -1,26 +1,78 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   
   // Catch the error state sent from the AuthCallback guard
   const location = useLocation();
-  const inactiveError = location.state?.error;
+  const inactiveError = location.state?.error || localError;
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        skipBrowserRedirect: true,
       },
     });
 
     if (error) {
       console.error('Error with Google Login:', error.message);
       setLoading(false);
+      return;
+    }
+
+    if (data?.url) {
+      // Calculate popup position
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      const popup = window.open(
+        data.url,
+        'google-auth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      if (!popup) {
+        alert('Popup blocked! Please allow popups for this site.');
+        setLoading(false);
+        return;
+      }
+
+      // Listener for completion message from the popup
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data?.type === 'AUTH_COMPLETE') {
+          window.removeEventListener('message', handleMessage);
+          navigate('/products');
+        } else if (event.data?.type === 'AUTH_ERROR') {
+          window.removeEventListener('message', handleMessage);
+          setLoading(false);
+          if (event.data.error) {
+            setLocalError(event.data.error);
+          }
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Cleanup if popup is closed manually
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          setLoading(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      }, 1000);
     }
   };
 
