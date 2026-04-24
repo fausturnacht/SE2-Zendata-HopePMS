@@ -25,7 +25,7 @@ export default function Login() {
 
     if (error) {
       console.error('Error with Google Login:', error.message);
-      setAuthError('Unable to connect. Please check your network.');
+      setLocalError('Unable to connect. Please check your network.');
       setLoading(false);
       return;
     }
@@ -100,7 +100,7 @@ export default function Login() {
 
           <GoogleAuthButton
             loading={loading}
-            error={authError}
+            error={localError}
             onClick={handleGoogleLogin}
           />
         </div>
