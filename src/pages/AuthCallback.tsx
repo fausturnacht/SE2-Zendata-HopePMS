@@ -11,12 +11,16 @@ export default function AuthCallback() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
-        navigate('/login', { replace: true });
+        if (window.opener) {
+          window.opener.postMessage({ type: 'AUTH_ERROR', error: 'Authentication failed' }, window.location.origin);
+          window.close();
+        } else {
+          navigate('/login', { replace: true });
+        }
         return;
       }
 
       // LOGIN GUARD: Check the user's status in the database
-      // Using 'userid' to match specific table schema
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('record_status')
@@ -25,24 +29,39 @@ export default function AuthCallback() {
 
       if (profileError) {
         console.error('Error fetching profile:', profileError.message);
-        // Fallback to login if the database check fails
-        navigate('/login', { replace: true });
+        if (window.opener) {
+          window.opener.postMessage({ type: 'AUTH_ERROR', error: 'Could not fetch profile' }, window.location.origin);
+          window.close();
+        } else {
+          navigate('/login', { replace: true });
+        }
         return;
       }
 
       // The Bouncer: Kick them out if INACTIVE
       if (profile?.record_status === 'INACTIVE') {
         await supabase.auth.signOut();
-        // Send them back to login with a hidden error state
-        navigate('/login', { 
-          replace: true, 
-          state: { error: "Account pending approval. Please contact an administrator to activate your access." } 
-        });
+        const errorMessage = "Account pending approval. Please contact an administrator to activate your access.";
+        
+        if (window.opener) {
+          window.opener.postMessage({ type: 'AUTH_ERROR', error: errorMessage }, window.location.origin);
+          window.close();
+        } else {
+          navigate('/login', { 
+            replace: true, 
+            state: { error: errorMessage } 
+          });
+        }
         return;
       }
 
       // If they are ACTIVE, let them into the system
-      navigate('/dashboard', { replace: true });
+      if (window.opener) {
+        window.opener.postMessage({ type: 'AUTH_COMPLETE' }, window.location.origin);
+        window.close();
+      } else {
+        navigate('/products', { replace: true });
+      }
     };
 
     processAuth();
