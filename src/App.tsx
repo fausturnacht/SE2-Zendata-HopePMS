@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
+import ApiDebug from './pages/ApiDebug';
 import { RootLayout } from './layouts/RootLayout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,11 @@ function App() {
           <RootLayout>
             <div>Products Dashboard (Protected)</div>
           </RootLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/api" element={
+        <ProtectedRoute>
+          <ApiDebug />
         </ProtectedRoute>
       } />
     </Routes>
