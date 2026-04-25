@@ -33,10 +33,10 @@ WARNING: If you have recently worked with the fullstack branches (e.g. dev or an
     * Duration:
     * Summary: 
 
-### test-cases.md (M4 - R&A)
+### test-cases.md (M5 - QA/Docs)
 * Save your docs file as .md and paste the contents inside.
 
-### user-stories.md (M5 - QA/Docs)
+### user-stories.md (M4 - RA)
 * Save your docs file as .md and paste the contents inside.
 
 
