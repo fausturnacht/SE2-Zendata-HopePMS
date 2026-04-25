@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useRights } from '../hooks/useRights';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -8,6 +9,7 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const { currentUser, signOut } = useAuth();
+  const { isAdmin, isSuperAdmin } = useRights();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -17,7 +19,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
     { name: 'Products', icon: 'inventory_2', href: '/products', active: false },
     { name: 'Reports', icon: 'analytics', href: '/reports', active: false },
     { name: 'Admin', icon: 'admin_panel_settings', href: '/admin', active: false },
-    { name: 'Deleted Items', icon: 'delete', href: '/deleted', active: false },
+    ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: 'delete', href: '/deleted', active: false }] : []),
   ];
 
   return (

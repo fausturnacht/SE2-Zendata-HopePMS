@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
 import ApiDebug from './pages/ApiDebug';
+import ProductListPage from './pages/ProductListPage';
 import { RootLayout } from './layouts/RootLayout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -37,7 +38,7 @@ function App() {
       <Route path="/products" element={
         <ProtectedRoute>
           <RootLayout>
-            <div>Products Dashboard (Protected)</div>
+            <ProductListPage />
           </RootLayout>
         </ProtectedRoute>
       } />
