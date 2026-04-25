@@ -1,10 +1,10 @@
-# SE2-Zendata-HopePMS 🚀
+# SE2-Zendata-HopePMS
 
 A robust **Product Management System (PMS)** implementation based on the Hope Inc. sample database. Developed by the **Zendata** group (3BSCS-1) for SE2.
 
 ---
 
-## 🛠️ Tech Stack Considerations
+## Tech Stack Considerations
 
 This project leverages a modern, high-performance tech stack designed for scalability, maintainability, and developer efficiency.
 
@@ -36,17 +36,17 @@ This project leverages a modern, high-performance tech stack designed for scalab
 
 ---
 
-## ✨ Features
+## System Features
 
-- 📦 **Inventory Management**: Track product levels, categories, and suppliers.
-- 🔐 **Secure Authentication**: Managed via Supabase Auth with role-based access.
-- 🎨 **Responsive Design**: Fully optimized for desktop and mobile viewports.
-- ⚡ **Real-time Updates**: Instant data synchronization across clients.
-- 📊 **Dashboard Analytics**: Visual insights into product performance and stock status.
+- **Inventory Management**: Track product levels, categories, and suppliers.
+- **Secure Authentication**: Managed via Supabase Auth with role-based access.
+- **Responsive Design**: Fully optimized for desktop and mobile viewports.
+- **Real-time Updates**: Instant data synchronization across clients.
+- **Dashboard Analytics**: Visual insights into product performance and stock status.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher)
@@ -78,7 +78,7 @@ This project leverages a modern, high-performance tech stack designed for scalab
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 src/
@@ -92,10 +92,14 @@ src/
 
 ---
 
-## 👥 Meet the Team: Zendata (3BSCS-1)
-*Member list can be added here*
+## Meet the Team: Zendata (3BSCS-1)
+* Felix Luis Faustino
+* John Lian Nerecina
+* Carl Geneson Ola
+* Julius Albert Ortiz
+* Angel Lyn Tolentino
 
 ---
 
-## 📄 License
+## License
 This project is for educational purposes as part of the SE2 curriculum.
