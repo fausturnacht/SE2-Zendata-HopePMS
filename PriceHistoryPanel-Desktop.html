@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Academic Inventory - Price History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-dim": "#564f6b",
+                        "error-dim": "#4f0116",
+                        "on-tertiary-fixed-variant": "#534d68",
+                        "secondary-container": "#d3e4fe",
+                        "on-tertiary": "#fdf7ff",
+                        "primary-dim": "#0047c5",
+                        "inverse-primary": "#638aff",
+                        "on-primary": "#f8f7ff",
+                        "on-surface-variant": "#566166",
+                        "on-error": "#fff7f7",
+                        "secondary-fixed": "#d3e4fe",
+                        "secondary-dim": "#44546a",
+                        "inverse-surface": "#0b0f10",
+                        "error-container": "#ff8b9a",
+                        "secondary": "#506076",
+                        "outline": "#717c82",
+                        "on-surface": "#2a3439",
+                        "on-background": "#2a3439",
+                        "surface-variant": "#d9e4ea",
+                        "on-secondary-fixed": "#314055",
+                        "background": "#f7f9fb",
+                        "error": "#9e3f4e",
+                        "on-secondary-container": "#435368",
+                        "on-primary-fixed-variant": "#0b50d5",
+                        "on-primary-container": "#0046c3",
+                        "surface-container": "#e8eff3",
+                        "on-tertiary-container": "#4a445e",
+                        "primary-fixed-dim": "#c8d3ff",
+                        "primary-container": "#dbe1ff",
+                        "on-error-container": "#782232",
+                        "on-tertiary-fixed": "#37314a",
+                        "surface": "#f7f9fb",
+                        "on-secondary": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#a9b4b9",
+                        "primary": "#1353d8",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed-variant": "#4d5d73",
+                        "tertiary-fixed": "#d6cdee",
+                        "tertiary-fixed-dim": "#c8bfdf",
+                        "surface-container-highest": "#d9e4ea",
+                        "surface-container-low": "#f0f4f7",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-tint": "#1353d8",
+                        "secondary-fixed-dim": "#c5d6f0",
+                        "tertiary-container": "#d6cdee",
+                        "tertiary": "#625b77",
+                        "surface-container-high": "#e1e9ee",
+                        "on-primary-fixed": "#00369b",
+                        "inverse-on-surface": "#9a9d9f",
+                        "surface-dim": "#cfdce3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-[#f7f9fb] dark:bg-slate-950 text-[#1353d8] dark:text-blue-400 font-['Inter'] antialiased tracking-tight docked full-width top-0 sticky z-50 shadow-[0_0_40px_rgba(42,52,57,0.06)] flex justify-between items-center px-8 h-16 w-full">
+<div class="flex items-center gap-8">
+<div class="text-xl font-bold text-[#2a3439] dark:text-slate-100">Academic Inventory</div>
+<nav class="hidden md:flex gap-6 h-full items-center">
+<a class="text-[#566166] dark:text-slate-400 font-medium hover:text-[#2a3439] hover:bg-white/50 dark:hover:bg-slate-800 transition-colors duration-200 scale-100 active:scale-[0.98] transition-transform h-full flex items-center px-2" href="#">Catalog</a>
+<a class="text-[#566166] dark:text-slate-400 font-medium hover:text-[#2a3439] hover:bg-white/50 dark:hover:bg-slate-800 transition-colors duration-200 scale-100 active:scale-[0.98] transition-transform h-full flex items-center px-2" href="#">Analytics</a>
+<a class="text-[#566166] dark:text-slate-400 font-medium hover:text-[#2a3439] hover:bg-white/50 dark:hover:bg-slate-800 transition-colors duration-200 scale-100 active:scale-[0.98] transition-transform h-full flex items-center px-2" href="#">Archives</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-surface-container-lowest border border-outline-variant/15 rounded-full text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/10 w-64 placeholder:text-on-surface-variant/50" placeholder="Search" type="text"/>
+</div>
+<button class="p-2 text-[#566166] hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-[#566166] hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden shadow-sm ml-2">
+<img alt="Researcher Profile" class="w-full h-full object-cover" data-alt="professional headshot of a researcher in a bright academic setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD48H02cJEjdi2nswQ82YAcix_dsb4s-802DNerYpxOZe-uS4TE54g_EFCR5E9RAdtoaA7LlkJb4WK3BPG2zmSnA8I95Q8oDsRRNspP9rMYwMUrqk0pt0AVIuByK5b0TAfStaSQ9I_LOW-_0kcGT7poN36Ip0TB94Y-VrmINndqqx7ZGdm6L-_fJfn6sXhx7EjSGQjC-Xc6FaQD-OS9E5i_5TkBzdwMWdyLzefwNZyKyXDyVz8V3yw96ad3I-UTUGTLEEMen9TxTPI"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col p-4 gap-2 w-64 h-full bg-white dark:bg-slate-900 text-[#1353d8] dark:text-blue-400 font-['Inter'] text-sm leading-relaxed border-r-0 fixed left-0 top-16 shadow-none z-40">
+<div class="mb-6 px-4 pt-4">
+<div class="text-xs font-black uppercase tracking-[0.05em] text-[#566166] mb-1">Research Division</div>
+<div class="text-[0.65rem] text-on-surface-variant uppercase tracking-wider">Secure Environment</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 text-[#566166] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                    Products
+                </a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-[#566166] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]">reorder</span>
+                    Inventory
+                </a>
+<a class="flex items-center gap-3 px-4 py-2.5 bg-[#1353d8]/10 text-[#1353d8] dark:bg-blue-900/20 dark:text-blue-300 font-semibold rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">payments</span>
+                    Pricing
+                </a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-[#566166] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+                    Suppliers
+                </a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-[#566166] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]">assessment</span>
+                    Reports
+                </a>
+</nav>
+<div class="mt-auto pt-4 space-y-1 border-t border-surface-variant/20">
+<a class="flex items-center gap-3 px-4 py-2 text-[#566166] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+                    Help Center
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#566166] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg hover:translate-x-1 transition-all duration-300 opacity-100 hover:opacity-80" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+                    Log Out
+                </a>
+</div>
+<div class="mt-4 px-4 pb-4">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-medium py-2 rounded-lg text-sm shadow-[0_0_15px_rgba(19,83,216,0.2)] hover:shadow-[0_0_20px_rgba(19,83,216,0.3)] transition-all">
+                    Export Data
+                </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-64 p-8 overflow-y-auto bg-surface">
+<div class="max-w-6xl mx-auto space-y-8">
+<!-- Header area -->
+<div>
+<h1 class="text-3xl font-display font-semibold text-on-surface tracking-tight mb-2">Pricing Management</h1>
+<p class="text-on-surface-variant text-sm max-w-2xl">Review and update historical pricing data for catalog items. Expand a row to view complete price history or add new entries.</p>
+</div>
+<!-- Product Table Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_0_40px_rgba(42,52,57,0.06)] overflow-hidden">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-container-low border-b border-surface-variant/30 text-xs font-semibold uppercase tracking-[0.05em] text-on-surface-variant">
+<div class="col-span-2">Code</div>
+<div class="col-span-5">Description</div>
+<div class="col-span-2">Unit</div>
+<div class="col-span-2 text-right">Current Price</div>
+<div class="col-span-1 text-center"></div>
+</div>
+<!-- Row 1: Collapsed State -->
+<div class="group border-b border-surface-variant/20 hover:bg-surface-container-low/50 transition-colors">
+<div class="grid grid-cols-12 gap-4 px-6 py-5 items-center relative">
+<!-- Overlay Label for Wireframe -->
+<div class="absolute -left-3 top-1/2 -translate-y-1/2 -translate-x-full bg-surface-variant text-on-surface-variant text-[10px] uppercase font-bold px-2 py-1 rounded whitespace-nowrap opacity-50 hidden lg:block">Collapsed State</div>
+<div class="col-span-2 text-sm font-medium text-on-surface">CHM-1024</div>
+<div class="col-span-5 text-sm text-on-surface-variant">Sodium Hydroxide, Reagent Grade</div>
+<div class="col-span-2 text-sm text-on-surface-variant">500g Bottle</div>
+<div class="col-span-2 text-sm font-medium text-right text-on-surface">$45.50</div>
+<div class="col-span-1 flex justify-center text-on-surface-variant group-hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Row 2: Expanded State -->
+<div class="bg-primary/5 border-l-2 border-primary">
+<div class="grid grid-cols-12 gap-4 px-6 py-5 items-center relative cursor-pointer">
+<!-- Overlay Label for Wireframe -->
+<div class="absolute -left-3 top-6 -translate-x-full bg-primary/20 text-primary text-[10px] uppercase font-bold px-2 py-1 rounded whitespace-nowrap hidden lg:block">Expanded State</div>
+<div class="col-span-2 text-sm font-semibold text-primary">BIO-3301</div>
+<div class="col-span-5 text-sm font-medium text-on-surface">Fetal Bovine Serum, Heat Inactivated</div>
+<div class="col-span-2 text-sm text-on-surface-variant">500mL Flask</div>
+<div class="col-span-2 text-sm font-semibold text-right text-on-surface">$215.00</div>
+<div class="col-span-1 flex justify-center text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">expand_less</span>
+</div>
+</div>
+<!-- Accordion Panel Content -->
+<div class="px-6 pb-6 pt-2 ml-12 border-t border-primary/10">
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm ring-1 ring-outline-variant/10">
+<h3 class="text-sm font-semibold text-on-surface uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-primary">history</span>
+                                    Price History
+                                </h3>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- History Table -->
+<div class="lg:col-span-2">
+<div class="overflow-hidden rounded-md ring-1 ring-outline-variant/15">
+<table class="w-full text-left text-sm text-on-surface-variant">
+<thead class="text-xs uppercase bg-surface-container-low text-on-surface-variant">
+<tr>
+<th class="px-4 py-3 font-semibold" scope="col">Effective Date</th>
+<th class="px-4 py-3 font-semibold text-right" scope="col">Unit Price</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="bg-surface-container-lowest">
+<td class="px-4 py-3 font-medium text-on-surface">Oct 15, 2023</td>
+<td class="px-4 py-3 text-right font-medium text-on-surface">$215.00</td>
+</tr>
+<tr class="bg-surface-container-lowest">
+<td class="px-4 py-3">Feb 01, 2023</td>
+<td class="px-4 py-3 text-right">$208.50</td>
+</tr>
+<tr class="bg-surface-container-lowest text-on-surface-variant/70">
+<td class="px-4 py-3">Nov 10, 2021</td>
+<td class="px-4 py-3 text-right">$195.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Add New Price Form -->
+<div class="bg-surface-container-low rounded-lg p-5">
+<h4 class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-4">Add New Price</h4>
+<form class="space-y-4">
+<div>
+<label class="block text-xs font-medium text-on-surface-variant mb-1">Effective Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded text-sm px-3 py-2 text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" type="date"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-medium text-on-surface-variant mb-1">New Price</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">$</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded text-sm pl-7 pr-3 py-2 text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" placeholder="0.00" step="0.01" type="number"/>
+</div>
+</div>
+<div class="pt-2 flex justify-end">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-4 py-2 rounded font-medium text-sm hover:shadow-[0_0_15px_rgba(19,83,216,0.2)] transition-all" type="button">
+                                                    Save Entry
+                                                </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 3: Collapsed State -->
+<div class="group border-b border-surface-variant/20 hover:bg-surface-container-low/50 transition-colors">
+<div class="grid grid-cols-12 gap-4 px-6 py-5 items-center">
+<div class="col-span-2 text-sm font-medium text-on-surface">EQP-702</div>
+<div class="col-span-5 text-sm text-on-surface-variant">Microcentrifuge Tubes, 1.5mL</div>
+<div class="col-span-2 text-sm text-on-surface-variant">Pack of 500</div>
+<div class="col-span-2 text-sm font-medium text-right text-on-surface">$32.00</div>
+<div class="col-span-1 flex justify-center text-on-surface-variant group-hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

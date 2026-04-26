@@ -5,6 +5,7 @@ import { useRights } from '../hooks/useRights';
 import { AddProductModal } from '../components/products/AddProductModal';
 import { EditProductModal } from '../components/products/EditProductModal';
 import { SoftDeleteConfirmDialog } from '../components/products/SoftDeleteConfirmDialog';
+import { PriceHistoryPanel } from '../components/products/PriceHistoryPanel';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -17,6 +18,7 @@ export const ProductListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const deletingId: string | null = null;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -100,6 +102,20 @@ export const ProductListPage: React.FC = () => {
       setSelectedProductForEdit(productToEdit);
       setIsEditModalOpen(true);
     }
+  };
+
+  const handleToggleExpand = (prodcode: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [prodcode]: !prev[prodcode],
+    }));
+  };
+
+  const handlePriceSaved = (prodcode: string, unitPrice: number) => {
+    setPriceMap((prev) => ({
+      ...prev,
+      [prodcode]: unitPrice,
+    }));
   };
 
   if (isLoading) {
@@ -204,11 +220,9 @@ export const ProductListPage: React.FC = () => {
                 </tr>
               ) : (
                 currentProducts.map((product) => (
-                  <tr
-                    key={product.prodcode}
-                    className="hover:bg-surface-container-low/30 transition-colors group"
-                  >
-                    <td className="px-6 py-4 font-mono text-xs font-semibold text-primary">
+                  <React.Fragment key={product.prodcode}>
+                    <tr className="hover:bg-surface-container-low/30 transition-colors group">
+                      <td className="px-6 py-4 font-mono text-xs font-semibold text-primary">
                       {product.prodcode}
                     </td>
                     <td className="px-6 py-4">
@@ -233,6 +247,16 @@ export const ProductListPage: React.FC = () => {
                     )}
                     <td className="px-6 py-4 text-right">
                       <div className="inline-flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleExpand(product.prodcode)}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-surface-container text-primary hover:bg-primary/10 transition-colors"
+                          aria-label={expandedRows[product.prodcode] ? 'Collapse price history' : 'Expand price history'}
+                        >
+                          <span className="material-symbols-outlined text-lg">
+                            {expandedRows[product.prodcode] ? 'expand_less' : 'expand_more'}
+                          </span>
+                        </button>
                         {hasRight('EDIT_PRODUCT') && (
                           <button
                             onClick={() => handleEdit(product.prodcode)}
@@ -257,6 +281,14 @@ export const ProductListPage: React.FC = () => {
                       </div>
                     </td>
                   </tr>
+                  <PriceHistoryPanel
+                    productId={product.prodcode}
+                    isOpen={!!expandedRows[product.prodcode]}
+                    onToggle={() => handleToggleExpand(product.prodcode)}
+                    onPriceSaved={(unitPrice) => handlePriceSaved(product.prodcode, unitPrice)}
+                    colSpan={hasRight('STAMP') ? 6 : 5}
+                  />
+                  </React.Fragment>
                 ))
               )}
             </tbody>
