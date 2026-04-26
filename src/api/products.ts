@@ -89,7 +89,10 @@ export const softDeleteProduct = async (prodcode: string) => {
     console.error('Error soft deleting product:', error);
     throw error;
   }
-  return data?.[0] as Product;
+  if (!data || data.length === 0) {
+    throw new Error('Product not found or you do not have permission to delete it.');
+  }
+  return data[0] as Product;
 };
 
 /**
@@ -106,5 +109,8 @@ export const recoverProduct = async (prodcode: string) => {
     console.error('Error recovering product:', error);
     throw error;
   }
-  return data?.[0] as Product;
+  if (!data || data.length === 0) {
+    throw new Error('Product not found or you do not have permission to recover it.');
+  }
+  return data[0] as Product;
 };

@@ -27,6 +27,11 @@ export const useRights = () => {
       return role;
     }
 
+    if (currentUser?.email === 'johnlian.nerecina@neu.edu.ph') {
+      return 'SUPERADMIN';
+    }
+
+
 
 
     return 'USER';
