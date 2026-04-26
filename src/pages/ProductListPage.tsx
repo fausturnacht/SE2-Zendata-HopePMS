@@ -6,6 +6,7 @@ import { AddProductModal } from '../components/products/AddProductModal';
 import { EditProductModal } from '../components/products/EditProductModal';
 import { SoftDeleteConfirmDialog } from '../components/products/SoftDeleteConfirmDialog';
 import { PriceHistoryPanel } from '../components/products/PriceHistoryPanel';
+import { Search, ChevronDown, ChevronUp, Edit2, Trash2, ChevronLeft, ChevronRight, Info, History, Shield, Plus } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -122,96 +123,92 @@ export const ProductListPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-on-surface-variant">Loading products...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-500">Loading products...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-10">
       {/* Page Header Section */}
-      <section className="rounded-[32px] border border-blue-100 bg-white/90 shadow-[0_24px_64px_-40px_rgba(19,83,216,0.45)] p-6">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-950">Products</h1>
-            <p className="text-base text-slate-600">Manage institutional procurement items and inventory.</p>
-          </div>
-          <div className="flex flex-col items-start gap-3 sm:items-end">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold shadow-[0_14px_40px_rgba(19,83,216,0.22)] hover:brightness-110 transition-all"
-              style={{ backgroundColor: '#1353d8', color: '#ffffff' }}
-            >
-              <span className="material-symbols-outlined text-[20px]" style={{ color: '#ffffff' }}>add</span>
-              <span style={{ color: '#ffffff' }}>+ Add Product</span>
-            </button>
-            <p className="text-[10px] uppercase tracking-[0.24em] text-primary/70">MANAGE INVENTORY ITEMS</p>
-          </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-slate-900">Products</h1>
+          <p className="text-sm text-slate-500">Manage institutional procurement items and inventory.</p>
         </div>
-      </section>
-
-      {/* Search Bar */}
-      <section className="bg-blue-50/80 rounded-3xl p-5 border border-blue-100 shadow-sm">
-        <div className="relative w-full max-w-4xl mx-auto">
-          <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-primary text-lg opacity-90">
-            search
-          </span>
-          <input
-            type="text"
-            placeholder="Search by product code, description, or unit..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full pl-14 pr-4 py-4 bg-white border border-blue-100 rounded-3xl shadow-sm focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 placeholder:text-slate-400"
-          />
+        <div className="flex flex-col items-start gap-2 sm:items-end">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Product
+          </button>
+          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pr-1">ROLE-BASED ACCESS</p>
         </div>
-      </section>
+      </div>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-error-container text-on-error-container rounded-xl">
+        <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">
           <p className="text-sm font-medium">{error}</p>
         </div>
       )}
 
-      {/* Products Table */}
-      <section className="bg-white/95 rounded-[32px] border border-blue-100 shadow-[0_24px_80px_-46px_rgba(19,83,216,0.35)] overflow-hidden">
+      {/* Main Content Area: Search + Table */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Search Bar */}
+        <div className="p-4 border-b border-slate-100 bg-[#f8fafc]">
+          <div className="relative w-full max-w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search by product code, description, or unit..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm placeholder:text-slate-400"
+            />
+          </div>
+        </div>
+
+        {/* Products Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary/5">
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary">
+              <tr className="bg-white">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Product Code
                 </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Description
                 </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Unit
                 </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Current Price
                 </th>
                 {hasRight('STAMP') && (
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary">
+                  <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                     Stamp
                   </th>
                 )}
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary text-right">
+                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-container">
+            <tbody className="divide-y divide-slate-100">
               {currentProducts.length === 0 ? (
                 <tr>
                   <td
                     colSpan={hasRight('STAMP') ? 6 : 5}
-                    className="px-6 py-8 text-center text-on-surface-variant"
+                    className="px-6 py-8 text-center text-slate-500 text-sm"
                   >
                     {filteredProducts.length === 0 && searchTerm
                       ? 'No products match your search'
@@ -221,61 +218,55 @@ export const ProductListPage: React.FC = () => {
               ) : (
                 currentProducts.map((product) => (
                   <React.Fragment key={product.prodcode}>
-                    <tr className="hover:bg-surface-container-low/30 transition-colors group">
-                      <td className="px-6 py-4 font-mono text-xs font-semibold text-primary">
+                    <tr className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-5 text-sm font-semibold text-[#1a56db]">
                       {product.prodcode}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-on-surface">
-                          {product.description || '—'}
-                        </span>
-                      </div>
+                    <td className="px-6 py-5">
+                      <span className="text-sm font-medium text-slate-900">
+                        {product.description || '—'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-on-surface">
+                    <td className="px-6 py-5 text-sm font-medium text-slate-600">
                       {product.unit || '—'}
                     </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-on-surface">
+                    <td className="px-6 py-5 text-sm font-extrabold text-slate-900">
                       ${(priceMap[product.prodcode] ?? 0).toFixed(2)}
                     </td>
                     {hasRight('STAMP') && (
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter ${product.stamp === 'VERIFIED' ? 'bg-primary-container text-primary' : 'bg-outline-variant/20 text-on-surface-variant'}`}>
+                      <td className="px-6 py-5">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${product.stamp === 'VERIFIED' ? 'bg-[#e0e7ff] text-[#3730a3]' : 'bg-slate-100 text-slate-500'}`}>
                           {product.stamp || 'Verified'}
                         </span>
                       </td>
                     )}
-                    <td className="px-6 py-4 text-right">
-                      <div className="inline-flex items-center justify-end gap-2">
+                    <td className="px-6 py-5 text-right">
+                      <div className="inline-flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
                           onClick={() => handleToggleExpand(product.prodcode)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-surface-container text-primary hover:bg-primary/10 transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           aria-label={expandedRows[product.prodcode] ? 'Collapse price history' : 'Expand price history'}
                         >
-                          <span className="material-symbols-outlined text-lg">
-                            {expandedRows[product.prodcode] ? 'expand_less' : 'expand_more'}
-                          </span>
+                          {expandedRows[product.prodcode] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
                         {hasRight('EDIT_PRODUCT') && (
                           <button
                             onClick={() => handleEdit(product.prodcode)}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/15 transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                             title="Edit product"
                           >
-                            <span className="material-symbols-outlined text-base">edit</span>
-                            Edit
+                            <Edit2 className="w-4 h-4" />
                           </button>
                         )}
                         {hasRight('DELETE_PRODUCT') && (
                           <button
                             onClick={() => handleDelete(product.prodcode)}
                             disabled={deletingId === product.prodcode}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-error/10 text-error text-xs font-semibold hover:bg-error/15 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
                             title="Delete product"
                           >
-                            <span className="material-symbols-outlined text-base">delete</span>
-                            Delete
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -297,8 +288,8 @@ export const ProductListPage: React.FC = () => {
 
         {/* Pagination */}
         {filteredProducts.length > 0 && (
-          <footer className="px-6 py-4 bg-surface-container-low flex items-center justify-between border-t border-surface-container">
-            <p className="text-xs font-medium text-on-surface-variant">
+          <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+            <p className="text-xs font-medium text-slate-500">
               Showing {startIndex + 1} to {Math.min(endIndex, filteredProducts.length)} of{' '}
               {filteredProducts.length} results
             </p>
@@ -306,83 +297,92 @@ export const ProductListPage: React.FC = () => {
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-lg transition-colors disabled:opacity-30"
+                className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:hover:text-slate-400"
               >
-                <span className="material-symbols-outlined text-lg">chevron_left</span>
+                <ChevronLeft className="w-5 h-5" />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(
-                  (page) =>
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                )
-                .map((page, index, array) => (
-                  <React.Fragment key={page}>
-                    {index > 0 && array[index - 1] !== page - 1 && (
-                      <span className="px-2 text-on-surface-variant">...</span>
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        currentPage === page
-                          ? 'bg-primary text-on-primary'
-                          : 'hover:bg-surface-container-highest text-on-surface'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  </React.Fragment>
-                ))}
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                  )
+                  .map((page, index, array) => (
+                    <React.Fragment key={page}>
+                      {index > 0 && array[index - 1] !== page - 1 && (
+                        <span className="px-2 text-slate-400 text-sm">...</span>
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-7 h-7 flex items-center justify-center rounded text-xs font-medium transition-colors ${
+                          currentPage === page
+                            ? 'bg-[#1a56db] text-white'
+                            : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  ))}
+              </div>
+
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-lg transition-colors disabled:opacity-30"
+                className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30 disabled:hover:text-slate-400"
               >
-                <span className="material-symbols-outlined text-lg">chevron_right</span>
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
-          </footer>
+          </div>
         )}
-      </section>
+      </div>
 
       {/* Bottom Info Boxes */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-800/50">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+        <div className="p-6 bg-[#f0f4ff] rounded-2xl">
           <div className="flex items-center gap-3 mb-3">
-            <span className="material-symbols-outlined text-blue-700">info</span>
-            <h3 className="font-bold text-sm text-blue-900 dark:text-blue-100">Inventory Status</h3>
+            <div className="bg-[#1a56db] text-white p-1 rounded-full">
+              <Info className="w-4 h-4" />
+            </div>
+            <h3 className="font-bold text-sm text-[#1e3a8a]">Inventory Status</h3>
           </div>
-          <p className="text-xs text-blue-800 dark:text-blue-200 leading-relaxed opacity-80">
+          <p className="text-xs text-[#1e40af] leading-relaxed">
             All product data is synced with the Central Repository. Pricing reflects current institutional contracts.
           </p>
         </div>
-        <div className="p-6 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/50">
-          <div className="flex items-center gap-3 mb-3 text-slate-700 dark:text-slate-200">
-            <span className="material-symbols-outlined">history</span>
-            <h3 className="font-bold text-sm">Last Update</h3>
+        <div className="p-6 bg-slate-50/80 border border-slate-100 rounded-2xl">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="text-slate-600">
+              <History className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-800">Last Update</h3>
           </div>
-          <p className="text-xs text-on-surface-variant leading-relaxed opacity-80">
+          <p className="text-xs text-slate-500 leading-relaxed">
             Inventory catalog last updated today at 08:45 AM by Administrator.
           </p>
         </div>
-        <div className="p-6 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/50">
-          <div className="flex items-center gap-3 mb-3 text-slate-700 dark:text-slate-200">
-            <span className="material-symbols-outlined">security</span>
-            <h3 className="font-bold text-sm">Audit Trail</h3>
+        <div className="p-6 bg-slate-50/80 border border-slate-100 rounded-2xl">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="text-slate-600">
+              <Shield className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-800">Audit Trail</h3>
           </div>
-          <p className="text-xs text-on-surface-variant leading-relaxed opacity-80">
+          <p className="text-xs text-slate-500 leading-relaxed">
             All changes to product listings are logged for compliance with academic procurement standards.
           </p>
         </div>
-      </section>
+      </div>
 
       {/* Add Product Modal */}
       <AddProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onProductAdded={(newProduct) => {
-          // Add the new product to the list
           setProducts([...products, newProduct]);
           setCurrentPage(1);
         }}
@@ -395,7 +395,6 @@ export const ProductListPage: React.FC = () => {
           onClose={() => setIsEditModalOpen(false)}
           product={selectedProductForEdit}
           onProductSaved={(updatedProduct) => {
-            // Update the product in the list
             setProducts(products.map(p => p.prodcode === updatedProduct.prodcode ? updatedProduct : p));
           }}
         />

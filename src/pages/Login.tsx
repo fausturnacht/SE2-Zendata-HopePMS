@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import GoogleAuthButton from '../components/GoogleAuthButton';
@@ -100,7 +100,7 @@ export default function Login() {
 
           <GoogleAuthButton
             loading={loading}
-            error={localError}
+            error={localError || undefined}
             onClick={handleGoogleLogin}
           />
         </div>

@@ -11,7 +11,6 @@ export default function GoogleAuthButton({
   loading,
   error,
   onClick,
-  isMobile = false,
 }: GoogleAuthButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 

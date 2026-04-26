@@ -11,20 +11,32 @@ export interface Product {
 }
 
 /**
- * Fetches all products based on user type.
- * 'USER' only sees ACTIVE records.
- * 'ADMIN' and 'SUPERADMIN' see all records.
+ * Fetches all active products.
  */
-export const getProducts = async (userType: UserType) => {
-  let query = supabase.from('product').select('*');
+export const getProducts = async (_userType: UserType) => {
+  const { data, error } = await supabase
+    .from('product')
+    .select('*')
+    .eq('record_status', 'ACTIVE');
   
-  if (userType === 'USER') {
-    query = query.eq('record_status', 'ACTIVE');
-  }
-  
-  const { data, error } = await query;
   if (error) {
     console.error('Error fetching products:', error);
+    throw error;
+  }
+  return data as Product[];
+};
+
+/**
+ * Fetches all soft-deleted products.
+ */
+export const getDeletedProducts = async () => {
+  const { data, error } = await supabase
+    .from('product')
+    .select('*')
+    .eq('record_status', 'DELETED');
+    
+  if (error) {
+    console.error('Error fetching deleted products:', error);
     throw error;
   }
   return data as Product[];
@@ -77,7 +89,10 @@ export const softDeleteProduct = async (prodcode: string) => {
     console.error('Error soft deleting product:', error);
     throw error;
   }
-  return data?.[0] as Product;
+  if (!data || data.length === 0) {
+    throw new Error('Product not found or you do not have permission to delete it.');
+  }
+  return data[0] as Product;
 };
 
 /**
@@ -94,5 +109,8 @@ export const recoverProduct = async (prodcode: string) => {
     console.error('Error recovering product:', error);
     throw error;
   }
-  return data?.[0] as Product;
+  if (!data || data.length === 0) {
+    throw new Error('Product not found or you do not have permission to recover it.');
+  }
+  return data[0] as Product;
 };
