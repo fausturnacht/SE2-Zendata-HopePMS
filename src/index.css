@@ -10,16 +10,19 @@
   html {
     min-height: 100%;
     font-family: 'Inter', system-ui, sans-serif;
-    background: #f7f9fb;
+    background: linear-gradient(180deg, #e8efff 0%, #eef4ff 40%, #ffffff 100%);
   }
 
   body {
     min-height: 100%;
     margin: 0;
+    color: #2a3439;
+    background: linear-gradient(180deg, #e8efff 0%, #eef4ff 40%, #ffffff 100%);
   }
 
   #root {
     min-height: 100vh;
+    color: inherit;
   }
 
   .material-symbols-outlined {
@@ -39,4 +42,4 @@
   --font-headline: "Manrope", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-label: "Inter", sans-serif;
-}
+}

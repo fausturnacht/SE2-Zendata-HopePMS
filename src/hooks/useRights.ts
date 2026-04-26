@@ -18,13 +18,15 @@ export const useRights = () => {
    * - User metadata in Supabase auth
    */
   const getUserRole = (): 'USER' | 'ADMIN' | 'SUPERADMIN' => {
-    // Try to get role from user metadata (if set in Supabase)
-    const role = (currentUser?.user_metadata?.role as string) || 'USER';
-    
+    // Try to get role from user metadata or app metadata (Supabase may use either)
+    const role = (currentUser?.user_metadata?.role as string) ||
+      (currentUser?.app_metadata?.role as string) ||
+      'USER';
+
     if (role === 'ADMIN' || role === 'SUPERADMIN') {
       return role;
     }
-    
+
     return 'USER';
   };
 
@@ -46,8 +48,8 @@ export const useRights = () => {
 
     // Regular USER roles
     if (userRole === 'USER') {
-      // Regular users have limited access
-      return ['STAMP'].includes(right);
+      // Default user access includes product actions and stamp visibility.
+      return ['ADD_PRODUCT', 'EDIT_PRODUCT', 'DELETE_PRODUCT', 'STAMP'].includes(right);
     }
 
     return false;

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
@@ -11,23 +11,31 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const { currentUser, signOut } = useAuth();
   const { isAdmin, isSuperAdmin } = useRights();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const navigationItems = [
-    { name: 'Dashboard', icon: 'dashboard', href: '/dashboard', active: true },
-    { name: 'Products', icon: 'inventory_2', href: '/products', active: false },
-    { name: 'Reports', icon: 'analytics', href: '/reports', active: false },
-    { name: 'Admin', icon: 'admin_panel_settings', href: '/admin', active: false },
-    ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: 'delete', href: '/deleted', active: false }] : []),
+    { name: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
+    { name: 'Products', icon: 'inventory_2', href: '/products' },
+    { name: 'Reports', icon: 'analytics', href: '/reports' },
+    { name: 'Admin', icon: 'admin_panel_settings', href: '/admin' },
+    ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: 'delete', href: '/deleted' }] : []),
   ];
 
   return (
-    <div className="bg-surface text-on-surface overflow-hidden font-body">
+    <div className="bg-blue-50 text-on-surface text-slate-900 overflow-hidden font-body">
       {/* TopAppBar */}
-      <header className="w-full sticky top-0 z-50 bg-white/70 backdrop-blur-md shadow-sm flex items-center justify-between px-6 py-3">
+      <header className="w-full sticky top-0 z-50 bg-white border-b border-blue-100 shadow-sm flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-slate-800 cursor-pointer active:opacity-70 md:hidden" onClick={toggleSidebar}>menu</span>
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="material-symbols-outlined text-slate-800 cursor-pointer active:opacity-70"
+            aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            {sidebarOpen ? 'close' : 'menu'}
+          </button>
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold tracking-tight text-primary">HOPE INC.</span>
             <span className="text-sm font-medium text-on-surface-variant tracking-widest uppercase opacity-60">PMS</span>
@@ -49,9 +57,9 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex flex-1 min-h-[calc(100vh-64px)]">
         {/* NavigationDrawer */}
-        <aside className={`h-screen w-64 border-r border-slate-200 bg-slate-50 fixed left-0 top-0 mt-14 flex flex-col p-4 gap-2 z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:mt-0`}>
+        <aside className={`w-64 border-r border-blue-100 bg-white/90 shadow-sm flex flex-col p-4 gap-2 transition-all overflow-y-auto ${sidebarOpen ? 'fixed left-0 top-14 z-40 h-[calc(100vh-56px)]' : 'hidden'} md:flex md:relative md:top-0 md:z-auto`}>
           {/* Header Profile Section */}
           <div className="flex flex-col mb-6 px-2">
             <div className="flex items-center gap-3 py-4">
@@ -67,21 +75,24 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           </div>
           {/* Navigation Items */}
           <nav className="flex flex-col gap-1">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out ${
-                  item.active
-                    ? 'bg-blue-50 text-primary font-medium'
-                    : 'text-slate-600 hover:bg-slate-200/50'
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <span className={`material-symbols-outlined ${item.active ? "style='font-variation-settings: 'FILL' 1;'" : ''}`}>{item.icon}</span>
-                <span className="text-sm tracking-wide">{item.name}</span>
-              </Link>
-            ))}
+            {navigationItems.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ease-in-out ${
+                    isActive
+                      ? 'bg-primary/10 text-primary font-semibold shadow-sm'
+                      : 'text-slate-600 hover:bg-blue-50/80 hover:text-primary'
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                  <span className="text-sm tracking-wide">{item.name}</span>
+                </Link>
+              );
+            })}
           </nav>
           {/* Bottom Guard */}
           <div className="mt-auto p-2">
@@ -96,7 +107,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         {sidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden" onClick={toggleSidebar}></div>}
 
         {/* Main Content Area */}
-        <main className="flex-1 ml-0 md:ml-64 p-8 overflow-y-auto scrolling-touch bg-surface">
+        <main className="flex-1 min-h-screen p-8 overflow-y-auto bg-blue-50 text-on-surface text-slate-900">
           {children}
         </main>
       </div>
