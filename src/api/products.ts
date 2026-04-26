@@ -11,20 +11,32 @@ export interface Product {
 }
 
 /**
- * Fetches all products based on user type.
- * 'USER' only sees ACTIVE records.
- * 'ADMIN' and 'SUPERADMIN' see all records.
+ * Fetches all active products.
  */
-export const getProducts = async (userType: UserType) => {
-  let query = supabase.from('product').select('*');
+export const getProducts = async (_userType: UserType) => {
+  const { data, error } = await supabase
+    .from('product')
+    .select('*')
+    .eq('record_status', 'ACTIVE');
   
-  if (userType === 'USER') {
-    query = query.eq('record_status', 'ACTIVE');
-  }
-  
-  const { data, error } = await query;
   if (error) {
     console.error('Error fetching products:', error);
+    throw error;
+  }
+  return data as Product[];
+};
+
+/**
+ * Fetches all soft-deleted products.
+ */
+export const getDeletedProducts = async () => {
+  const { data, error } = await supabase
+    .from('product')
+    .select('*')
+    .eq('record_status', 'DELETED');
+    
+  if (error) {
+    console.error('Error fetching deleted products:', error);
     throw error;
   }
   return data as Product[];

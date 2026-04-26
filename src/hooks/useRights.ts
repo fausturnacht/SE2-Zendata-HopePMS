@@ -27,6 +27,8 @@ export const useRights = () => {
       return role;
     }
 
+
+
     return 'USER';
   };
 

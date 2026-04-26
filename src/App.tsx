@@ -5,6 +5,7 @@ import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
 import ApiDebug from './pages/ApiDebug';
 import ProductListPage from './pages/ProductListPage';
+import DeletedItemsPage from './pages/DeletedItemsPage';
 import { RootLayout } from './layouts/RootLayout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,13 @@ function App() {
         <ProtectedRoute>
           <RootLayout>
             <ProductListPage />
+          </RootLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/deleted" element={
+        <ProtectedRoute>
+          <RootLayout>
+            <DeletedItemsPage />
           </RootLayout>
         </ProtectedRoute>
       } />
