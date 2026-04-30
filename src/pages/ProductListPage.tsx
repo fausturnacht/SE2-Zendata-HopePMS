@@ -13,7 +13,6 @@ const ITEMS_PER_PAGE = 10;
 export const ProductListPage: React.FC = () => {
   // Destructure the needed rights flags and helpers from Context
   const { hasRight, userRole, isAdmin, isSuperAdmin } = useRights();
-
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +27,7 @@ export const ProductListPage: React.FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedProductForDelete, setSelectedProductForDelete] = useState<string | null>(null);
 
-  // PR-02 Gating Constants
+  // Gating Constants
   const canAdd = hasRight('PRD_ADD');
   const canEdit = hasRight('PRD_EDIT');
   const canDelete = hasRight('PRD_DEL');
@@ -84,7 +83,7 @@ export const ProductListPage: React.FC = () => {
 
   // Handle delete
   const handleDelete = (prodcode: string) => {
-    // PR-02 Guard Clause
+    // Guard Clause
     if (!canDelete) {
       alert('You do not have permission to delete products');
       return;
@@ -102,7 +101,7 @@ export const ProductListPage: React.FC = () => {
 
   // Handle edit
   const handleEdit = (prodcode: string) => {
-    // PR-02 Guard Clause
+    // Guard Clause
     if (!canEdit) {
       alert('You do not have permission to edit products');
       return;
@@ -148,7 +147,7 @@ export const ProductListPage: React.FC = () => {
           <p className="text-sm text-slate-500">Manage institutional procurement items and inventory.</p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          {/* PR-02: Gated Add Button */}
+          {/* Gated Add Button */}
           {canAdd && (
             <button
               onClick={() => setIsModalOpen(true)}
@@ -205,7 +204,7 @@ export const ProductListPage: React.FC = () => {
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Current Price
                 </th>
-                {/* PR-02: Gated Stamp Header */}
+                {/* Gated Stamp Header */}
                 {showStampColumn && (
                   <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                     Stamp

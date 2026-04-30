@@ -10,7 +10,7 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const { currentUser, signOut } = useAuth();
-  const { isAdmin, isSuperAdmin } = useRights();
+  const { isAdmin, isSuperAdmin, userRole } = useRights();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -20,7 +20,9 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
     { name: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, href: '/dashboard' },
     { name: 'Products', icon: <Package className="w-5 h-5" />, href: '/products' },
     { name: 'Reports', icon: <BarChart2 className="w-5 h-5" />, href: '/reports' },
-    { name: 'Admin', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'Admin/SuperAdmin only' },
+    //Admin Module only visible to SUPERADMIN
+    ...(isSuperAdmin ? [{ name: 'Admin', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'SuperAdmin only' }] : []),
+    //Deleted Items visible to ADMIN and SUPERADMIN
     ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: <Trash2 className="w-5 h-5" />, href: '/deleted', subtitle: 'Admin/SuperAdmin only' }] : []),
   ];
 
@@ -40,7 +42,6 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
 
       {/* Sidebar */}
       <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-[#f8fafc] border-r border-slate-200 flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {/* Sidebar Header */}
         <div className="p-6">
           <h1 className="text-xl font-bold text-slate-900">HOPE PMS</h1>
           <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Product Management</p>
@@ -82,14 +83,14 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           </div>
           <div className="flex flex-col truncate">
             <span className="text-sm font-semibold truncate capitalize">{userName}</span>
-            <span className="text-xs text-slate-500">Staff Member</span>
+            {/* PR-03: Display dynamic user role instead of static "Staff Member" */}
+            <span className="text-xs text-slate-500 font-medium">{userRole || 'Loading...'}</span>
           </div>
         </div>
       </aside>
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        
         {/* Top Navbar */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 shrink-0">
           <div className="flex items-center gap-4">
