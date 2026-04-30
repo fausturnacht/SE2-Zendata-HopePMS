@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useRights } from '../hooks/useRights';
+import { useRights } from "../contexts/UserRightsContext";
 import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, Bell, LogOut, Menu, X } from 'lucide-react';
 
 interface RootLayoutProps {
