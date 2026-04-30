@@ -11,7 +11,8 @@ import { Search, ChevronDown, ChevronUp, Edit2, Trash2, ChevronLeft, ChevronRigh
 const ITEMS_PER_PAGE = 10;
 
 export const ProductListPage: React.FC = () => {
-  const { hasRight, userRole } = useRights();
+  // Destructure the needed rights flags and helpers from Context
+  const { hasRight, userRole, isAdmin, isSuperAdmin } = useRights();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,6 +28,13 @@ export const ProductListPage: React.FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedProductForDelete, setSelectedProductForDelete] = useState<string | null>(null);
 
+  // PR-02 Gating Constants
+  const canAdd = hasRight('PRD_ADD');
+  const canEdit = hasRight('PRD_EDIT');
+  const canDelete = hasRight('PRD_DEL');
+  const showStampColumn = isAdmin || isSuperAdmin;
+  const currentTableColSpan = showStampColumn ? 6 : 5;
+
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,7 +43,6 @@ export const ProductListPage: React.FC = () => {
         setError(null);
         const data = await getProducts(userRole as UserType);
         setProducts(data);
-
 
         // Fetch price history for all products
         const priceData = await getPriceHistory();
@@ -77,7 +84,8 @@ export const ProductListPage: React.FC = () => {
 
   // Handle delete
   const handleDelete = (prodcode: string) => {
-    if (!hasRight('DELETE_PRODUCT')) {
+    // PR-02 Guard Clause
+    if (!canDelete) {
       alert('You do not have permission to delete products');
       return;
     }
@@ -94,7 +102,8 @@ export const ProductListPage: React.FC = () => {
 
   // Handle edit
   const handleEdit = (prodcode: string) => {
-    if (!hasRight('EDIT_PRODUCT')) {
+    // PR-02 Guard Clause
+    if (!canEdit) {
       alert('You do not have permission to edit products');
       return;
     }
@@ -139,13 +148,16 @@ export const ProductListPage: React.FC = () => {
           <p className="text-sm text-slate-500">Manage institutional procurement items and inventory.</p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Add Product
-          </button>
+          {/* PR-02: Gated Add Button */}
+          {canAdd && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Add Product
+            </button>
+          )}
           <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pr-1">ROLE-BASED ACCESS</p>
         </div>
       </div>
@@ -193,7 +205,8 @@ export const ProductListPage: React.FC = () => {
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Current Price
                 </th>
-                {hasRight('STAMP') && (
+                {/* PR-02: Gated Stamp Header */}
+                {showStampColumn && (
                   <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                     Stamp
                   </th>
@@ -207,7 +220,7 @@ export const ProductListPage: React.FC = () => {
               {currentProducts.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={hasRight('STAMP') ? 6 : 5}
+                    colSpan={currentTableColSpan}
                     className="px-6 py-8 text-center text-slate-500 text-sm"
                   >
                     {filteredProducts.length === 0 && searchTerm
@@ -233,13 +246,16 @@ export const ProductListPage: React.FC = () => {
                     <td className="px-6 py-5 text-sm font-extrabold text-slate-900">
                       ${(priceMap[product.prodcode] ?? 0).toFixed(2)}
                     </td>
-                    {hasRight('STAMP') && (
+                    
+                    {/* PR-02: Gated Stamp Data Cell */}
+                    {showStampColumn && (
                       <td className="px-6 py-5">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${product.stamp === 'VERIFIED' ? 'bg-[#e0e7ff] text-[#3730a3]' : 'bg-slate-100 text-slate-500'}`}>
                           {product.stamp || 'Verified'}
                         </span>
                       </td>
                     )}
+                    
                     <td className="px-6 py-5 text-right">
                       <div className="inline-flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -250,7 +266,9 @@ export const ProductListPage: React.FC = () => {
                         >
                           {expandedRows[product.prodcode] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
-                        {hasRight('EDIT_PRODUCT') && (
+                        
+                        {/* PR-02: Gated Edit Button */}
+                        {canEdit && (
                           <button
                             onClick={() => handleEdit(product.prodcode)}
                             className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -259,7 +277,9 @@ export const ProductListPage: React.FC = () => {
                             <Edit2 className="w-4 h-4" />
                           </button>
                         )}
-                        {hasRight('DELETE_PRODUCT') && (
+                        
+                        {/* PR-02: Gated Delete Button */}
+                        {canDelete && (
                           <button
                             onClick={() => handleDelete(product.prodcode)}
                             disabled={deletingId === product.prodcode}
@@ -277,7 +297,7 @@ export const ProductListPage: React.FC = () => {
                     isOpen={!!expandedRows[product.prodcode]}
                     onToggle={() => handleToggleExpand(product.prodcode)}
                     onPriceSaved={(unitPrice) => handlePriceSaved(product.prodcode, unitPrice)}
-                    colSpan={hasRight('STAMP') ? 6 : 5}
+                    colSpan={currentTableColSpan}
                   />
                   </React.Fragment>
                 ))
