@@ -20,6 +20,9 @@ export default function AuthCallback() {
         return;
       }
 
+      // 🔍 DEBUG LOG: Let's see exactly what UUID Supabase gave this login session
+      console.log("🔑 Authenticated User UUID:", session.user.id);
+
       // LOGIN GUARD: Check the user's status in the database
       const { data: profile, error: profileError } = await supabase
         .from('users')
@@ -28,7 +31,9 @@ export default function AuthCallback() {
         .single();
 
       if (profileError) {
-        console.error('Error fetching profile:', profileError.message);
+        // 🔍 DEBUG LOG: Print the exact Supabase error message
+        console.error('🚨 Profile Fetch Error. Details:', profileError);
+        
         if (window.opener) {
           window.opener.postMessage({ type: 'AUTH_ERROR', error: 'Could not fetch profile' }, window.location.origin);
           window.close();

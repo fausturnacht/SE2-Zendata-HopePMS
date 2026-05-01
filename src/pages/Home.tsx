@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, MoreVertical, SlidersHorizontal } from 'lucide-react';
 import { getProducts, type Product } from '../api/products';
-import { useRights } from '../hooks/useRights';
+import { useRights } from "../contexts/UserRightsContext";
 
 export default function Home() {
   const { isSuperAdmin, isAdmin } = useRights();
@@ -132,7 +132,6 @@ export default function Home() {
         </div>
         
         <div className="h-48 w-full relative mb-4 flex items-end">
-          {/* Mock Chart SVG */}
           <svg className="w-full h-full text-blue-500/20" viewBox="0 0 1000 200" preserveAspectRatio="none">
             <path 
               d="M 0,200 L 0,150 C 200,100 300,180 500,160 C 700,140 800,40 1000,20 L 1000,200 Z" 

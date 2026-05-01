@@ -1,0 +1,110 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+
+export type RightsMap = {
+    [key: string]: number;
+};
+
+type UserRightsContextType = {
+    rights: RightsMap;
+    userType: string | null;
+    loadingRights: boolean;
+    userRole: string | null;
+    isAdmin: boolean;
+    isSuperAdmin: boolean;
+    isUser: boolean;
+    hasRight: (right: string) => boolean;
+};
+
+const UserRightsContext = createContext<UserRightsContextType | undefined>(undefined);
+
+export function UserRightsProvider({ children }: { children: React.ReactNode }) {
+    const { currentUser } = useAuth();
+    const [rights, setRights] = useState<RightsMap>({});
+    const [userType, setUserType] = useState<string | null>(null);
+    const [loadingRights, setLoadingRights] = useState(true);
+
+    useEffect(() => {
+        const fetchAccessData = async () => {
+            if (!currentUser) {
+                setRights({});
+                setUserType(null);
+                setLoadingRights(false);
+                return;
+            }
+
+            setLoadingRights(true);
+            try {
+                // Fetch User Type using maybeSingle to avoid 406 errors
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('user_type')
+                    .eq('userid', currentUser.id)
+                    .maybeSingle();
+
+                if (!userError && userData) {
+                    setUserType(userData.user_type);
+                }
+
+                // Fetch Module Rights
+                const { data: rightsData, error: rightsError } = await supabase
+                    .from('usermodule_rights')
+                    .select('right_id, right_value')
+                    .eq('userid', currentUser.id);
+
+                if (rightsError) throw rightsError;
+
+                const rightsMap: RightsMap = {};
+                if (rightsData) {
+                    rightsData.forEach((row: any) => {
+                        rightsMap[row.right_id] = row.right_value;
+                    });
+                }
+
+                setRights(rightsMap);
+            } catch (error) {
+                console.error('Error fetching user access data:', error);
+            } finally {
+                setLoadingRights(false);
+            }
+        };
+
+        fetchAccessData();
+    }, [currentUser]);
+
+    // Role Boolean Helpers
+    const isAdmin = userType === 'ADMIN';
+    const isSuperAdmin = userType === 'SUPERADMIN';
+    const isUser = userType === 'USER';
+    const userRole = userType;
+
+    // The core permission checker
+    const hasRight = (right: string): boolean => {
+        if (isSuperAdmin) return true;
+        return rights[right] === 1;
+    };
+
+    return (
+        <UserRightsContext.Provider value={{
+            rights,
+            userType,
+            loadingRights,
+            userRole,
+            isAdmin,
+            isSuperAdmin,
+            isUser,
+            hasRight
+        }}>
+            {children}
+        </UserRightsContext.Provider>
+    );
+}
+
+export const useRights = () => {
+    const context = useContext(UserRightsContext);
+    if (context === undefined) {
+        throw new Error('useRights must be used within a UserRightsProvider');
+    }
+    return context;
+};

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDeletedProducts, recoverProduct, type Product } from '../api/products';
-import { useRights } from '../hooks/useRights';
+import { useRights } from '../contexts/UserRightsContext';
 
 const ITEMS_PER_PAGE = 10;
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getProducts, type Product, type UserType } from '../api/products';
 import { getPriceHistory, type PriceEntry } from '../api/priceHistory';
-import { useRights } from '../hooks/useRights';
+import { useRights } from '../contexts/UserRightsContext';
 import { AddProductModal } from '../components/products/AddProductModal';
 import { EditProductModal } from '../components/products/EditProductModal';
 import { SoftDeleteConfirmDialog } from '../components/products/SoftDeleteConfirmDialog';
