@@ -34,7 +34,12 @@ function ProtectedRouteWrapper() {
 
 // Simple Wrapper for standalone pages
 function SimpleProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAuth();
+  const { currentUser, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  
   return currentUser ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
