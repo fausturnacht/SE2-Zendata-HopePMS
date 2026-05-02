@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRights } from '../../hooks/useRights';
+import { useRights } from '../../contexts/UserRightsContext';
 import FullProductListingReport from './FullProductListingReport';
 import TopSellingProductsReport from './TopSellingProductsReport';
 import { BarChart3 } from 'lucide-react';

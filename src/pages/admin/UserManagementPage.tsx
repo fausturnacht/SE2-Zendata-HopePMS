@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useRights } from '../../hooks/useRights';
+import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, approveUser, rejectUser, activateUser, deactivateUser } from '../../api/users';
 import { Download, CheckCircle2, XCircle, Search, Filter, Shield, Ban, Power } from 'lucide-react';
 

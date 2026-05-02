@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
  * REP-001: Fetches full product listing with current price.
  * Merges products with their most recent price from pricehist.
  */
-export const getProductListing = async (userType: any) => {
+export const getProductListing = async (userType?: any) => {
   const products = await getProducts(userType);
   const priceData = await getPriceHistory();
   

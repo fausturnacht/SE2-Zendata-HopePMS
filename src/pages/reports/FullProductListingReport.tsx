@@ -1,34 +1,43 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProductListing } from '../../api/reports';
-import { useRights } from '../../hooks/useRights';
-import { Search, ChevronLeft, ChevronRight, Download, FileText } from 'lucide-react';
+import { type Product, updateProduct } from '../../api/products';
+import { useRights } from '../../contexts/UserRightsContext';
+import { Search, ChevronLeft, ChevronRight, Download, FileText, ChevronUp, ChevronDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { SkeletonTable } from '../../components/shared/SkeletonTable';
+import { EmptyState } from '../../components/shared/EmptyState';
+import { ErrorBanner } from '../../components/shared/ErrorBanner';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function FullProductListingReport() {
-  const { userRole, hasRight } = useRights();
-  const [products, setProducts] = useState<any[]>([]);
+  const { hasRight } = useRights();
+  const [products, setProducts] = useState<(Product & { current_price: number })[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [filterCategory, setFilterCategory] = useState('All');
 
+  const fetchProducts = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await getProductListing();
+      setProducts(data);
+    } catch (err) {
+      console.error('Error fetching reports data:', err);
+      setError('Failed to load report data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getProductListing(userRole);
-        setProducts(data);
-      } catch (err) {
-        console.error('Error fetching reports data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProducts();
-  }, [userRole]);
+  }, [fetchProducts]);
 
   const filteredProducts = useMemo(() => {
     let filtered = products;
@@ -47,8 +56,28 @@ export default function FullProductListingReport() {
           (p.description || '').toLowerCase().includes(searchLower)
       );
     }
+
+    if (sortConfig) {
+      filtered = [...filtered].sort((a, b) => {
+        const aValue = a[sortConfig.key as keyof typeof a] || '';
+        const bValue = b[sortConfig.key as keyof typeof b] || '';
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
     return filtered;
-  }, [searchTerm, products, filterCategory]);
+  }, [searchTerm, products, filterCategory, sortConfig]);
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -147,11 +176,22 @@ export default function FullProductListingReport() {
   };
 
   if (isLoading) {
-    return <div className="p-8 text-center text-slate-500">Loading Report...</div>;
+    return <SkeletonTable columns={hasRight('STAMP') ? 5 : 4} />;
+  }
+
+  if (products.length === 0 && !error) {
+    return (
+      <EmptyState 
+        message="No products available for this report." 
+      />
+    );
   }
 
   return (
-    <div className="bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/15 flex flex-col overflow-hidden w-full">
+    <div className="flex flex-col gap-4">
+      <ErrorBanner error={error} onRetry={fetchProducts} />
+      {products.length > 0 && (
+        <div className="bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/15 flex flex-col overflow-hidden w-full">
       <div className="p-4 bg-surface-container-low flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-surface-variant">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5" />
@@ -197,18 +237,45 @@ export default function FullProductListingReport() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-lowest border-b border-surface-container-high text-xs tracking-wider uppercase text-on-surface-variant font-semibold">
-              <th className="p-4 pl-6 font-medium">Product Code</th>
-              <th className="p-4 font-medium">Description</th>
-              <th className="p-4 font-medium">Unit</th>
-              <th className="p-4 font-medium text-right">Current Price</th>
-              {hasRight('STAMP') && <th className="p-4 pr-6 text-center">Stamp</th>}
+              <th onClick={() => handleSort('prodcode')} className="p-4 pl-6 font-medium cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div className="flex items-center gap-1">
+                  Product Code
+                  {sortConfig?.key === 'prodcode' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                </div>
+              </th>
+              <th onClick={() => handleSort('description')} className="p-4 font-medium cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div className="flex items-center gap-1">
+                  Description
+                  {sortConfig?.key === 'description' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                </div>
+              </th>
+              <th onClick={() => handleSort('unit')} className="p-4 font-medium cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div className="flex items-center gap-1">
+                  Unit
+                  {sortConfig?.key === 'unit' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                </div>
+              </th>
+              <th onClick={() => handleSort('current_price')} className="p-4 font-medium text-right cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div className="flex items-center justify-end gap-1">
+                  Current Price
+                  {sortConfig?.key === 'current_price' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                </div>
+              </th>
+              {hasRight('STAMP') && (
+                <th onClick={() => handleSort('stamp')} className="p-4 pr-6 text-center cursor-pointer hover:bg-surface-container-low transition-colors">
+                  <div className="flex items-center justify-center gap-1">
+                    Stamp
+                    {sortConfig?.key === 'stamp' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                  </div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="text-sm divide-y divide-surface-container-high/50">
             {currentProducts.length === 0 ? (
               <tr>
                 <td colSpan={hasRight('STAMP') ? 5 : 4} className="p-8 text-center text-on-surface-variant">
-                  No products found.
+                  No matching products found.
                 </td>
               </tr>
             ) : (
@@ -222,9 +289,31 @@ export default function FullProductListingReport() {
                   </td>
                   {hasRight('STAMP') && (
                     <td className="p-4 pr-6 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${!product.stamp || product.stamp === 'VERIFIED' || product.stamp === 'V' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
-                        {!product.stamp || product.stamp === 'VERIFIED' || product.stamp === 'V' ? 'Verified' : product.stamp}
-                      </span>
+                      <select
+                        value={product.stamp || 'PENDING'}
+                        onChange={async (e) => {
+                          const newStamp = e.target.value;
+                          try {
+                            setError(null);
+                            await updateProduct(product.prodcode, { stamp: newStamp });
+                            setProducts(products.map(p => p.prodcode === product.prodcode ? { ...p, stamp: newStamp } : p));
+                          } catch (err) {
+                            console.error('Error updating stamp:', err);
+                            setError('Failed to update product stamp');
+                          }
+                        }}
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border-none outline-none cursor-pointer transition-colors ${
+                          (product.stamp === 'VERIFIED') 
+                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' 
+                            : product.stamp === 'REJECTED'
+                            ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                            : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                        }`}
+                      >
+                        <option value="PENDING">Pending</option>
+                        <option value="VERIFIED">Verified</option>
+                        <option value="REJECTED">Rejected</option>
+                      </select>
                     </td>
                   )}
                 </tr>
@@ -258,6 +347,8 @@ export default function FullProductListingReport() {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
+        </div>
+      )}
         </div>
       )}
     </div>

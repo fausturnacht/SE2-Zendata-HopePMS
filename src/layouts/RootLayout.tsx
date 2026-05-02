@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useRights } from '../hooks/useRights';
+import { useRights } from '../contexts/UserRightsContext';
 import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, Bell, LogOut, Menu, X } from 'lucide-react';
 
 interface RootLayoutProps {
@@ -25,7 +25,10 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   ];
 
   const userInitials = currentUser?.email?.substring(0, 2).toUpperCase() || 'U';
-  const userName = currentUser?.email?.split('@')[0] || 'User';
+  const userName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
+  const avatarUrl = currentUser?.user_metadata?.avatar_url;
+
+  const roleLabel = isSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin' : 'Staff Member';
 
   return (
     <div className="flex bg-[#f7f9fb] min-h-screen font-sans text-slate-800">
@@ -77,12 +80,16 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
 
         {/* Sidebar Footer / User Profile */}
         <div className="p-4 m-4 rounded-xl bg-slate-100/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
-            {userInitials}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover shrink-0 border border-white" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+              {userInitials}
+            </div>
+          )}
           <div className="flex flex-col truncate">
             <span className="text-sm font-semibold truncate capitalize">{userName}</span>
-            <span className="text-xs text-slate-500">Staff Member</span>
+            <span className="text-xs text-slate-500">{roleLabel}</span>
           </div>
         </div>
       </aside>

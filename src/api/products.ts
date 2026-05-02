@@ -13,7 +13,7 @@ export interface Product {
 /**
  * Fetches all active products.
  */
-export const getProducts = async (_userType: UserType) => {
+export const getProducts = async (_userType?: any) => {
   const { data, error } = await supabase
     .from('product')
     .select('*')
@@ -113,4 +113,20 @@ export const recoverProduct = async (prodcode: string) => {
     throw new Error('Product not found or you do not have permission to recover it.');
   }
   return data[0] as Product;
+};
+
+/**
+ * Bulk updates all active products to VERIFIED status.
+ */
+export const verifyAllProducts = async () => {
+  const { data, error } = await supabase
+    .from('product')
+    .update({ stamp: 'VERIFIED' })
+    .eq('record_status', 'ACTIVE');
+  
+  if (error) {
+    console.error('Error verifying all products:', error);
+    throw error;
+  }
+  return data;
 };
