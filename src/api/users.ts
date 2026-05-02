@@ -84,3 +84,20 @@ export const restoreUser = async (userid: string) => {
   }
   return data[0] as User;
 };
+
+/**
+ * Pre-authorizes a user by adding their email, name, and role to a pre_auth_users table.
+ * The database trigger on Supabase Auth should read from this table upon new user sign-up.
+ */
+export const preAuthorizeUser = async (email: string, username: string, user_type: string) => {
+  const { data, error } = await supabase
+    .from('pre_auth_users')
+    .insert([{ email, username, user_type }])
+    .select();
+  
+  if (error) {
+    console.error('Error pre-authorizing user:', error);
+    throw error;
+  }
+  return data?.[0];
+};
