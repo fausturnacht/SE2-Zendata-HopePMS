@@ -8,15 +8,21 @@ import {
   type UserType
 } from '../api/products';
 import { getPriceHistory, addPriceEntry } from '../api/priceHistory';
+import { getProductListing, getTopSellers } from '../api/reports';
+import { getUsers, updateUser, softDeleteUser, restoreUser } from '../api/users';
 
-type MainTabType = 'PRODUCTS' | 'PRICE_HISTORY';
+type MainTabType = 'PRODUCTS' | 'PRICE_HISTORY' | 'REPORTS' | 'USERS';
 type ProductTabType = 'LIST' | 'ADD' | 'UPDATE' | 'DELETE' | 'RECOVER';
 type PriceTabType = 'LIST' | 'ADD';
+type ReportTabType = 'REP-001' | 'REP-002';
+type UserTabType = 'FETCH' | 'EDIT' | 'DELETE' | 'RESTORE';
 
 const ApiDebug: React.FC = () => {
   const [mainTab, setMainTab] = useState<MainTabType>('PRODUCTS');
   const [productTab, setProductTab] = useState<ProductTabType>('LIST');
   const [priceTab, setPriceTab] = useState<PriceTabType>('LIST');
+  const [reportTab, setReportTab] = useState<ReportTabType>('REP-001');
+  const [userMgtTab, setUserMgtTab] = useState<UserTabType>('FETCH');
   
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -32,6 +38,14 @@ const ApiDebug: React.FC = () => {
   const [priceProdcode, setPriceProdcode] = useState('');
   const [effdate, setEffdate] = useState(new Date().toISOString().split('T')[0]);
   const [unitprice, setUnitprice] = useState<number>(0);
+
+  // Form states - Reports
+  const [topSellerLimit, setTopSellerLimit] = useState<number>(5);
+
+  // Form states - Users
+  const [targetUserId, setTargetUserId] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [editUserType, setEditUserType] = useState<UserType>('USER');
 
   const handleExecute = async () => {
     setLoading(true);
@@ -57,7 +71,7 @@ const ApiDebug: React.FC = () => {
             data = await recoverProduct(prodcode);
             break;
         }
-      } else {
+      } else if (mainTab === 'PRICE_HISTORY') {
         switch (priceTab) {
           case 'LIST':
             data = await getPriceHistory(priceProdcode || undefined);
@@ -69,6 +83,30 @@ const ApiDebug: React.FC = () => {
               unitprice, 
               record_status: 'ACTIVE' 
             });
+            break;
+        }
+      } else if (mainTab === 'REPORTS') {
+        switch (reportTab) {
+          case 'REP-001':
+            data = await getProductListing(userType);
+            break;
+          case 'REP-002':
+            data = await getTopSellers(topSellerLimit);
+            break;
+        }
+      } else if (mainTab === 'USERS') {
+        switch (userMgtTab) {
+          case 'FETCH':
+            data = await getUsers();
+            break;
+          case 'EDIT':
+            data = await updateUser(targetUserId, { username: editUsername, user_type: editUserType });
+            break;
+          case 'DELETE':
+            data = await softDeleteUser(targetUserId);
+            break;
+          case 'RESTORE':
+            data = await restoreUser(targetUserId);
             break;
         }
       }
@@ -94,11 +132,25 @@ const ApiDebug: React.FC = () => {
     { id: 'ADD', label: 'Add Entry', icon: 'price_change', color: 'cyan' },
   ];
 
-  const currentTabs = mainTab === 'PRODUCTS' ? productTabs : priceTabs;
-  const activeSubTab = mainTab === 'PRODUCTS' ? productTab : priceTab;
+  const reportTabs: { id: ReportTabType; label: string; icon: string; color: string }[] = [
+    { id: 'REP-001', label: 'Product Listing', icon: 'list_alt', color: 'purple' },
+    { id: 'REP-002', label: 'Top-Sellers', icon: 'trending_up', color: 'pink' },
+  ];
+
+  const userTabs: { id: UserTabType; label: string; icon: string; color: string }[] = [
+    { id: 'FETCH', label: 'Fetch', icon: 'group', color: 'sky' },
+    { id: 'EDIT', label: 'Edit', icon: 'manage_accounts', color: 'orange' },
+    { id: 'DELETE', label: 'Delete', icon: 'person_remove', color: 'red' },
+    { id: 'RESTORE', label: 'Restore', icon: 'person_add', color: 'emerald' },
+  ];
+
+  const currentTabs = mainTab === 'PRODUCTS' ? productTabs : mainTab === 'PRICE_HISTORY' ? priceTabs : mainTab === 'REPORTS' ? reportTabs : userTabs;
+  const activeSubTab = mainTab === 'PRODUCTS' ? productTab : mainTab === 'PRICE_HISTORY' ? priceTab : mainTab === 'REPORTS' ? reportTab : userMgtTab;
   const setActiveSubTab = (id: string) => {
     if (mainTab === 'PRODUCTS') setProductTab(id as ProductTabType);
-    else setPriceTab(id as PriceTabType);
+    else if (mainTab === 'PRICE_HISTORY') setPriceTab(id as PriceTabType);
+    else if (mainTab === 'REPORTS') setReportTab(id as ReportTabType);
+    else setUserMgtTab(id as UserTabType);
   };
 
   return (
@@ -122,10 +174,10 @@ const ApiDebug: React.FC = () => {
           </div>
 
           {/* Main Navigation Tabs */}
-          <div className="flex bg-white p-1 rounded-[1.5rem] border border-slate-200 shadow-sm">
+          <div className="flex bg-white p-1 rounded-[1.5rem] border border-slate-200 shadow-sm flex-wrap gap-1">
             <button
               onClick={() => { setMainTab('PRODUCTS'); setResult(null); }}
-              className={`px-6 py-2.5 rounded-2xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-2xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${
                 mainTab === 'PRODUCTS' 
                   ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
                   : 'text-slate-400 hover:text-slate-600'
@@ -136,7 +188,7 @@ const ApiDebug: React.FC = () => {
             </button>
             <button
               onClick={() => { setMainTab('PRICE_HISTORY'); setResult(null); }}
-              className={`px-6 py-2.5 rounded-2xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-2xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${
                 mainTab === 'PRICE_HISTORY' 
                   ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
                   : 'text-slate-400 hover:text-slate-600'
@@ -144,6 +196,28 @@ const ApiDebug: React.FC = () => {
             >
               <span className="material-symbols-outlined text-lg">history_edu</span>
               Price History
+            </button>
+            <button
+              onClick={() => { setMainTab('REPORTS'); setResult(null); }}
+              className={`px-4 py-2.5 rounded-2xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${
+                mainTab === 'REPORTS' 
+                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">analytics</span>
+              Reports
+            </button>
+            <button
+              onClick={() => { setMainTab('USERS'); setResult(null); }}
+              className={`px-4 py-2.5 rounded-2xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${
+                mainTab === 'USERS' 
+                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">group</span>
+              Users
             </button>
           </div>
         </header>
@@ -260,7 +334,7 @@ const ApiDebug: React.FC = () => {
                         </div>
                       )}
                     </>
-                  ) : (
+                  ) : mainTab === 'PRICE_HISTORY' ? (
                     /* PRICE HISTORY TAB */
                     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <div className="space-y-2">
@@ -307,6 +381,101 @@ const ApiDebug: React.FC = () => {
                       {priceTab === 'LIST' && (
                         <p className="text-[11px] text-slate-500 italic ml-1">
                           Leave Product Code empty to fetch the entire price history across all products.
+                        </p>
+                      )}
+                    </div>
+                  ) : mainTab === 'REPORTS' ? (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      {reportTab === 'REP-001' && (
+                        <div className="space-y-3">
+                          <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">User Role Access</label>
+                          <div className="flex gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                            {(['USER', 'ADMIN', 'SUPERADMIN'] as UserType[]).map((type) => (
+                              <button
+                                key={type}
+                                onClick={() => setUserType(type)}
+                                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 ${
+                                  userType === type 
+                                    ? 'bg-white shadow-sm text-blue-700 border border-blue-100' 
+                                    : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                              >
+                                {type}
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-[11px] text-slate-500 italic ml-1 mt-2">
+                            {userType === 'USER' ? 'Filtering for record_status = "ACTIVE" only.' : 'Returning all database records.'}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {reportTab === 'REP-002' && (
+                        <div className="space-y-2">
+                          <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">
+                            Top Sellers Limit (Row Count)
+                          </label>
+                          <input 
+                            type="number" 
+                            value={topSellerLimit} 
+                            onChange={(e) => setTopSellerLimit(Number(e.target.value))}
+                            min="1"
+                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all font-bold text-slate-900"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      {userMgtTab !== 'FETCH' && (
+                        <div className="space-y-2">
+                          <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">
+                            Target User ID
+                          </label>
+                          <input 
+                            type="text" 
+                            value={targetUserId} 
+                            onChange={(e) => setTargetUserId(e.target.value)}
+                            placeholder="e.g. usr_123456"
+                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
+                          />
+                        </div>
+                      )}
+
+                      {userMgtTab === 'EDIT' && (
+                        <>
+                          <div className="space-y-2">
+                            <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Username</label>
+                            <input 
+                              type="text" 
+                              value={editUsername} 
+                              onChange={(e) => setEditUsername(e.target.value)}
+                              placeholder="johndoe"
+                              className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Role / User Type</label>
+                            <div className="relative">
+                              <select 
+                                value={editUserType} 
+                                onChange={(e) => setEditUserType(e.target.value as UserType)}
+                                className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all font-bold text-slate-900 appearance-none cursor-pointer"
+                              >
+                                <option value="USER">USER</option>
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="SUPERADMIN">SUPERADMIN</option>
+                              </select>
+                              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-light">expand_more</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {userMgtTab === 'FETCH' && (
+                        <p className="text-[11px] text-slate-500 italic ml-1">
+                          Fetches all users where record_status = 'ACTIVE'.
                         </p>
                       )}
                     </div>
