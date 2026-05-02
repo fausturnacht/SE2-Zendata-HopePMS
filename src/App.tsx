@@ -1,45 +1,21 @@
-import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
-import { UserRightsProvider } from './contexts/UserRightsContext';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
 import ApiDebug from './pages/ApiDebug';
 import ProductListPage from './pages/ProductListPage';
 import DeletedItemsPage from './pages/DeletedItemsPage';
+import ReportsPage from './pages/reports/ReportsPage';
 import { RootLayout } from './layouts/RootLayout';
 
-// Optimized Wrapper Route
-// This prevents the context from unmounting/remounting on every page change
-function ProtectedRouteWrapper() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { currentUser, isLoading } = useAuth();
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  // If logged in, wrap the layout and provider ONCE. 
-  // <Outlet /> acts as a placeholder where pages (Home, ProductList, etc.) will render.
-  return currentUser ? (
-    <UserRightsProvider>
-      <RootLayout>
-        <Outlet /> 
-      </RootLayout>
-    </UserRightsProvider>
-  ) : (
-    <Navigate to="/login" replace />
-  );
-}
-
-// Simple Wrapper for standalone pages
-function SimpleProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { currentUser, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-  
   return currentUser ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
@@ -53,18 +29,39 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
 
-      {/* Protected Routes (Grouped together under the single wrapper!) */}
-      <Route element={<ProtectedRouteWrapper />}>
-        <Route path="/dashboard" element={<Home />} />
-        <Route path="/products" element={<ProductListPage />} />
-        <Route path="/deleted" element={<DeletedItemsPage />} />
-      </Route>
-
-      {/* API Debug Route (Protected, but no Layout or Rights Provider needed) */}
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <RootLayout>
+            <Home />
+          </RootLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/products" element={
+        <ProtectedRoute>
+          <RootLayout>
+            <ProductListPage />
+          </RootLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/deleted" element={
+        <ProtectedRoute>
+          <RootLayout>
+            <DeletedItemsPage />
+          </RootLayout>
+        </ProtectedRoute>
+      } />
       <Route path="/api" element={
-        <SimpleProtectedRoute>
+        <ProtectedRoute>
           <ApiDebug />
-        </SimpleProtectedRoute>
+        </ProtectedRoute>
+      } />
+      <Route path="/reports" element={
+        <ProtectedRoute>
+          <RootLayout>
+            <ReportsPage />
+          </RootLayout>
+        </ProtectedRoute>
       } />
     </Routes>
   );
