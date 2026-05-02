@@ -9,13 +9,13 @@ import {
 } from '../api/products';
 import { getPriceHistory, addPriceEntry } from '../api/priceHistory';
 import { getProductListing, getTopSellers } from '../api/reports';
-import { getUsers, updateUser, softDeleteUser, restoreUser } from '../api/users';
+import { getUsers, updateUser, softDeleteUser, restoreUser, preAuthorizeUser } from '../api/users';
 
 type MainTabType = 'PRODUCTS' | 'PRICE_HISTORY' | 'REPORTS' | 'USERS';
 type ProductTabType = 'LIST' | 'ADD' | 'UPDATE' | 'DELETE' | 'RECOVER';
 type PriceTabType = 'LIST' | 'ADD';
 type ReportTabType = 'REP-001' | 'REP-002';
-type UserTabType = 'FETCH' | 'EDIT' | 'DELETE' | 'RESTORE';
+type UserTabType = 'FETCH' | 'EDIT' | 'DELETE' | 'RESTORE' | 'PRE_AUTH';
 
 const ApiDebug: React.FC = () => {
   const [mainTab, setMainTab] = useState<MainTabType>('PRODUCTS');
@@ -46,6 +46,11 @@ const ApiDebug: React.FC = () => {
   const [targetUserId, setTargetUserId] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editUserType, setEditUserType] = useState<UserType>('USER');
+  
+  // Form states - Pre-Auth
+  const [preAuthEmail, setPreAuthEmail] = useState('');
+  const [preAuthName, setPreAuthName] = useState('');
+  const [preAuthRole, setPreAuthRole] = useState<UserType>('USER');
 
   const handleExecute = async () => {
     setLoading(true);
@@ -99,6 +104,9 @@ const ApiDebug: React.FC = () => {
           case 'FETCH':
             data = await getUsers();
             break;
+          case 'PRE_AUTH':
+            data = await preAuthorizeUser(preAuthEmail, preAuthName, preAuthRole);
+            break;
           case 'EDIT':
             data = await updateUser(targetUserId, { username: editUsername, user_type: editUserType });
             break;
@@ -139,6 +147,7 @@ const ApiDebug: React.FC = () => {
 
   const userTabs: { id: UserTabType; label: string; icon: string; color: string }[] = [
     { id: 'FETCH', label: 'Fetch', icon: 'group', color: 'sky' },
+    { id: 'PRE_AUTH', label: 'Pre-Auth', icon: 'how_to_reg', color: 'indigo' },
     { id: 'EDIT', label: 'Edit', icon: 'manage_accounts', color: 'orange' },
     { id: 'DELETE', label: 'Delete', icon: 'person_remove', color: 'red' },
     { id: 'RESTORE', label: 'Restore', icon: 'person_add', color: 'emerald' },
@@ -427,40 +436,34 @@ const ApiDebug: React.FC = () => {
                     </div>
                   ) : (
                     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      {userMgtTab !== 'FETCH' && (
-                        <div className="space-y-2">
-                          <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">
-                            Target User ID
-                          </label>
-                          <input 
-                            type="text" 
-                            value={targetUserId} 
-                            onChange={(e) => setTargetUserId(e.target.value)}
-                            placeholder="e.g. usr_123456"
-                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
-                          />
-                        </div>
-                      )}
-
-                      {userMgtTab === 'EDIT' && (
+                      {userMgtTab === 'PRE_AUTH' ? (
                         <>
                           <div className="space-y-2">
-                            <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Username</label>
+                            <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Email</label>
                             <input 
-                              type="text" 
-                              value={editUsername} 
-                              onChange={(e) => setEditUsername(e.target.value)}
-                              placeholder="johndoe"
+                              type="email" 
+                              value={preAuthEmail} 
+                              onChange={(e) => setPreAuthEmail(e.target.value)}
+                              placeholder="newuser@example.com"
                               className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
                             />
                           </div>
-
+                          <div className="space-y-2">
+                            <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Name / Username</label>
+                            <input 
+                              type="text" 
+                              value={preAuthName} 
+                              onChange={(e) => setPreAuthName(e.target.value)}
+                              placeholder="John Doe"
+                              className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
+                            />
+                          </div>
                           <div className="space-y-2">
                             <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Role / User Type</label>
                             <div className="relative">
                               <select 
-                                value={editUserType} 
-                                onChange={(e) => setEditUserType(e.target.value as UserType)}
+                                value={preAuthRole} 
+                                onChange={(e) => setPreAuthRole(e.target.value as UserType)}
                                 className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all font-bold text-slate-900 appearance-none cursor-pointer"
                               >
                                 <option value="USER">USER</option>
@@ -471,12 +474,60 @@ const ApiDebug: React.FC = () => {
                             </div>
                           </div>
                         </>
-                      )}
+                      ) : (
+                        <>
+                          {userMgtTab !== 'FETCH' && (
+                            <div className="space-y-2">
+                              <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">
+                                Target User ID
+                              </label>
+                              <input 
+                                type="text" 
+                                value={targetUserId} 
+                                onChange={(e) => setTargetUserId(e.target.value)}
+                                placeholder="e.g. usr_123456"
+                                className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
+                              />
+                            </div>
+                          )}
 
-                      {userMgtTab === 'FETCH' && (
-                        <p className="text-[11px] text-slate-500 italic ml-1">
-                          Fetches all users where record_status = 'ACTIVE'.
-                        </p>
+                          {userMgtTab === 'EDIT' && (
+                            <>
+                              <div className="space-y-2">
+                                <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Username</label>
+                                <input 
+                                  type="text" 
+                                  value={editUsername} 
+                                  onChange={(e) => setEditUsername(e.target.value)}
+                                  placeholder="johndoe"
+                                  className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all placeholder:text-slate-300 font-bold text-slate-900"
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <label className="block text-xs font-black uppercase tracking-widest text-slate-600 ml-1">Role / User Type</label>
+                                <div className="relative">
+                                  <select 
+                                    value={editUserType} 
+                                    onChange={(e) => setEditUserType(e.target.value as UserType)}
+                                    className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3.5 focus:border-slate-900 focus:ring-0 outline-none transition-all font-bold text-slate-900 appearance-none cursor-pointer"
+                                  >
+                                    <option value="USER">USER</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="SUPERADMIN">SUPERADMIN</option>
+                                  </select>
+                                  <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-light">expand_more</span>
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {userMgtTab === 'FETCH' && (
+                            <p className="text-[11px] text-slate-500 italic ml-1">
+                              Fetches all users where record_status = 'ACTIVE'.
+                            </p>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
