@@ -101,3 +101,52 @@ export const preAuthorizeUser = async (email: string, username: string, user_typ
   }
   return data?.[0];
 };
+
+export const getPendingUsers = async () => {
+  try {
+    // Check if there is a pending users or pre_auth_users table. Assuming pre_auth_users for now.
+    const { data, error } = await supabase.from('pre_auth_users').select('*');
+    if (error) {
+      console.warn('Could not fetch pre_auth_users, checking if pending status in users');
+      const fallback = await supabase.from('users').select('*').eq('record_status', 'INACTIVE');
+      return fallback.data || [];
+    }
+    return data || [];
+  } catch (e) {
+    return [];
+  }
+};
+
+export const fetchAllUsers = async () => {
+  const { data, error } = await supabase.from('users').select('*');
+  if (error) {
+    console.error('Error fetching all users:', error);
+    throw error;
+  }
+  return data || [];
+};
+
+export const approveUser = async (id: string) => {
+  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE' }).eq('userid', id);
+  if (error) throw error;
+  return data;
+};
+
+export const rejectUser = async (id: string) => {
+  const { data, error } = await supabase.from('users').delete().eq('userid', id);
+  if (error) throw error;
+  return data;
+};
+
+export const activateUser = async (id: string) => {
+  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE' }).eq('userid', id);
+  if (error) throw error;
+  return data;
+};
+
+export const deactivateUser = async (id: string) => {
+  const { data, error } = await supabase.from('users').update({ record_status: 'INACTIVE' }).eq('userid', id);
+  if (error) throw error;
+  return data;
+};
+

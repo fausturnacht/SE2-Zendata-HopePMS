@@ -7,6 +7,7 @@ import ApiDebug from './pages/ApiDebug';
 import ProductListPage from './pages/ProductListPage';
 import DeletedItemsPage from './pages/DeletedItemsPage';
 import ReportsPage from './pages/reports/ReportsPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
 import { RootLayout } from './layouts/RootLayout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -60,6 +61,13 @@ function App() {
         <ProtectedRoute>
           <RootLayout>
             <ReportsPage />
+          </RootLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <RootLayout>
+            <UserManagementPage />
           </RootLayout>
         </ProtectedRoute>
       } />
