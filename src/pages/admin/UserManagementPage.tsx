@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
-import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X } from 'lucide-react';
+import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown } from 'lucide-react';
 
 export default function UserManagementPage() {
   const { hasRight, loadingRights } = useRights();
@@ -11,6 +11,9 @@ export default function UserManagementPage() {
   const [loadingPending, setLoadingPending] = useState(true);
   const [loadingActive, setLoadingActive] = useState(true);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('All');
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   const [showPreAuthModal, setShowPreAuthModal] = useState(false);
   const [preAuthEmail, setPreAuthEmail] = useState('');
@@ -33,6 +36,38 @@ export default function UserManagementPage() {
   if (!hasRight('ADM_USER')) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  const filteredActiveUsers = useMemo(() => {
+    let result = [...activeUsers];
+    const searchLower = searchTerm.toLowerCase();
+
+    // Search
+    if (searchTerm) {
+      result = result.filter(user => {
+        const id = (user.id || user.userid || '').toLowerCase();
+        const name = (user.username || user.email || '').toLowerCase();
+        return id.includes(searchLower) || name.includes(searchLower);
+      });
+    }
+
+    // Filter
+    if (filterRole !== 'All') {
+      result = result.filter(user => user.user_type === filterRole);
+    }
+
+    // Sort
+    if (sortConfig) {
+      result.sort((a, b) => {
+        const aValue = (a[sortConfig.key] || '').toLowerCase();
+        const bValue = (b[sortConfig.key] || '').toLowerCase();
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [activeUsers, searchTerm, filterRole, sortConfig]);
 
   const loadData = async () => {
     try {
@@ -221,15 +256,54 @@ export default function UserManagementPage() {
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
           <h3 className="text-lg font-bold text-slate-900">Active Users</h3>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-64 placeholder:text-slate-400 transition-all shadow-sm" placeholder="Search ID or Name" type="text"/>
+              <input 
+                className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-64 placeholder:text-slate-400 transition-all shadow-sm" 
+                placeholder="Search ID or Name" 
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <button className="px-4 py-2 bg-white text-slate-700 text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
-              <Filter className="w-4 h-4" />
-              Filter
-            </button>
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <select
+                className="pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-40 appearance-none cursor-pointer shadow-sm"
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+              >
+                <option value="All">All Roles</option>
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="SUPERADMIN">SUPERADMIN</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+            </div>
+            <div className="relative">
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <select
+                className="pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-48 appearance-none cursor-pointer shadow-sm"
+                value={sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val) {
+                    setSortConfig(null);
+                  } else {
+                    const [key, direction] = val.split('-');
+                    setSortConfig({ key, direction: direction as 'asc' | 'desc' });
+                  }
+                }}
+              >
+                <option value="">Sort by...</option>
+                <option value="username-asc">Name (A-Z)</option>
+                <option value="username-desc">Name (Z-A)</option>
+                <option value="user_type-asc">Role (A-Z)</option>
+                <option value="user_type-desc">Role (Z-A)</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+            </div>
           </div>
         </div>
         
@@ -250,11 +324,11 @@ export default function UserManagementPage() {
                 <tr>
                   <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">Loading users...</td>
                 </tr>
-              ) : activeUsers.length === 0 ? (
+              ) : filteredActiveUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No active users found</td>
+                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No users match your criteria</td>
                 </tr>
-              ) : activeUsers.map(user => {
+              ) : filteredActiveUsers.map((user: any) => {
                 const isSuperAdmin = user.user_type === 'SUPERADMIN';
                 const isActive = user.record_status === 'ACTIVE';
                 const id = user.id || user.userid;

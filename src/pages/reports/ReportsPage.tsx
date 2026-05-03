@@ -1,29 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useRights } from '../../contexts/UserRightsContext';
 import FullProductListingReport from './FullProductListingReport';
 import TopSellingProductsReport from './TopSellingProductsReport';
 import { BarChart3 } from 'lucide-react';
 
 export default function ReportsPage() {
-  const { hasRight, loadingRights } = useRights();
-  const navigate = useNavigate();
+  const { loadingRights } = useRights();
 
-  const canViewReports = hasRight('REP_001') || hasRight('REP_002');
+  const canViewReports = true;
   
   useEffect(() => {
-    if (!loadingRights && !canViewReports) {
-      navigate('/products');
-    }
-  }, [canViewReports, navigate, loadingRights]);
+    // Reports are now open to all authenticated users
+  }, []);
 
   const [activeTab, setActiveTab] = useState<'REP_001' | 'REP_002'>('REP_001');
 
   useEffect(() => {
     if (!loadingRights) {
-      setActiveTab(hasRight('REP_001') ? 'REP_001' : 'REP_002');
+      setActiveTab('REP_001');
     }
-  }, [loadingRights, hasRight]);
+  }, [loadingRights]);
 
   if (loadingRights) {
     return (
@@ -55,30 +51,26 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex items-center gap-6 border-b border-slate-200 pb-px w-full overflow-x-auto no-scrollbar">
-        {hasRight('REP_001') && (
-          <button
-            onClick={() => setActiveTab('REP_001')}
-            className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'REP_001'
-                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            REP-001: Full Product Listing
-          </button>
-        )}
-        {hasRight('REP_002') && (
-          <button
-            onClick={() => setActiveTab('REP_002')}
-            className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'REP_002'
-                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            REP-002: Top Selling Products
-          </button>
-        )}
+        <button
+          onClick={() => setActiveTab('REP_001')}
+          className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
+            activeTab === 'REP_001'
+              ? 'text-blue-600 font-bold border-b-2 border-blue-600'
+              : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          REP-001: Full Product Listing
+        </button>
+        <button
+          onClick={() => setActiveTab('REP_002')}
+          className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
+            activeTab === 'REP_002'
+              ? 'text-blue-600 font-bold border-b-2 border-blue-600'
+              : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          REP-002: Top Selling Products
+        </button>
       </div>
 
       <div className="flex-1 flex flex-col max-w-full relative z-10">

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getProducts, type Product, updateProduct } from '../api/products';
+import { getProducts, type Product } from '../api/products';
 import { getPriceHistory, type PriceEntry } from '../api/priceHistory';
 import { useRights } from '../contexts/UserRightsContext';
 import { AddProductModal } from '../components/products/AddProductModal';
 import { EditProductModal } from '../components/products/EditProductModal';
 import { SoftDeleteConfirmDialog } from '../components/products/SoftDeleteConfirmDialog';
 import { PriceHistoryPanel } from '../components/products/PriceHistoryPanel';
-import { Search, ChevronDown, ChevronUp, Edit2, Trash2, ChevronLeft, ChevronRight, Info, History, Shield, Plus } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Edit2, Trash2, ChevronLeft, ChevronRight, Info, History, Shield, Plus, Filter, ArrowUpDown } from 'lucide-react';
 import { SkeletonTable } from '../components/shared/SkeletonTable';
 import { EmptyState } from '../components/shared/EmptyState';
 import { ErrorBanner } from '../components/shared/ErrorBanner';
@@ -22,6 +22,7 @@ export const ProductListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [filterCategory, setFilterCategory] = useState('All');
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const deletingId: string | null = null;
@@ -62,17 +63,39 @@ export const ProductListPage: React.FC = () => {
   }, [fetchProducts]);
 
   // Handle search and sorting
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach(p => {
+      if (p.unit) cats.add(p.unit);
+    });
+    return ['All', ...Array.from(cats)].sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    let result = products.filter((product) =>
+    let result = products;
+
+    if (filterCategory !== 'All') {
+      result = result.filter(p => p.unit === filterCategory);
+    }
+
+    result = result.filter((product) =>
       product.prodcode.toLowerCase().includes(searchLower) ||
       (product.description?.toLowerCase().includes(searchLower) ?? false)
     );
 
     if (sortConfig) {
       result.sort((a, b) => {
-        const aValue = a[sortConfig.key as keyof Product] || '';
-        const bValue = b[sortConfig.key as keyof Product] || '';
+        let aValue: any;
+        let bValue: any;
+
+        if (sortConfig.key === 'price') {
+          aValue = priceMap[a.prodcode] || 0;
+          bValue = priceMap[b.prodcode] || 0;
+        } else {
+          aValue = a[sortConfig.key as keyof Product] || '';
+          bValue = b[sortConfig.key as keyof Product] || '';
+        }
 
         if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
         if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -81,7 +104,7 @@ export const ProductListPage: React.FC = () => {
     }
 
     return result;
-  }, [searchTerm, products, sortConfig]);
+  }, [searchTerm, products, filterCategory, sortConfig, priceMap]);
 
   const handleSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -220,18 +243,62 @@ export const ProductListPage: React.FC = () => {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Search Bar */}
         <div className="p-4 border-b border-slate-100 bg-[#f8fafc]">
-          <div className="relative w-full max-w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search by product code, description, or unit..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm placeholder:text-slate-400"
-            />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by product code, description, or unit..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm placeholder:text-slate-400"
+              />
+            </div>
+            <div className="relative sm:w-64">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <select
+                value={filterCategory}
+                onChange={(e) => {
+                  setFilterCategory(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm text-slate-700 appearance-none cursor-pointer"
+              >
+                {availableCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat === 'All' ? 'All Units' : cat}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+            </div>
+
+            <div className="relative sm:w-64">
+              <ArrowUpDown className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <select
+                value={sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val) {
+                    setSortConfig(null);
+                  } else {
+                    const [key, direction] = val.split('-');
+                    setSortConfig({ key, direction: direction as 'asc' | 'desc' });
+                  }
+                }}
+                className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm text-slate-700 appearance-none cursor-pointer"
+              >
+                <option value="">Sort by...</option>
+                <option value="prodcode-asc">Product Code (A-Z)</option>
+                <option value="prodcode-desc">Product Code (Z-A)</option>
+                <option value="description-asc">Description (A-Z)</option>
+                <option value="description-desc">Description (Z-A)</option>
+                <option value="price-asc">Price (Low to High)</option>
+                <option value="price-desc">Price (High to Low)</option>
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+            </div>
           </div>
         </div>
 

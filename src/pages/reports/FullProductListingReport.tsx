@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProductListing } from '../../api/reports';
-import { type Product, updateProduct } from '../../api/products';
+import { type Product } from '../../api/products';
 import { useRights } from '../../contexts/UserRightsContext';
 import { Search, ChevronLeft, ChevronRight, Download, FileText, ChevronUp, ChevronDown } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -213,20 +213,46 @@ export default function FullProductListingReport() {
           />
         </div>
         
-        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide shrink-0">
-          {availableCategories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => { setFilterCategory(cat); setCurrentPage(1); }}
-              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide border transition-colors ${
-                filterCategory === cat 
-                  ? 'bg-secondary-container text-on-secondary-container border-transparent' 
-                  : 'bg-surface text-on-surface-variant border-outline-variant/20 hover:bg-surface-container-low'
-              }`}
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+          <div className="relative w-full sm:w-40">
+            <select
+              value={filterCategory}
+              onChange={(e) => {
+                setFilterCategory(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-3 pr-8 py-2 border border-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/20 text-sm bg-white appearance-none"
             >
-              {cat === 'All' ? 'All Categories' : cat}
-            </button>
-          ))}
+              {availableCategories.map(cat => (
+                <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+          </div>
+          <div className="relative w-full sm:w-48">
+            <select
+              value={sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (!val) {
+                  setSortConfig(null);
+                } else {
+                  const [key, direction] = val.split('-');
+                  setSortConfig({ key, direction: direction as 'asc' | 'desc' });
+                }
+              }}
+              className="w-full pl-3 pr-8 py-2 border border-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/20 text-sm bg-white appearance-none"
+            >
+              <option value="">Sort by...</option>
+              <option value="prodcode-asc">Product Code (A-Z)</option>
+              <option value="prodcode-desc">Product Code (Z-A)</option>
+              <option value="description-asc">Description (A-Z)</option>
+              <option value="description-desc">Description (Z-A)</option>
+              <option value="current_price-asc">Price (Low to High)</option>
+              <option value="current_price-desc">Price (High to Low)</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+          </div>
         </div>
 
         <div className="flex items-center gap-2 ml-auto w-full sm:w-auto mt-2 sm:mt-0">

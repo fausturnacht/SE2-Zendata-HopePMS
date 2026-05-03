@@ -13,6 +13,7 @@ export default function Login() {
   const inactiveError = location.state?.error || localError;
 
   const handleGoogleLogin = async () => {
+    setLocalError(null);
     setLoading(true);
     
     const { data, error } = await supabase.auth.signInWithOAuth({

@@ -56,7 +56,7 @@ export const SoftDeleteConfirmDialog: React.FC<SoftDeleteConfirmDialogProps> = (
       onClick={handleBackdropClick}
     >
       {/* Modal Dialog */}
-      <div className="bg-surface-container-lowest rounded-xl shadow-[0_0_40px_rgba(42,52,57,0.12)] w-full max-w-[400px] flex flex-col relative overflow-hidden">
+      <div className="bg-white rounded-xl shadow-[0_0_40px_rgba(42,52,57,0.12)] w-full max-w-[400px] flex flex-col relative overflow-hidden">
         {/* Content Container */}
         <div className="p-8 flex flex-col items-center text-center">
           {/* Warning Icon Container */}
