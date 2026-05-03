@@ -186,6 +186,22 @@ export default function UserManagementPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Helper component for disabled SuperAdmin actions
+  const SuperAdminDisabledActions = () => (
+    <div className="relative group/tooltip flex gap-2">
+      <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+        <Edit className="w-4 h-4" /> Edit
+      </button>
+      <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+        <Ban className="w-4 h-4" /> Deactivate
+      </button>
+      {/* Tooltip on Hover */}
+      <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-48 bg-slate-900 text-white text-xs p-2 rounded shadow-lg text-center z-10 pointer-events-none">
+        SUPERADMIN accounts cannot be modified
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 max-w-full">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-4">
@@ -227,6 +243,7 @@ export default function UserManagementPage() {
                 <th className="px-6 py-4 font-medium">Email</th>
                 <th className="px-6 py-4 font-medium">Requested Role</th>
                 <th className="px-6 py-4 font-medium">Date Requested</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-slate-100">
@@ -238,15 +255,37 @@ export default function UserManagementPage() {
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No pending authorization requests</td>
                 </tr>
-              ) : pendingUsers.map(user => (
-                <tr key={user.id || user.userid} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{user.id || user.userid || '—'}</td>
-                  <td className="px-6 py-4 font-medium text-slate-900">{user.username || '—'}</td>
+              ) : pendingUsers.map(user => {
+                const isSuperAdmin = user.user_type === 'SUPERADMIN';
+                const id = user.id || user.userid;
+                return (
+                <tr key={id} className={`hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? 'bg-slate-50/30' : ''}`}>
+                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
+                  <td className={`px-6 py-4 font-medium ${isSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>{user.username || '—'}</td>
                   <td className="px-6 py-4 text-slate-500">{user.email}</td>
-                  <td className="px-6 py-4"><span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">{user.user_type || '—'}</span></td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
+                      {user.user_type || '—'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
+                  <td className="px-6 py-4 flex justify-end gap-2 relative group">
+                    {/* Gating: Disable SuperAdmin modification in Pending table */}
+                    {isSuperAdmin ? (
+                      <SuperAdminDisabledActions />
+                    ) : (
+                      <div className="flex gap-2">
+                         <button 
+                          onClick={() => handleActivate(id)}
+                          disabled={actionInProgress === `activate-${id}`}
+                          className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
+                          {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Approve
+                        </button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
@@ -357,18 +396,9 @@ export default function UserManagementPage() {
                     </td>
                   )}
                   <td className="px-6 py-4 flex justify-end gap-2 relative group">
+                    {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins */}
                     {isSuperAdmin ? (
-                      <div className="relative group/tooltip flex gap-2">
-                        <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
-                          <Edit className="w-4 h-4" /> Edit
-                        </button>
-                        <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
-                          <Ban className="w-4 h-4" /> Deactivate
-                        </button>
-                        <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-48 bg-slate-900 text-white text-xs p-2 rounded shadow-lg text-center z-10">
-                          SUPERADMIN accounts cannot be modified
-                        </div>
-                      </div>
+                      <SuperAdminDisabledActions />
                     ) : (
                       <div className="flex gap-2">
                         <button 
