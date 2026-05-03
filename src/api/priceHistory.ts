@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { createStamp } from '../utils/stamp';
 
 export interface PriceEntry {
   effdate: string;
@@ -34,9 +35,10 @@ export const getPriceHistory = async (prodcode?: string) => {
  * Adds a new price history entry.
  */
 export const addPriceEntry = async (entry: PriceEntry) => {
+  const stamp = await createStamp('ADDED');
   const { data, error } = await supabase
     .from('pricehist')
-    .insert([entry])
+    .insert([{ ...entry, stamp }])
     .select();
 
   if (error) {

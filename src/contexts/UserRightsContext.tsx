@@ -82,6 +82,7 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
     // The core permission checker
     const hasRight = (right: string): boolean => {
         if (isSuperAdmin) return true;
+        if (isUser && right === 'STAMP') return false;
         return rights[right] === 1;
     };
 

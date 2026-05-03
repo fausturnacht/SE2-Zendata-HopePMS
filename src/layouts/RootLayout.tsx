@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../contexts/UserRightsContext';
-import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, Bell, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, LogOut, Menu, X } from 'lucide-react';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -106,13 +106,9 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            <h2 className="hidden sm:block text-[15px] font-medium text-slate-600">Product Management System</h2>
           </div>
           
           <div className="flex items-center gap-4">
-            <button className="text-slate-500 hover:text-slate-700 transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
             <div className="w-px h-6 bg-slate-200 mx-1"></div>
             <button 
               onClick={signOut}

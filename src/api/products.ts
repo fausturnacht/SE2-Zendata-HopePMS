@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { createStamp } from '../utils/stamp';
 
 export type UserType = 'USER' | 'ADMIN' | 'SUPERADMIN';
 
@@ -46,9 +47,10 @@ export const getDeletedProducts = async () => {
  * Adds a new product to the database.
  */
 export const addProduct = async (product: Partial<Product>) => {
+  const stamp = await createStamp('ADDED');
   const { data, error } = await supabase
     .from('product')
-    .insert([product])
+    .insert([{ ...product, stamp }])
     .select();
   
   if (error) {
@@ -62,9 +64,10 @@ export const addProduct = async (product: Partial<Product>) => {
  * Updates an existing product.
  */
 export const updateProduct = async (prodcode: string, product: Partial<Product>) => {
+  const stamp = await createStamp('EDITED');
   const { data, error } = await supabase
     .from('product')
-    .update(product)
+    .update({ ...product, stamp })
     .eq('prodcode', prodcode)
     .select();
   
@@ -79,9 +82,10 @@ export const updateProduct = async (prodcode: string, product: Partial<Product>)
  * Soft deletes a product by setting record_status to 'DELETED'.
  */
 export const softDeleteProduct = async (prodcode: string) => {
+  const stamp = await createStamp('DELETED');
   const { data, error } = await supabase
     .from('product')
-    .update({ record_status: 'DELETED' })
+    .update({ record_status: 'DELETED', stamp })
     .eq('prodcode', prodcode)
     .select();
   
@@ -99,9 +103,10 @@ export const softDeleteProduct = async (prodcode: string) => {
  * Recovers a soft-deleted product by setting record_status to 'ACTIVE'.
  */
 export const recoverProduct = async (prodcode: string) => {
+  const stamp = await createStamp('RECOVERED');
   const { data, error } = await supabase
     .from('product')
-    .update({ record_status: 'ACTIVE' })
+    .update({ record_status: 'ACTIVE', stamp })
     .eq('prodcode', prodcode)
     .select();
   

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProductListing } from '../../api/reports';
-import { type Product, updateProduct } from '../../api/products';
+import { type Product } from '../../api/products';
 import { useRights } from '../../contexts/UserRightsContext';
 import { Search, ChevronLeft, ChevronRight, Download, FileText, ChevronUp, ChevronDown } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -39,13 +39,19 @@ export default function FullProductListingReport() {
     fetchProducts();
   }, [fetchProducts]);
 
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach(p => {
+      if (p.unit) cats.add(p.unit);
+    });
+    return ['All', ...Array.from(cats)].sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     let filtered = products;
 
     if (filterCategory !== 'All') {
-      const lowerFilter = filterCategory.toLowerCase();
-      // Heuristic string match for category if product structure has no exact "category" field
-      filtered = filtered.filter(p => (p.description || '').toLowerCase().includes(lowerFilter) || (p.prodcode || '').toLowerCase().includes(lowerFilter));
+      filtered = filtered.filter(p => p.unit === filterCategory);
     }
 
     if (searchTerm) {
@@ -84,7 +90,7 @@ export default function FullProductListingReport() {
   const currentProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleExportCSV = () => {
-    const headers = ['Product Code', 'Description', 'Unit', 'Current Price'];
+    const headers = ['Product Code', 'Description', 'Category', 'Current Price'];
     if (hasRight('STAMP')) headers.push('Stamp');
 
     const csvRows = [
@@ -137,7 +143,7 @@ export default function FullProductListingReport() {
     doc.setLineWidth(0.5);
     doc.line(14, 28, pageWidth - 14, 28);
 
-    const head = [['Product Code', 'Description', 'Unit', 'Current Price']];
+    const head = [['Product Code', 'Description', 'Category', 'Current Price']];
     if (hasRight('STAMP')) head[0].push('Stamp');
 
     const body = filteredProducts.map(p => {
@@ -207,20 +213,46 @@ export default function FullProductListingReport() {
           />
         </div>
         
-        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide shrink-0">
-          {['All', 'Reagents', 'Consumables', 'Equipment'].map(cat => (
-            <button
-              key={cat}
-              onClick={() => { setFilterCategory(cat); setCurrentPage(1); }}
-              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide border transition-colors ${
-                filterCategory === cat 
-                  ? 'bg-secondary-container text-on-secondary-container border-transparent' 
-                  : 'bg-surface text-on-surface-variant border-outline-variant/20 hover:bg-surface-container-low'
-              }`}
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+          <div className="relative w-full sm:w-40">
+            <select
+              value={filterCategory}
+              onChange={(e) => {
+                setFilterCategory(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-3 pr-8 py-2 border border-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/20 text-sm bg-white appearance-none"
             >
-              {cat === 'All' ? 'All Items' : cat}
-            </button>
-          ))}
+              {availableCategories.map(cat => (
+                <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+          </div>
+          <div className="relative w-full sm:w-48">
+            <select
+              value={sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (!val) {
+                  setSortConfig(null);
+                } else {
+                  const [key, direction] = val.split('-');
+                  setSortConfig({ key, direction: direction as 'asc' | 'desc' });
+                }
+              }}
+              className="w-full pl-3 pr-8 py-2 border border-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/20 text-sm bg-white appearance-none"
+            >
+              <option value="">Sort by...</option>
+              <option value="prodcode-asc">Product Code (A-Z)</option>
+              <option value="prodcode-desc">Product Code (Z-A)</option>
+              <option value="description-asc">Description (A-Z)</option>
+              <option value="description-desc">Description (Z-A)</option>
+              <option value="current_price-asc">Price (Low to High)</option>
+              <option value="current_price-desc">Price (High to Low)</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+          </div>
         </div>
 
         <div className="flex items-center gap-2 ml-auto w-full sm:w-auto mt-2 sm:mt-0">
@@ -251,7 +283,7 @@ export default function FullProductListingReport() {
               </th>
               <th onClick={() => handleSort('unit')} className="p-4 font-medium cursor-pointer hover:bg-surface-container-low transition-colors">
                 <div className="flex items-center gap-1">
-                  Unit
+                  Category
                   {sortConfig?.key === 'unit' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                 </div>
               </th>
@@ -288,32 +320,8 @@ export default function FullProductListingReport() {
                     ${(product.current_price || 0).toFixed(2)}
                   </td>
                   {hasRight('STAMP') && (
-                    <td className="p-4 pr-6 text-center">
-                      <select
-                        value={product.stamp || 'PENDING'}
-                        onChange={async (e) => {
-                          const newStamp = e.target.value;
-                          try {
-                            setError(null);
-                            await updateProduct(product.prodcode, { stamp: newStamp });
-                            setProducts(products.map(p => p.prodcode === product.prodcode ? { ...p, stamp: newStamp } : p));
-                          } catch (err) {
-                            console.error('Error updating stamp:', err);
-                            setError('Failed to update product stamp');
-                          }
-                        }}
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border-none outline-none cursor-pointer transition-colors ${
-                          (product.stamp === 'VERIFIED') 
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' 
-                            : product.stamp === 'REJECTED'
-                            ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
-                            : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-                        }`}
-                      >
-                        <option value="PENDING">Pending</option>
-                        <option value="VERIFIED">Verified</option>
-                        <option value="REJECTED">Rejected</option>
-                      </select>
+                    <td className="p-4 pr-6 text-center text-xs text-on-surface-variant font-mono whitespace-nowrap">
+                      {product.stamp || '—'}
                     </td>
                   )}
                 </tr>

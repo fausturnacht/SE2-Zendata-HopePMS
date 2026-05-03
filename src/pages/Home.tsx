@@ -1,12 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
-  Bell, 
   Package, 
   Users, 
+  UserPlus,
   TrendingUp, 
   ArrowRight,
-  ShieldCheck,
-  Clock,
   LayoutDashboard
 } from 'lucide-react';
 import { getProducts, type Product, verifyAllProducts } from '../api/products';
@@ -62,7 +60,7 @@ export default function Home() {
         getProducts(),
         hasRight('ADM_USER') ? fetchAllUsers() : Promise.resolve([]),
         hasRight('ADM_USER') ? getPendingUsers() : Promise.resolve([]),
-        hasRight('REP_002') ? getTopSellers(5) : Promise.resolve([])
+        hasRight('REP_002') ? getTopSellers(10) : Promise.resolve([])
       ]);
 
       setProducts(productsData);
@@ -96,11 +94,22 @@ export default function Home() {
     };
   }, [products]);
 
-  const pieData = useMemo(() => [
-    { name: 'Verified', value: stats.verified, color: '#10b981' },
-    { name: 'Pending', value: stats.pendingReview, color: '#f59e0b' },
-    { name: 'Rejected', value: stats.rejected, color: '#ef4444' }
-  ].filter(item => item.value > 0), [stats]);
+  const pieData = useMemo(() => {
+    const unitCounts: Record<string, number> = {};
+    products.forEach(p => {
+      const u = p.unit || 'Unknown';
+      unitCounts[u] = (unitCounts[u] || 0) + 1;
+    });
+    
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'];
+    let idx = 0;
+    
+    return Object.entries(unitCounts).map(([name, value]) => ({
+      name,
+      value,
+      color: colors[idx++ % colors.length]
+    })).sort((a, b) => b.value - a.value);
+  }, [products]);
 
   if (isLoading) {
     return (
@@ -158,8 +167,8 @@ export default function Home() {
       <ErrorBanner error={error} onRetry={fetchDashboardData} />
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Link to="/products" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link to="/products" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
           <div className="flex items-start justify-between mb-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
               <Package className="w-6 h-6" />
@@ -171,7 +180,7 @@ export default function Home() {
         </Link>
 
         {hasRight('ADM_USER') && (
-          <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+          <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <Users className="w-6 h-6" />
@@ -183,40 +192,17 @@ export default function Home() {
           </Link>
         )}
 
-        {hasRight('ADM_USER') && pendingUsersCount > 0 && (
-          <Link to="/admin" className="group bg-rose-50 border-rose-100 p-6 rounded-2xl border shadow-sm hover:shadow-md transition-all">
+        {hasRight('ADM_USER') && (
+          <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-rose-100 text-rose-600 rounded-xl">
-                <ShieldCheck className="w-6 h-6" />
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                <UserPlus className="w-6 h-6" />
               </div>
-              <div className="px-2.5 py-1 bg-rose-600 text-white text-[10px] font-bold rounded-full animate-bounce">URGENT</div>
+              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-amber-600 transition-all group-hover:translate-x-1" />
             </div>
-            <div className="text-2xl font-bold text-rose-700">{pendingUsersCount}</div>
-            <div className="text-sm text-rose-600 mt-1">Pending Authorizations</div>
+            <div className="text-2xl font-bold text-slate-900">{pendingUsersCount}</div>
+            <div className="text-sm text-slate-500 mt-1">Pending Pre-auth</div>
           </Link>
-        )}
-
-        <Link to="/products" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-              <Clock className="w-6 h-6" />
-            </div>
-            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-amber-600 transition-all group-hover:translate-x-1" />
-          </div>
-          <div className="text-2xl font-bold text-slate-900">{stats.pendingReview}</div>
-          <div className="text-sm text-slate-500 mt-1">Products Pending Review</div>
-        </Link>
-
-        {(!hasRight('ADM_USER') || pendingUsersCount === 0) && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-slate-900">12%</div>
-            <div className="text-sm text-slate-500 mt-1">Weekly Growth</div>
-          </div>
         )}
       </div>
 
@@ -227,7 +213,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Inventory Distribution</h3>
-                <p className="text-xs text-slate-400 mt-1">Breakdown of verified vs pending review products</p>
+                <p className="text-xs text-slate-400 mt-1">Breakdown of products by unit type</p>
               </div>
             </div>
             
@@ -273,7 +259,7 @@ export default function Home() {
                   <h3 className="text-lg font-bold text-slate-900">Top Selling Products</h3>
                   <p className="text-xs text-slate-400 mt-1">Quantity sold by product code</p>
                 </div>
-                <Link to="/reports/top-selling" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-wider">
+                <Link to="/reports" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-wider">
                   Full Report <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -300,39 +286,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* System Activity & Alerts */}
-        <div className="space-y-6">
-          <div className="bg-[#1e293b] text-white rounded-2xl p-6 shadow-xl border border-slate-800">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-slate-700/50 rounded-lg text-emerald-400">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold">Security Alerts</h3>
-            </div>
-            
-            <div className="space-y-4">
-              {pendingUsersCount > 0 ? (
-                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl">
-                  <div className="flex items-center gap-3 text-rose-400 mb-2">
-                    <Bell className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">High Priority</span>
-                  </div>
-                  <p className="text-sm text-slate-300 leading-snug">
-                    {pendingUsersCount} new user requests require authorization. 
-                  </p>
-                  <Link to="/admin" className="mt-4 block text-center py-2 bg-rose-600 hover:bg-rose-500 rounded-lg text-xs font-bold transition-colors">
-                    Review Requests
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center py-6 text-slate-500">
-                  <ShieldCheck className="w-10 h-10 mb-2 opacity-20" />
-                  <p className="text-xs font-medium uppercase tracking-widest">System Secure</p>
-                  <p className="text-[10px] opacity-60">All access points verified</p>
-                </div>
-              )}
-            </div>
-          </div>
+
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-slate-900 mb-6">Quick Actions</h3>
@@ -375,7 +329,6 @@ export default function Home() {
               )}
             </div>
           </div>
-        </div>
       </div>
     </div>
   );

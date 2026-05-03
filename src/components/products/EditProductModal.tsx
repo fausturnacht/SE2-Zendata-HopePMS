@@ -128,7 +128,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
       onClick={handleBackdropClick}
     >
       {/* Modal Dialog */}
-      <div className="bg-surface-container-lowest w-full max-w-md rounded-xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="px-6 py-5 border-b border-surface-container-low flex justify-between items-center">
           <h2 className="text-xl font-bold tracking-tight text-on-surface font-headline">
@@ -281,7 +281,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
         </div>
 
         {/* Modal Footer (Actions) */}
-        <div className="px-6 py-4 bg-surface-container-lowest border-t border-surface-container-low flex justify-end gap-3 rounded-b-xl">
+        <div className="px-6 py-4 bg-white border-t border-surface-container-low flex justify-end gap-3 rounded-b-xl">
           <button
             type="button"
             onClick={onClose}
