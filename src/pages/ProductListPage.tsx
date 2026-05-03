@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { getProducts, type Product, type UserType } from '../api/products';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { getProducts, type Product, updateProduct } from '../api/products';
 import { getPriceHistory, type PriceEntry } from '../api/priceHistory';
 import { useRights } from '../contexts/UserRightsContext';
 import { AddProductModal } from '../components/products/AddProductModal';
@@ -7,17 +7,21 @@ import { EditProductModal } from '../components/products/EditProductModal';
 import { SoftDeleteConfirmDialog } from '../components/products/SoftDeleteConfirmDialog';
 import { PriceHistoryPanel } from '../components/products/PriceHistoryPanel';
 import { Search, ChevronDown, ChevronUp, Edit2, Trash2, ChevronLeft, ChevronRight, Info, History, Shield, Plus } from 'lucide-react';
+import { SkeletonTable } from '../components/shared/SkeletonTable';
+import { EmptyState } from '../components/shared/EmptyState';
+import { ErrorBanner } from '../components/shared/ErrorBanner';
 
 const ITEMS_PER_PAGE = 10;
 
 export const ProductListPage: React.FC = () => {
-  // Destructure the needed rights flags and helpers from Context
-  const { hasRight, userRole, isAdmin, isSuperAdmin } = useRights();
+  const { hasRight } = useRights();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const deletingId: string | null = null;
@@ -27,53 +31,65 @@ export const ProductListPage: React.FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedProductForDelete, setSelectedProductForDelete] = useState<string | null>(null);
 
-  // Gating Constants
-  const canAdd = hasRight('PRD_ADD');
-  const canEdit = hasRight('PRD_EDIT');
-  const canDelete = hasRight('PRD_DEL');
-  const showStampColumn = isAdmin || isSuperAdmin;
-  const currentTableColSpan = showStampColumn ? 6 : 5;
-
   // Fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getProducts(userRole as UserType);
-        setProducts(data);
+  const fetchProducts = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await getProducts();
+      setProducts(data);
 
-        // Fetch price history for all products
-        const priceData = await getPriceHistory();
-        const priceMap: Record<string, number> = {};
-        if (priceData && Array.isArray(priceData)) {
-          // Get the most recent price for each product (since it's ordered by effdate DESC)
-          priceData.forEach((entry: PriceEntry) => {
-            if (!priceMap[entry.prodcode]) {
-              priceMap[entry.prodcode] = entry.unitprice;
-            }
-          });
-        }
-        setPriceMap(priceMap);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        setError('Failed to load products');
-      } finally {
-        setIsLoading(false);
+      const priceData = await getPriceHistory();
+      const newPriceMap: Record<string, number> = {};
+      if (priceData && Array.isArray(priceData)) {
+        priceData.forEach((entry: PriceEntry) => {
+          if (!newPriceMap[entry.prodcode]) {
+            newPriceMap[entry.prodcode] = entry.unitprice;
+          }
+        });
       }
-    };
+      setPriceMap(newPriceMap);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError('Failed to load products');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProducts();
-  }, [userRole]);
+  }, [fetchProducts]);
 
-  // Handle search
+  // Handle search and sorting
   const filteredProducts = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return products.filter((product) =>
+    let result = products.filter((product) =>
       product.prodcode.toLowerCase().includes(searchLower) ||
       (product.description?.toLowerCase().includes(searchLower) ?? false)
     );
-  }, [searchTerm, products]);
+
+    if (sortConfig) {
+      result.sort((a, b) => {
+        const aValue = a[sortConfig.key as keyof Product] || '';
+        const bValue = b[sortConfig.key as keyof Product] || '';
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [searchTerm, products, sortConfig]);
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -83,8 +99,7 @@ export const ProductListPage: React.FC = () => {
 
   // Handle delete
   const handleDelete = (prodcode: string) => {
-    // Guard Clause
-    if (!canDelete) {
+    if (!hasRight('DELETE_PRODUCT')) {
       alert('You do not have permission to delete products');
       return;
     }
@@ -101,8 +116,7 @@ export const ProductListPage: React.FC = () => {
 
   // Handle edit
   const handleEdit = (prodcode: string) => {
-    // Guard Clause
-    if (!canEdit) {
+    if (!hasRight('EDIT_PRODUCT')) {
       alert('You do not have permission to edit products');
       return;
     }
@@ -129,11 +143,53 @@ export const ProductListPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-500">Loading products...</p>
+      <div className="space-y-8 pb-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-slate-900">Products</h1>
+            <p className="text-sm text-slate-500">Manage institutional procurement items and inventory.</p>
+          </div>
         </div>
+        <SkeletonTable columns={hasRight('STAMP') ? 6 : 5} />
+      </div>
+    );
+  }
+
+  if (products.length === 0 && !error) {
+    return (
+      <div className="space-y-8 pb-10 flex flex-col min-h-full">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-slate-900">Products</h1>
+            <p className="text-sm text-slate-500">Manage institutional procurement items and inventory.</p>
+          </div>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Add Product
+            </button>
+            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pr-1">ROLE-BASED ACCESS</p>
+          </div>
+        </div>
+
+        <EmptyState 
+          message="No products found. Add your first product to get started." 
+          ctaLabel={hasRight('ADD_PRODUCT') ? "Add Product" : undefined}
+          onCtaClick={hasRight('ADD_PRODUCT') ? () => setIsModalOpen(true) : undefined} 
+        />
+
+        {/* Add Product Modal */}
+        <AddProductModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onProductAdded={(newProduct) => {
+            setProducts([...products, newProduct]);
+            setCurrentPage(1);
+          }}
+        />
       </div>
     );
   }
@@ -147,26 +203,18 @@ export const ProductListPage: React.FC = () => {
           <p className="text-sm text-slate-500">Manage institutional procurement items and inventory.</p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          {/* Gated Add Button */}
-          {canAdd && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Add Product
-            </button>
-          )}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Product
+          </button>
           <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pr-1">ROLE-BASED ACCESS</p>
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg">
-          <p className="text-sm font-medium">{error}</p>
-        </div>
-      )}
+      <ErrorBanner error={error} onRetry={fetchProducts} />
 
       {/* Main Content Area: Search + Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -192,22 +240,45 @@ export const ProductListPage: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-white">
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                  Product Code
+                <th 
+                  onClick={() => handleSort('prodcode')}
+                  className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Product Code
+                    {sortConfig?.key === 'prodcode' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                  </div>
                 </th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                  Description
+                <th 
+                  onClick={() => handleSort('description')}
+                  className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Description
+                    {sortConfig?.key === 'description' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                  </div>
                 </th>
-                <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                  Unit
+                <th 
+                  onClick={() => handleSort('unit')}
+                  className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    Unit
+                    {sortConfig?.key === 'unit' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                  </div>
                 </th>
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   Current Price
                 </th>
-                {/* Gated Stamp Header */}
-                {showStampColumn && (
-                  <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                    Stamp
+                {hasRight('STAMP') && (
+                  <th 
+                    onClick={() => handleSort('stamp')}
+                    className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Stamp
+                      {sortConfig?.key === 'stamp' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                    </div>
                   </th>
                 )}
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">
@@ -219,7 +290,7 @@ export const ProductListPage: React.FC = () => {
               {currentProducts.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={currentTableColSpan}
+                    colSpan={hasRight('STAMP') ? 6 : 5}
                     className="px-6 py-8 text-center text-slate-500 text-sm"
                   >
                     {filteredProducts.length === 0 && searchTerm
@@ -245,16 +316,33 @@ export const ProductListPage: React.FC = () => {
                     <td className="px-6 py-5 text-sm font-extrabold text-slate-900">
                       ${(priceMap[product.prodcode] ?? 0).toFixed(2)}
                     </td>
-                    
-                    {/* PR-02: Gated Stamp Data Cell */}
-                    {showStampColumn && (
+                    {hasRight('STAMP') && (
                       <td className="px-6 py-5">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${product.stamp === 'VERIFIED' ? 'bg-[#e0e7ff] text-[#3730a3]' : 'bg-slate-100 text-slate-500'}`}>
-                          {product.stamp || 'Verified'}
-                        </span>
+                        <select
+                          value={product.stamp || 'PENDING'}
+                          onChange={async (e) => {
+                            const newStamp = e.target.value;
+                            try {
+                              setError(null);
+                              await updateProduct(product.prodcode, { stamp: newStamp });
+                              setProducts(products.map(p => p.prodcode === product.prodcode ? { ...p, stamp: newStamp } : p));
+                            } catch (err) {
+                              console.error('Error updating stamp:', err);
+                              setError('Failed to update product stamp');
+                            }
+                          }}
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border-none outline-none cursor-pointer transition-colors ${
+                            (product.stamp === 'VERIFIED') 
+                              ? 'bg-[#e0e7ff] text-[#3730a3] hover:bg-[#d0d7ef]' 
+                              : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                          }`}
+                        >
+                          <option value="PENDING">Pending</option>
+                          <option value="VERIFIED">Verified</option>
+                          <option value="REJECTED">Rejected</option>
+                        </select>
                       </td>
                     )}
-                    
                     <td className="px-6 py-5 text-right">
                       <div className="inline-flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -265,9 +353,7 @@ export const ProductListPage: React.FC = () => {
                         >
                           {expandedRows[product.prodcode] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
-                        
-                        {/* PR-02: Gated Edit Button */}
-                        {canEdit && (
+                        {hasRight('EDIT_PRODUCT') && (
                           <button
                             onClick={() => handleEdit(product.prodcode)}
                             className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -276,9 +362,7 @@ export const ProductListPage: React.FC = () => {
                             <Edit2 className="w-4 h-4" />
                           </button>
                         )}
-                        
-                        {/* PR-02: Gated Delete Button */}
-                        {canDelete && (
+                        {hasRight('DELETE_PRODUCT') && (
                           <button
                             onClick={() => handleDelete(product.prodcode)}
                             disabled={deletingId === product.prodcode}
@@ -296,7 +380,7 @@ export const ProductListPage: React.FC = () => {
                     isOpen={!!expandedRows[product.prodcode]}
                     onToggle={() => handleToggleExpand(product.prodcode)}
                     onPriceSaved={(unitPrice) => handlePriceSaved(product.prodcode, unitPrice)}
-                    colSpan={currentTableColSpan}
+                    colSpan={hasRight('STAMP') ? 6 : 5}
                   />
                   </React.Fragment>
                 ))

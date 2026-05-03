@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useRights } from "../contexts/UserRightsContext";
+import { useRights } from '../contexts/UserRightsContext';
 import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, Bell, LogOut, Menu, X } from 'lucide-react';
 
 interface RootLayoutProps {
@@ -10,7 +10,7 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const { currentUser, signOut } = useAuth();
-  const { isAdmin, isSuperAdmin, userRole } = useRights();
+  const { isAdmin, isSuperAdmin, hasRight } = useRights();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -20,14 +20,15 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
     { name: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, href: '/dashboard' },
     { name: 'Products', icon: <Package className="w-5 h-5" />, href: '/products' },
     { name: 'Reports', icon: <BarChart2 className="w-5 h-5" />, href: '/reports' },
-    //Admin Module only visible to SUPERADMIN
-    ...(isSuperAdmin ? [{ name: 'Admin', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'SuperAdmin only' }] : []),
-    //Deleted Items visible to ADMIN and SUPERADMIN
+    ...(hasRight('ADM_USER') ? [{ name: 'Admin', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'Admin/SuperAdmin only' }] : []),
     ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: <Trash2 className="w-5 h-5" />, href: '/deleted', subtitle: 'Admin/SuperAdmin only' }] : []),
   ];
 
   const userInitials = currentUser?.email?.substring(0, 2).toUpperCase() || 'U';
-  const userName = currentUser?.email?.split('@')[0] || 'User';
+  const userName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
+  const avatarUrl = currentUser?.user_metadata?.avatar_url;
+
+  const roleLabel = isSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin' : 'Staff Member';
 
   return (
     <div className="flex bg-[#f7f9fb] min-h-screen font-sans text-slate-800">
@@ -42,6 +43,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
 
       {/* Sidebar */}
       <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-[#f8fafc] border-r border-slate-200 flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {/* Sidebar Header */}
         <div className="p-6">
           <h1 className="text-xl font-bold text-slate-900">HOPE PMS</h1>
           <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Product Management</p>
@@ -78,19 +80,23 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
 
         {/* Sidebar Footer / User Profile */}
         <div className="p-4 m-4 rounded-xl bg-slate-100/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
-            {userInitials}
-          </div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover shrink-0 border border-white" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+              {userInitials}
+            </div>
+          )}
           <div className="flex flex-col truncate">
             <span className="text-sm font-semibold truncate capitalize">{userName}</span>
-            {/* PR-03: Display dynamic user role instead of static "Staff Member" */}
-            <span className="text-xs text-slate-500 font-medium">{userRole || 'Loading...'}</span>
+            <span className="text-xs text-slate-500">{roleLabel}</span>
           </div>
         </div>
       </aside>
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        
         {/* Top Navbar */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 shrink-0">
           <div className="flex items-center gap-4">
