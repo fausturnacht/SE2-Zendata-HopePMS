@@ -6,7 +6,7 @@ import { useRights } from '../contexts/UserRightsContext';
 const ITEMS_PER_PAGE = 10;
 
 export default function DeletedItemsPage() {
-  const { isAdmin, isSuperAdmin } = useRights();
+  const { isAdmin, isSuperAdmin, loadingRights } = useRights();
   const navigate = useNavigate();
   
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,10 +16,10 @@ export default function DeletedItemsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAdmin && !isSuperAdmin) {
+    if (!loadingRights && !isAdmin && !isSuperAdmin) {
       navigate('/products', { replace: true });
     }
-  }, [isAdmin, isSuperAdmin, navigate]);
+  }, [isAdmin, isSuperAdmin, navigate, loadingRights]);
 
   useEffect(() => {
     const fetchDeleted = async () => {
@@ -65,6 +65,15 @@ export default function DeletedItemsPage() {
       alert('Failed to recover product. See console for details.');
     }
   };
+
+  if (loadingRights) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-slate-500 font-medium">Checking permissions...</p>
+      </div>
+    );
+  }
 
   if (!isAdmin && !isSuperAdmin) {
     return null; // Will redirect in useEffect

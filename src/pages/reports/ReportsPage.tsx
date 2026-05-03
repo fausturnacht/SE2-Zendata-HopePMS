@@ -6,18 +6,35 @@ import TopSellingProductsReport from './TopSellingProductsReport';
 import { BarChart3 } from 'lucide-react';
 
 export default function ReportsPage() {
-  const { hasRight } = useRights();
+  const { hasRight, loadingRights } = useRights();
   const navigate = useNavigate();
 
   const canViewReports = hasRight('REP_001') || hasRight('REP_002');
   
   useEffect(() => {
-    if (!canViewReports) {
+    if (!loadingRights && !canViewReports) {
       navigate('/products');
     }
-  }, [canViewReports, navigate]);
+  }, [canViewReports, navigate, loadingRights]);
 
-  const [activeTab, setActiveTab] = useState<'REP_001' | 'REP_002'>(hasRight('REP_001') ? 'REP_001' : 'REP_002');
+  const [activeTab, setActiveTab] = useState<'REP_001' | 'REP_002'>('REP_001');
+
+  useEffect(() => {
+    if (!loadingRights) {
+      setActiveTab(hasRight('REP_001') ? 'REP_001' : 'REP_002');
+    }
+  }, [loadingRights, hasRight]);
+
+  if (loadingRights) {
+    return (
+      <main className="flex-1 p-6 md:p-8 lg:p-12 max-w-7xl w-full mx-auto flex flex-col gap-8 bg-slate-50/50 min-h-screen">
+        <div className="flex flex-col items-center justify-center h-64">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+           <p className="text-slate-500 font-medium">Loading reports access...</p>
+        </div>
+      </main>
+    );
+  }
 
   if (!canViewReports) return null;
 

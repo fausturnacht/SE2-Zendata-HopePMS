@@ -5,12 +5,21 @@ import { getPendingUsers, fetchAllUsers, approveUser, rejectUser, activateUser, 
 import { Download, CheckCircle2, XCircle, Search, Filter, Shield, Ban, Power } from 'lucide-react';
 
 export default function UserManagementPage() {
-  const { hasRight } = useRights();
+  const { hasRight, loadingRights } = useRights();
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [loadingPending, setLoadingPending] = useState(true);
   const [loadingActive, setLoadingActive] = useState(true);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+
+  if (loadingRights) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-slate-500 font-medium">Checking permissions...</p>
+      </div>
+    );
+  }
 
   if (!hasRight('ADM_USER')) {
     return <Navigate to="/dashboard" replace />;
