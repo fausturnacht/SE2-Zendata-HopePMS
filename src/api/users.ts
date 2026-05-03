@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { createStamp } from '../utils/stamp';
 
 export interface User {
   userid: string;
@@ -29,9 +30,10 @@ export const getUsers = async () => {
  * Updates an existing user's profile fields.
  */
 export const updateUser = async (userid: string, userData: Partial<User>) => {
+  const stamp = await createStamp('EDITED');
   const { data, error } = await supabase
     .from('users')
-    .update(userData)
+    .update({ ...userData, stamp })
     .eq('userid', userid)
     .select();
   
@@ -49,9 +51,10 @@ export const updateUser = async (userid: string, userData: Partial<User>) => {
  * Soft deletes a user by setting record_status to 'INACTIVE'.
  */
 export const softDeleteUser = async (userid: string) => {
+  const stamp = await createStamp('DELETED');
   const { data, error } = await supabase
     .from('users')
-    .update({ record_status: 'INACTIVE' })
+    .update({ record_status: 'INACTIVE', stamp })
     .eq('userid', userid)
     .select();
   
@@ -69,9 +72,10 @@ export const softDeleteUser = async (userid: string) => {
  * Restores a user by setting record_status to 'ACTIVE'.
  */
 export const restoreUser = async (userid: string) => {
+  const stamp = await createStamp('RESTORED');
   const { data, error } = await supabase
     .from('users')
-    .update({ record_status: 'ACTIVE' })
+    .update({ record_status: 'ACTIVE', stamp })
     .eq('userid', userid)
     .select();
   
@@ -127,7 +131,8 @@ export const fetchAllUsers = async () => {
 };
 
 export const approveUser = async (id: string) => {
-  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE' }).eq('userid', id);
+  const stamp = await createStamp('APPROVED');
+  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE', stamp }).eq('userid', id);
   if (error) throw error;
   return data;
 };
@@ -139,13 +144,15 @@ export const rejectUser = async (id: string) => {
 };
 
 export const activateUser = async (id: string) => {
-  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE' }).eq('userid', id);
+  const stamp = await createStamp('ACTIVATED');
+  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE', stamp }).eq('userid', id);
   if (error) throw error;
   return data;
 };
 
 export const deactivateUser = async (id: string) => {
-  const { data, error } = await supabase.from('users').update({ record_status: 'INACTIVE' }).eq('userid', id);
+  const stamp = await createStamp('DEACTIVATED');
+  const { data, error } = await supabase.from('users').update({ record_status: 'INACTIVE', stamp }).eq('userid', id);
   if (error) throw error;
   return data;
 };

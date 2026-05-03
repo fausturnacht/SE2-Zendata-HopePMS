@@ -318,29 +318,9 @@ export const ProductListPage: React.FC = () => {
                     </td>
                     {hasRight('STAMP') && (
                       <td className="px-6 py-5">
-                        <select
-                          value={product.stamp || 'PENDING'}
-                          onChange={async (e) => {
-                            const newStamp = e.target.value;
-                            try {
-                              setError(null);
-                              await updateProduct(product.prodcode, { stamp: newStamp });
-                              setProducts(products.map(p => p.prodcode === product.prodcode ? { ...p, stamp: newStamp } : p));
-                            } catch (err) {
-                              console.error('Error updating stamp:', err);
-                              setError('Failed to update product stamp');
-                            }
-                          }}
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border-none outline-none cursor-pointer transition-colors ${
-                            (product.stamp === 'VERIFIED') 
-                              ? 'bg-[#e0e7ff] text-[#3730a3] hover:bg-[#d0d7ef]' 
-                              : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                          }`}
-                        >
-                          <option value="PENDING">Pending</option>
-                          <option value="VERIFIED">Verified</option>
-                          <option value="REJECTED">Rejected</option>
-                        </select>
+                        <span className="text-xs text-slate-500 font-mono">
+                          {product.stamp || '—'}
+                        </span>
                       </td>
                     )}
                     <td className="px-6 py-5 text-right">

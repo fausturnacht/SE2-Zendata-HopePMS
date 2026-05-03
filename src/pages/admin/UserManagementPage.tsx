@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useRights } from '../../contexts/UserRightsContext';
-import { getPendingUsers, fetchAllUsers, approveUser, rejectUser, activateUser, deactivateUser } from '../../api/users';
-import { Download, CheckCircle2, XCircle, Search, Filter, Shield, Ban, Power } from 'lucide-react';
+import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
+import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X } from 'lucide-react';
 
 export default function UserManagementPage() {
   const { hasRight, loadingRights } = useRights();
@@ -11,6 +11,15 @@ export default function UserManagementPage() {
   const [loadingPending, setLoadingPending] = useState(true);
   const [loadingActive, setLoadingActive] = useState(true);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+
+  const [showPreAuthModal, setShowPreAuthModal] = useState(false);
+  const [preAuthEmail, setPreAuthEmail] = useState('');
+  const [preAuthName, setPreAuthName] = useState('');
+  const [preAuthRole, setPreAuthRole] = useState<'USER' | 'ADMIN' | 'SUPERADMIN'>('USER');
+
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editUsername, setEditUsername] = useState('');
+  const [editUserType, setEditUserType] = useState<'USER' | 'ADMIN' | 'SUPERADMIN'>('USER');
 
   if (loadingRights) {
     return (
@@ -53,28 +62,45 @@ export default function UserManagementPage() {
     loadData();
   }, []);
 
-  const handleApprove = async (id: string) => {
-    setActionInProgress(`approve-${id}`);
+  const handlePreAuthorize = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActionInProgress('preauth');
     try {
-      await approveUser(id);
+      await preAuthorizeUser(preAuthEmail, preAuthName, preAuthRole);
+      setShowPreAuthModal(false);
+      setPreAuthEmail('');
+      setPreAuthName('');
+      setPreAuthRole('USER');
       await loadData();
     } catch (e) {
       console.error(e);
+      alert('Failed to pre-authorize user');
     } finally {
       setActionInProgress(null);
     }
   };
 
-  const handleReject = async (id: string) => {
-    setActionInProgress(`reject-${id}`);
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    const id = editingUser.id || editingUser.userid;
+    setActionInProgress(`edit-${id}`);
     try {
-      await rejectUser(id);
+      await updateUser(id, { username: editUsername, user_type: editUserType });
+      setEditingUser(null);
       await loadData();
     } catch (e) {
       console.error(e);
+      alert('Failed to update user');
     } finally {
       setActionInProgress(null);
     }
+  };
+
+  const openEditModal = (user: any) => {
+    setEditingUser(user);
+    setEditUsername(user.username || user.email || '');
+    setEditUserType(user.user_type || 'USER');
   };
 
   const handleActivate = async (id: string) => {
@@ -144,8 +170,17 @@ export default function UserManagementPage() {
       {/* Pending Authorization Section */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
-          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
+          </div>
+          <button 
+            onClick={() => setShowPreAuthModal(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <UserPlus className="w-4 h-4" />
+            Pre-authorize
+          </button>
         </div>
         
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
@@ -157,7 +192,6 @@ export default function UserManagementPage() {
                 <th className="px-6 py-4 font-medium">Email</th>
                 <th className="px-6 py-4 font-medium">Requested Role</th>
                 <th className="px-6 py-4 font-medium">Date Requested</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-slate-100">
@@ -176,20 +210,6 @@ export default function UserManagementPage() {
                   <td className="px-6 py-4 text-slate-500">{user.email}</td>
                   <td className="px-6 py-4"><span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">{user.user_type || '—'}</span></td>
                   <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
-                  <td className="px-6 py-4 flex justify-end gap-2">
-                    <button 
-                      onClick={() => handleApprove(user.id || user.userid)}
-                      disabled={actionInProgress === `approve-${user.id || user.userid}`}
-                      className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50" title="Approve">
-                        {actionInProgress === `approve-${user.id || user.userid}` ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"></span> : <CheckCircle2 className="w-5 h-5" />}
-                    </button>
-                    <button 
-                      onClick={() => handleReject(user.id || user.userid)}
-                      disabled={actionInProgress === `reject-${user.id || user.userid}`}
-                      className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50" title="Reject">
-                         {actionInProgress === `reject-${user.id || user.userid}` ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-rose-600 border-t-transparent"></span> : <XCircle className="w-5 h-5" />}
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -221,17 +241,18 @@ export default function UserManagementPage() {
                 <th className="px-6 py-4 font-medium">Username</th>
                 <th className="px-6 py-4 font-medium">User Type</th>
                 <th className="px-6 py-4 font-medium">Status</th>
+                {hasRight('STAMP') && <th className="px-6 py-4 font-medium">Stamp</th>}
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-slate-100">
               {loadingActive ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Loading users...</td>
+                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">Loading users...</td>
                 </tr>
               ) : activeUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">No active users found</td>
+                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No active users found</td>
                 </tr>
               ) : activeUsers.map(user => {
                 const isSuperAdmin = user.user_type === 'SUPERADMIN';
@@ -256,9 +277,17 @@ export default function UserManagementPage() {
                       <span className={isActive ? 'text-slate-900' : 'text-slate-500'}>{isActive ? 'Active' : 'Suspended'}</span>
                     </div>
                   </td>
+                  {hasRight('STAMP') && (
+                    <td className="px-6 py-4 text-xs text-slate-500 font-mono">
+                      {user.stamp || '—'}
+                    </td>
+                  )}
                   <td className="px-6 py-4 flex justify-end gap-2 relative group">
                     {isSuperAdmin ? (
-                      <div className="relative group/tooltip">
+                      <div className="relative group/tooltip flex gap-2">
+                        <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+                          <Edit className="w-4 h-4" /> Edit
+                        </button>
                         <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
                           <Ban className="w-4 h-4" /> Deactivate
                         </button>
@@ -266,20 +295,29 @@ export default function UserManagementPage() {
                           SUPERADMIN accounts cannot be modified
                         </div>
                       </div>
-                    ) : isActive ? (
-                      <button 
-                        onClick={() => handleDeactivate(id)}
-                        disabled={actionInProgress === `deactivate-${id}`}
-                        className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                        {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
-                      </button>
                     ) : (
-                      <button 
-                        onClick={() => handleActivate(id)}
-                        disabled={actionInProgress === `activate-${id}`}
-                        className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                        {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
-                      </button>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => openEditModal(user)}
+                          className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all text-xs font-semibold flex items-center gap-1">
+                          <Edit className="w-4 h-4" /> Edit
+                        </button>
+                        {isActive ? (
+                          <button 
+                            onClick={() => handleDeactivate(id)}
+                            disabled={actionInProgress === `deactivate-${id}`}
+                            className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
+                            {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleActivate(id)}
+                            disabled={actionInProgress === `activate-${id}`}
+                            className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
+                            {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
+                          </button>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -288,6 +326,81 @@ export default function UserManagementPage() {
           </table>
         </div>
       </section>
+
+      {/* Modals */}
+      {showPreAuthModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900">Pre-authorize User</h3>
+              <button onClick={() => setShowPreAuthModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handlePreAuthorize} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Email</label>
+                <input required type="email" value={preAuthEmail} onChange={(e) => setPreAuthEmail(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" placeholder="user@example.com" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username / Name</label>
+                <input required type="text" value={preAuthName} onChange={(e) => setPreAuthName(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" placeholder="John Doe" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
+                <select value={preAuthRole} onChange={(e) => setPreAuthRole(e.target.value as any)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium">
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="SUPERADMIN">SUPERADMIN</option>
+                </select>
+              </div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setShowPreAuthModal(false)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={actionInProgress === 'preauth'} className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition-colors flex justify-center items-center">
+                  {actionInProgress === 'preauth' ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-white border-t-transparent"></span> : 'Pre-authorize'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingUser && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900">Edit User</h3>
+              <button onClick={() => setEditingUser(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleEditUser} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">User ID</label>
+                <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm text-slate-500 font-mono" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username</label>
+                <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
+                <select value={editUserType} onChange={(e) => setEditUserType(e.target.value as any)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium">
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="SUPERADMIN">SUPERADMIN</option>
+                </select>
+              </div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition-colors flex justify-center items-center">
+                  {actionInProgress?.startsWith('edit') ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-white border-t-transparent"></span> : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
