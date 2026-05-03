@@ -5,21 +5,23 @@ import TopSellingProductsReport from './TopSellingProductsReport';
 import { BarChart3 } from 'lucide-react';
 
 export default function ReportsPage() {
-  const { loadingRights } = useRights();
-
-  const canViewReports = true;
-  
-  useEffect(() => {
-    // Reports are now open to all authenticated users
-  }, []);
-
+  // Destructure hasRight to use our gating logic
+  const { loadingRights, hasRight } = useRights();
+  const canViewRep1 = hasRight('REP_001');
+  const canViewRep2 = hasRight('REP_002');
+  // User can view the page if they have AT LEAST ONE report right
+  const canViewReports = canViewRep1 || canViewRep2;
   const [activeTab, setActiveTab] = useState<'REP_001' | 'REP_002'>('REP_001');
 
   useEffect(() => {
     if (!loadingRights) {
-      setActiveTab('REP_001');
+      if (canViewRep1) {
+        setActiveTab('REP_001');
+      } else if (canViewRep2) {
+        setActiveTab('REP_002');
+      }
     }
-  }, [loadingRights]);
+  }, [loadingRights, canViewRep1, canViewRep2]);
 
   if (loadingRights) {
     return (
@@ -32,7 +34,15 @@ export default function ReportsPage() {
     );
   }
 
-  if (!canViewReports) return null;
+  // Fallback if someone manually types "/reports" into the URL without access
+  if (!canViewReports) {
+    return (
+      <main className="flex-1 p-12 text-center text-slate-500 min-h-screen">
+        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+        <p>You do not have permission to view any reports.</p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 p-6 md:p-8 lg:p-12 max-w-7xl w-full mx-auto flex flex-col gap-8 bg-slate-50/50 min-h-screen">
@@ -51,31 +61,38 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex items-center gap-6 border-b border-slate-200 pb-px w-full overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => setActiveTab('REP_001')}
-          className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
-            activeTab === 'REP_001'
-              ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          REP-001: Full Product Listing
-        </button>
-        <button
-          onClick={() => setActiveTab('REP_002')}
-          className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
-            activeTab === 'REP_002'
-              ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          REP-002: Top Selling Products
-        </button>
+        {/* Gating: REP_001 Tab */}
+        {canViewRep1 && (
+          <button
+            onClick={() => setActiveTab('REP_001')}
+            className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'REP_001'
+                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            REP-001: Full Product Listing
+          </button>
+        )}
+
+        {/* SPRINT 3 GATING: REP_002 Tab */}
+        {canViewRep2 && (
+          <button
+            onClick={() => setActiveTab('REP_002')}
+            className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'REP_002'
+                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            REP-002: Top Selling Products
+          </button>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col max-w-full relative z-10">
-        {activeTab === 'REP_001' && <FullProductListingReport />}
-        {activeTab === 'REP_002' && <TopSellingProductsReport />}
+        {activeTab === 'REP_001' && canViewRep1 && <FullProductListingReport />}
+        {activeTab === 'REP_002' && canViewRep2 && <TopSellingProductsReport />}
       </div>
     </main>
   );
