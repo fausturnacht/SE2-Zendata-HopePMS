@@ -1,3 +1,11 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
 # Logs
 logs
 *.log
@@ -11,6 +19,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.vite
 
 # Editor directories and files
 .vscode/*
