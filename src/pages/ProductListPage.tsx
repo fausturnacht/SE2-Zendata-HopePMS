@@ -35,6 +35,7 @@ export const ProductListPage: React.FC = () => {
 
   // Fetch products
   const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
     try {
       setError(null);
       const data = await getProducts();
@@ -209,8 +210,11 @@ export const ProductListPage: React.FC = () => {
         <AddProductModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onProductAdded={(newProduct) => {
+          onProductAdded={(newProduct, initialPrice) => {
             setProducts([...products, newProduct]);
+            if (initialPrice !== undefined) {
+              setPriceMap(prev => ({ ...prev, [newProduct.prodcode]: initialPrice }));
+            }
             setCurrentPage(1);
           }}
         />
@@ -540,8 +544,11 @@ export const ProductListPage: React.FC = () => {
       <AddProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onProductAdded={(newProduct) => {
+        onProductAdded={(newProduct, initialPrice) => {
           setProducts([...products, newProduct]);
+          if (initialPrice !== undefined) {
+            setPriceMap(prev => ({ ...prev, [newProduct.prodcode]: initialPrice }));
+          }
           setCurrentPage(1);
         }}
       />

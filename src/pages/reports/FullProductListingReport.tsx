@@ -8,6 +8,7 @@ import autoTable from 'jspdf-autotable';
 import { SkeletonTable } from '../../components/shared/SkeletonTable';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { ErrorBanner } from '../../components/shared/ErrorBanner';
+import { getTodayGMT8 } from '../../utils/dateUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -112,14 +113,14 @@ export default function FullProductListingReport() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Full_Product_Listing_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `Full_Product_Listing_${getTodayGMT8()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    const dateStr = new Date().toISOString().split('T')[0];
+    const dateStr = getTodayGMT8();
 
     // Header
     doc.setFontSize(16);

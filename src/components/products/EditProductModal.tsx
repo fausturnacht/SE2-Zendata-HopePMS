@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { updateProduct, type Product } from '../../api/products';
 import { addPriceEntry, checkPriceEntryExists, updatePriceEntry } from '../../api/priceHistory';
 import { OverwritePriceModal } from './OverwritePriceModal';
+import { getTodayGMT8 } from '../../utils/dateUtils';
 
 export interface EditProductModalProps {
   isOpen: boolean;
@@ -101,7 +102,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
       const priceChanged = newPrice !== currentPrice;
 
       if (priceChanged) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayGMT8();
         if (shouldOverwritePrice) {
           await updatePriceEntry(product.prodcode, today, newPrice);
         } else {
@@ -141,7 +142,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
     const priceChanged = newPrice !== currentPrice;
 
     if (priceChanged) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayGMT8();
       try {
         const exists = await checkPriceEntryExists(product.prodcode, today);
         if (exists) {
