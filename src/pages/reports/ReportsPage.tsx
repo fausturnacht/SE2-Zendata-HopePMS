@@ -5,7 +5,7 @@ import TopSellingProductsReport from './TopSellingProductsReport';
 import { BarChart3 } from 'lucide-react';
 
 export default function ReportsPage() {
-  const { loadingRights } = useRights();
+  const { loadingRights, isSuperAdmin } = useRights();
 
   const canViewReports = true;
   
@@ -61,21 +61,23 @@ export default function ReportsPage() {
         >
           REP-001: Full Product Listing
         </button>
-        <button
-          onClick={() => setActiveTab('REP_002')}
-          className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
-            activeTab === 'REP_002'
-              ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          REP-002: Top Selling Products
-        </button>
+        {isSuperAdmin && (
+          <button
+            onClick={() => setActiveTab('REP_002')}
+            className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
+              activeTab === 'REP_002'
+                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            REP-002: Top Selling Products
+          </button>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col max-w-full relative z-10">
         {activeTab === 'REP_001' && <FullProductListingReport />}
-        {activeTab === 'REP_002' && <TopSellingProductsReport />}
+        {activeTab === 'REP_002' && isSuperAdmin && <TopSellingProductsReport />}
       </div>
     </main>
   );
