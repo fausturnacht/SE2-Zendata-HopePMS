@@ -5,7 +5,6 @@ import TopSellingProductsReport from './TopSellingProductsReport';
 import { BarChart3 } from 'lucide-react';
 
 export default function ReportsPage() {
-  // Destructure hasRight to use our gating logic
   const { loadingRights, hasRight } = useRights();
   const canViewRep1 = hasRight('REP_001');
   const canViewRep2 = hasRight('REP_002');
