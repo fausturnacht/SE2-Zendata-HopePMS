@@ -134,20 +134,6 @@ export const fetchAllUsers = async () => {
   return data || [];
 };
 
-export const approveUser = async (id: string) => {
-  const stamp = await createStamp('APPROVED');
-  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE', stamp }).eq('userid', id);
-  if (error) throw error;
-  await addUserStampEntry(id, stamp);
-  return data;
-};
-
-export const rejectUser = async (id: string) => {
-  const { data, error } = await supabase.from('users').delete().eq('userid', id);
-  if (error) throw error;
-  return data;
-};
-
 export const activateUser = async (id: string) => {
   const stamp = await createStamp('ACTIVATED');
   const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE', stamp }).eq('userid', id);
