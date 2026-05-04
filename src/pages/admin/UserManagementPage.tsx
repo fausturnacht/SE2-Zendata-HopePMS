@@ -3,8 +3,10 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
-import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp } from 'lucide-react';
+import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { UserStampHistoryPanel } from '../../components/admin/UserStampHistoryPanel';
+
+const PAGE_SIZE = 10;
 
 export default function UserManagementPage() {
   const { currentUser } = useAuth();
@@ -17,7 +19,10 @@ export default function UserManagementPage() {
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('All');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'SUSPENDED'>('ALL');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [activeCurrentPage, setActiveCurrentPage] = useState(1);
+  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
 
   const [showPreAuthModal, setShowPreAuthModal] = useState(false);
   const [preAuthEmail, setPreAuthEmail] = useState('');
@@ -54,9 +59,16 @@ export default function UserManagementPage() {
       });
     }
 
-    // Filter
+    // Filter by role
     if (filterRole !== 'All') {
       result = result.filter(user => user.user_type === filterRole);
+    }
+
+    // Filter by status
+    if (filterStatus === 'ACTIVE') {
+      result = result.filter(user => user.record_status === 'ACTIVE');
+    } else if (filterStatus === 'SUSPENDED') {
+      result = result.filter(user => user.record_status !== 'ACTIVE');
     }
 
     // Sort
@@ -71,7 +83,7 @@ export default function UserManagementPage() {
     }
 
     return result;
-  }, [activeUsers, searchTerm, filterRole, sortConfig]);
+  }, [activeUsers, searchTerm, filterRole, filterStatus, sortConfig]);
 
   const loadData = async () => {
     try {
@@ -100,6 +112,10 @@ export default function UserManagementPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    setActiveCurrentPage(1);
+  }, [searchTerm, filterRole, filterStatus, sortConfig]);
 
   const handlePreAuthorize = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,78 +245,6 @@ export default function UserManagementPage() {
         </button>
       </header>
 
-      {/* Pending Authorization Section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
-          </div>
-          <button 
-            onClick={() => setShowPreAuthModal(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <UserPlus className="w-4 h-4" />
-            Pre-authorize
-          </button>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[700px]">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                <th className="px-6 py-4 font-medium">User ID</th>
-                <th className="px-6 py-4 font-medium">Username</th>
-                <th className="px-6 py-4 font-medium">Email</th>
-                <th className="px-6 py-4 font-medium">Requested Role</th>
-                <th className="px-6 py-4 font-medium">Date Requested</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm divide-y divide-slate-100">
-              {loadingPending ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading pending requests...</td>
-                </tr>
-              ) : pendingUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No pending authorization requests</td>
-                </tr>
-              ) : pendingUsers.map(user => {
-                const isSuperAdmin = user.user_type === 'SUPERADMIN';
-                const id = user.id || user.userid;
-                return (
-                <tr key={id} className={`hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? 'bg-slate-50/30' : ''}`}>
-                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
-                  <td className={`px-6 py-4 font-medium ${isSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>{user.username || '—'}</td>
-                  <td className="px-6 py-4 text-slate-500">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
-                      {user.user_type || '—'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
-                  <td className="px-6 py-4 flex justify-end gap-2 relative group">
-                    {/* Gating: Disable SuperAdmin modification in Pending table */}
-                    {isSuperAdmin ? (
-                      <SuperAdminDisabledActions />
-                    ) : (
-                      <div className="flex gap-2">
-                         <button 
-                          onClick={() => handleActivate(id)}
-                          disabled={actionInProgress === `activate-${id}`}
-                          className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                          {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Approve
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              )})}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       {/* Active Users Section */}
       <section>
@@ -317,6 +261,13 @@ export default function UserManagementPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <button
+              onClick={() => setFilterStatus(prev => prev === 'ALL' ? 'ACTIVE' : prev === 'ACTIVE' ? 'SUSPENDED' : 'ALL')}
+              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 font-medium hover:bg-slate-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap min-w-[140px]"
+            >
+              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-emerald-500' : filterStatus === 'SUSPENDED' ? 'border border-slate-400 bg-transparent' : 'bg-blue-500'}`}></div>
+              {filterStatus === 'ALL' ? 'All Users' : filterStatus === 'ACTIVE' ? 'Active Only' : 'Suspended Only'}
+            </button>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <select
@@ -378,7 +329,7 @@ export default function UserManagementPage() {
                 <tr>
                   <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No users match your criteria</td>
                 </tr>
-              ) : filteredActiveUsers.map((user: any) => {
+              ) : filteredActiveUsers.slice((activeCurrentPage - 1) * PAGE_SIZE, activeCurrentPage * PAGE_SIZE).map((user: any) => {
                 const isRowSuperAdmin = user.user_type === 'SUPERADMIN';
                 const isActive = user.record_status === 'ACTIVE';
                 const id = user.id || user.userid;
@@ -458,6 +409,112 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Active Users Pagination */}
+        {filteredActiveUsers.length > PAGE_SIZE && (
+          <div className="mt-4 flex items-center justify-between px-2">
+            <p className="text-xs font-medium text-slate-500">
+              Showing {(activeCurrentPage - 1) * PAGE_SIZE + 1}–{Math.min(activeCurrentPage * PAGE_SIZE, filteredActiveUsers.length)} of {filteredActiveUsers.length} users
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveCurrentPage(p => Math.max(1, p - 1))}
+                disabled={activeCurrentPage === 1}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm font-semibold text-slate-700 min-w-[3rem] text-center">
+                Page {activeCurrentPage} of {Math.ceil(filteredActiveUsers.length / PAGE_SIZE)}
+              </span>
+              <button
+                onClick={() => setActiveCurrentPage(p => Math.min(Math.ceil(filteredActiveUsers.length / PAGE_SIZE), p + 1))}
+                disabled={activeCurrentPage === Math.ceil(filteredActiveUsers.length / PAGE_SIZE)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Pending Authorization Section */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
+          </div>
+          <button 
+            onClick={() => setShowPreAuthModal(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <UserPlus className="w-4 h-4" />
+            Pre-authorize
+          </button>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
+                <th className="px-6 py-4 font-medium">User ID</th>
+                <th className="px-6 py-4 font-medium">Username</th>
+                <th className="px-6 py-4 font-medium">Email</th>
+                <th className="px-6 py-4 font-medium">Requested Role</th>
+                <th className="px-6 py-4 font-medium">Date Requested</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-slate-100">
+              {loadingPending ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading pending requests...</td>
+                </tr>
+              ) : pendingUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No pending authorization requests</td>
+                </tr>
+              ) : pendingUsers.slice((pendingCurrentPage - 1) * PAGE_SIZE, pendingCurrentPage * PAGE_SIZE).map(user => (
+                <tr key={user.id || user.userid} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{user.id || user.userid || '—'}</td>
+                  <td className="px-6 py-4 font-medium text-slate-900">{user.username || '—'}</td>
+                  <td className="px-6 py-4 text-slate-500">{user.email}</td>
+                  <td className="px-6 py-4"><span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">{user.user_type || '—'}</span></td>
+                  <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pending Authorization Pagination */}
+        {pendingUsers.length > PAGE_SIZE && (
+          <div className="mt-4 flex items-center justify-between px-2">
+            <p className="text-xs font-medium text-slate-500">
+              Showing {(pendingCurrentPage - 1) * PAGE_SIZE + 1}–{Math.min(pendingCurrentPage * PAGE_SIZE, pendingUsers.length)} of {pendingUsers.length} requests
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPendingCurrentPage(p => Math.max(1, p - 1))}
+                disabled={pendingCurrentPage === 1}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm font-semibold text-slate-700 min-w-[3rem] text-center">
+                Page {pendingCurrentPage} of {Math.ceil(pendingUsers.length / PAGE_SIZE)}
+              </span>
+              <button
+                onClick={() => setPendingCurrentPage(p => Math.min(Math.ceil(pendingUsers.length / PAGE_SIZE), p + 1))}
+                disabled={pendingCurrentPage === Math.ceil(pendingUsers.length / PAGE_SIZE)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Modals */}
