@@ -92,7 +92,20 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
     // The core permission checker
     const hasRight = (right: string): boolean => {
         if (isSuperAdmin) return true;
+
+        // REP-002 is strictly for superadmins
+        if (right === 'REP_002') return false;
+
+        // REP-001, ADD_PRODUCT, EDIT_PRODUCT, and DELETE_PRODUCT are now visible to everyone
+        if (right === 'REP_001' || right === 'ADD_PRODUCT' || right === 'EDIT_PRODUCT' || right === 'DELETE_PRODUCT') return true;
+
+        // ADM_USER is now visible to Admin and SuperAdmin
+        if (right === 'ADM_USER' && (isAdmin || isSuperAdmin)) return true;
+
+        // Standard User cannot see STAMP columns
         if (isUser && right === 'STAMP') return false;
+
+        // Fallback to database rights for any other rights
         return rights[right] === 1;
     };
 

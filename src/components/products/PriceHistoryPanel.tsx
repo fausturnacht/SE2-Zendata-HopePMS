@@ -140,6 +140,11 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
 
   const singlePoint = chartData.length === 1;
 
+  // Build sorted history for the table (descending by date)
+  const sortedHistory = history
+    ? [...history].sort((a, b) => (a.effdate < b.effdate ? 1 : a.effdate > b.effdate ? -1 : 0))
+    : [];
+
   return (
     <tr className="bg-surface-container-lowest">
       <td colSpan={colSpan} className="px-6 py-4">
@@ -185,8 +190,8 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {history && history.length > 0 ? (
-                        history.map((entry) => (
+                      {sortedHistory && sortedHistory.length > 0 ? (
+                        sortedHistory.map((entry) => (
                           <tr key={`${entry.prodcode}-${entry.effdate}`} className="bg-white">
                             <td className="px-4 py-4 font-medium text-slate-800">{entry.effdate}</td>
                             <td className="px-4 py-4 text-right font-semibold text-slate-900">

@@ -383,20 +383,21 @@ export default function UserManagementPage() {
                           {isActive ? (
                             <button 
                               onClick={() => handleDeactivate(id)}
-                              disabled={actionInProgress === `deactivate-${id}` || isSelfRow}
+                              disabled={actionInProgress === `deactivate-${id}` || !!isSelfRow}
                               className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
                               {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
                             </button>
                           ) : (
                             <button 
                               onClick={() => handleActivate(id)}
-                              disabled={actionInProgress === `activate-${id}` || isSelfRow}
+                              disabled={actionInProgress === `activate-${id}` || !!isSelfRow}
                               className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
                               {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
                             </button>
                           )}
                         </div>
                       )}
+                    </div>
                   </td>
                 </tr>
                 <UserStampHistoryPanel
