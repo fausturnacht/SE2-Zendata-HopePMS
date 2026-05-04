@@ -1,0 +1,144 @@
+import { supabase } from '../lib/supabase';
+import { createStamp } from '../utils/stamp';
+import { addStampEntry } from './stampHistory';
+
+export type UserType = 'USER' | 'ADMIN' | 'SUPERADMIN';
+
+export interface Product {
+  prodcode: string;
+  description: string | null;
+  unit: string | null;
+  record_status: 'ACTIVE' | 'INACTIVE';
+  stamp: string | null;
+}
+
+/**
+ * Fetches all active products.
+ */
+export const getProducts = async (_userType?: any) => {
+  const { data, error } = await supabase
+    .from('product')
+    .select('*')
+    .eq('record_status', 'ACTIVE');
+  
+  if (error) {
+    console.error('Error fetching products:', error);
+    throw error;
+  }
+  return data as Product[];
+};
+
+/**
+ * Fetches all soft-deleted products.
+ */
+export const getDeletedProducts = async () => {
+  const { data, error } = await supabase
+    .from('product')
+    .select('*')
+    .eq('record_status', 'DELETED');
+    
+  if (error) {
+    console.error('Error fetching deleted products:', error);
+    throw error;
+  }
+  return data as Product[];
+};
+
+/**
+ * Adds a new product to the database.
+ */
+export const addProduct = async (product: Partial<Product>) => {
+  const stamp = await createStamp('ADDED');
+  const { data, error } = await supabase
+    .from('product')
+    .insert([{ ...product, stamp }])
+    .select();
+  
+  if (error) {
+    console.error('Error adding product:', error);
+    throw error;
+  }
+  const saved = data?.[0] as Product;
+  await addStampEntry(saved.prodcode, stamp);
+  return saved;
+};
+
+/**
+ * Updates an existing product.
+ */
+export const updateProduct = async (prodcode: string, product: Partial<Product>) => {
+  const stamp = await createStamp('EDITED');
+  const { data, error } = await supabase
+    .from('product')
+    .update({ ...product, stamp })
+    .eq('prodcode', prodcode)
+    .select();
+  
+  if (error) {
+    console.error('Error updating product:', error);
+    throw error;
+  }
+  const updated = data?.[0] as Product;
+  await addStampEntry(prodcode, stamp);
+  return updated;
+};
+
+/**
+ * Soft deletes a product by setting record_status to 'DELETED'.
+ */
+export const softDeleteProduct = async (prodcode: string) => {
+  const stamp = await createStamp('DELETED');
+  const { data, error } = await supabase
+    .from('product')
+    .update({ record_status: 'DELETED', stamp })
+    .eq('prodcode', prodcode)
+    .select();
+  
+  if (error) {
+    console.error('Error soft deleting product:', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error('Product not found or you do not have permission to delete it.');
+  }
+  await addStampEntry(prodcode, stamp);
+  return data[0] as Product;
+};
+
+/**
+ * Recovers a soft-deleted product by setting record_status to 'ACTIVE'.
+ */
+export const recoverProduct = async (prodcode: string) => {
+  const stamp = await createStamp('RECOVERED');
+  const { data, error } = await supabase
+    .from('product')
+    .update({ record_status: 'ACTIVE', stamp })
+    .eq('prodcode', prodcode)
+    .select();
+  
+  if (error) {
+    console.error('Error recovering product:', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error('Product not found or you do not have permission to recover it.');
+  }
+  await addStampEntry(prodcode, stamp);
+  return data[0] as Product;
+};
+
+/**
+ * Bulk updates all active products to VERIFIED status.
+ */
+export const verifyAllProducts = async () => {
+  const { data, error } = await supabase
+    .from('product')
+    .update({ stamp: 'VERIFIED' })
+    .eq('record_status', 'ACTIVE');
+  
+  if (error) {
+    console.error('Error verifying all products:', error);
+    throw error;
+  }
+  return data;
+};
