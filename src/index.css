@@ -42,4 +42,13 @@
   --font-headline: "Manrope", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-label: "Inter", sans-serif;
+
+  --color-primary: #1a56db;
+  --color-primary-dim: #1e40af;
+  --color-error: #dc2626;
+  --color-error-dim: #991b1b;
+  --color-surface: #ffffff;
+  --color-on-surface: #2a3439;
+  --color-on-surface-variant: #64748b;
+  --color-surface-container-low: #f8fafc;
 }

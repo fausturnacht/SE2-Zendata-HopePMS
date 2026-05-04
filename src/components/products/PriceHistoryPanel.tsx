@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { addPriceEntry, getPriceHistory, type PriceEntry } from '../../api/priceHistory';
+import { getTodayGMT8 } from '../../utils/dateUtils';
 import {
   ResponsiveContainer,
   LineChart,
@@ -40,7 +41,7 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
   const [history, setHistory] = useState<PriceEntry[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [effDate, setEffDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [effDate, setEffDate] = useState(() => getTodayGMT8());
   const [unitPrice, setUnitPrice] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);

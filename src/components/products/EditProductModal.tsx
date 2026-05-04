@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { updateProduct, type Product } from '../../api/products';
-import { addPriceEntry } from '../../api/priceHistory';
+import { addPriceEntry, checkPriceEntryExists, updatePriceEntry } from '../../api/priceHistory';
+import { OverwritePriceModal } from './OverwritePriceModal';
+import { getTodayGMT8 } from '../../utils/dateUtils';
 
 export interface EditProductModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showOverwriteModal, setShowOverwriteModal] = useState(false);
 
   const MAX_DESC_LENGTH = 30;
 
@@ -85,13 +88,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  const performUpdate = async (shouldOverwritePrice: boolean = false) => {
     setIsLoading(true);
     try {
       // 1. Update core product fields
@@ -100,36 +97,68 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
         unit: formData.unit || null,
       });
 
-      // 2. If price changed, insert a new pricehist entry with today's date
+      // 2. Handle price update
       const newPrice = parseFloat(formData.price);
       const priceChanged = newPrice !== currentPrice;
 
       if (priceChanged) {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        await addPriceEntry({
-          prodcode: product.prodcode,
-          effdate: today,
-          unitprice: newPrice,
-        });
+        const today = getTodayGMT8();
+        if (shouldOverwritePrice) {
+          await updatePriceEntry(product.prodcode, today, newPrice);
+        } else {
+          await addPriceEntry({
+            prodcode: product.prodcode,
+            effdate: today,
+            unitprice: newPrice,
+          });
+        }
       }
 
       setErrors({});
-
-      // Notify parent component with updated product and new price (if changed)
       if (onProductSaved) {
         onProductSaved(updatedProduct, priceChanged ? newPrice : undefined);
       }
-
+      setShowOverwriteModal(false);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating product:', error);
       setErrors((prev) => ({
         ...prev,
-        submit: 'Failed to save product. Please try again.',
+        submit: error.message || 'Failed to save product. Please try again.',
       }));
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const newPrice = parseFloat(formData.price);
+    const priceChanged = newPrice !== currentPrice;
+
+    if (priceChanged) {
+      const today = getTodayGMT8();
+      try {
+        const exists = await checkPriceEntryExists(product.prodcode, today);
+        if (exists) {
+          setShowOverwriteModal(true);
+          return;
+        }
+      } catch (err) {
+        console.error('Check failed', err);
+      }
+    }
+
+    await performUpdate();
+  };
+
+  const handleConfirmOverwrite = async () => {
+    await performUpdate(true);
   };
 
   if (!isOpen) {
@@ -391,6 +420,13 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
           </button>
         </div>
       </div>
+
+      <OverwritePriceModal
+        isOpen={showOverwriteModal}
+        onClose={() => setShowOverwriteModal(false)}
+        onConfirm={handleConfirmOverwrite}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
