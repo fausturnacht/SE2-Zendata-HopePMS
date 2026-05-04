@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { createStamp } from '../utils/stamp';
+import { addStampEntry } from './stampHistory';
 
 export type UserType = 'USER' | 'ADMIN' | 'SUPERADMIN';
 
@@ -57,7 +58,9 @@ export const addProduct = async (product: Partial<Product>) => {
     console.error('Error adding product:', error);
     throw error;
   }
-  return data?.[0] as Product;
+  const saved = data?.[0] as Product;
+  await addStampEntry(saved.prodcode, stamp);
+  return saved;
 };
 
 /**
@@ -75,7 +78,9 @@ export const updateProduct = async (prodcode: string, product: Partial<Product>)
     console.error('Error updating product:', error);
     throw error;
   }
-  return data?.[0] as Product;
+  const updated = data?.[0] as Product;
+  await addStampEntry(prodcode, stamp);
+  return updated;
 };
 
 /**
@@ -96,6 +101,7 @@ export const softDeleteProduct = async (prodcode: string) => {
   if (!data || data.length === 0) {
     throw new Error('Product not found or you do not have permission to delete it.');
   }
+  await addStampEntry(prodcode, stamp);
   return data[0] as Product;
 };
 
@@ -117,6 +123,7 @@ export const recoverProduct = async (prodcode: string) => {
   if (!data || data.length === 0) {
     throw new Error('Product not found or you do not have permission to recover it.');
   }
+  await addStampEntry(prodcode, stamp);
   return data[0] as Product;
 };
 
