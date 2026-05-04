@@ -544,8 +544,12 @@ export const ProductListPage: React.FC = () => {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           product={selectedProductForEdit}
-          onProductSaved={(updatedProduct) => {
+          currentPrice={priceMap[selectedProductForEdit.prodcode]}
+          onProductSaved={(updatedProduct, newPrice) => {
             setProducts(products.map(p => p.prodcode === updatedProduct.prodcode ? updatedProduct : p));
+            if (newPrice !== undefined) {
+              setPriceMap(prev => ({ ...prev, [updatedProduct.prodcode]: newPrice }));
+            }
           }}
         />
       )}
