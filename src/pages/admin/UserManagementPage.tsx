@@ -1,11 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
-import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp } from 'lucide-react';
+import { UserStampHistoryPanel } from '../../components/admin/UserStampHistoryPanel';
 
 export default function UserManagementPage() {
-  const { hasRight, loadingRights } = useRights();
+  const { currentUser } = useAuth();
+  const { hasRight, loadingRights, isAdmin, isSuperAdmin } = useRights();
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [loadingPending, setLoadingPending] = useState(true);
@@ -136,6 +140,13 @@ export default function UserManagementPage() {
     setEditingUser(user);
     setEditUsername(user.username || user.email || '');
     setEditUserType(user.user_type || 'USER');
+  };
+
+  const handleToggleExpand = (userid: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [userid]: !prev[userid],
+    }));
   };
 
   const handleActivate = async (id: string) => {
@@ -368,19 +379,21 @@ export default function UserManagementPage() {
                   <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No users match your criteria</td>
                 </tr>
               ) : filteredActiveUsers.map((user: any) => {
-                const isSuperAdmin = user.user_type === 'SUPERADMIN';
+                const isRowSuperAdmin = user.user_type === 'SUPERADMIN';
                 const isActive = user.record_status === 'ACTIVE';
                 const id = user.id || user.userid;
+                const isSelfRow = currentUser && (id === currentUser.id || user.email === currentUser.email);
                 
                 return (
-                <tr key={id} className={`hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? 'bg-slate-50/30' : ''}`}>
+                <React.Fragment key={id}>
+                <tr className={`hover:bg-slate-50/50 transition-colors ${isRowSuperAdmin ? 'bg-slate-50/30' : ''}`}>
                   <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
-                  <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>
+                  <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isRowSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>
                     {user.username || user.email}
-                    {isSuperAdmin && <Shield className="w-4 h-4 text-blue-600" />}
+                    {isRowSuperAdmin && <Shield className="w-4 h-4 text-blue-600" />}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isRowSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
                       {user.user_type || '—'}
                     </span>
                   </td>
@@ -395,36 +408,52 @@ export default function UserManagementPage() {
                       {user.stamp || '—'}
                     </td>
                   )}
-                  <td className="px-6 py-4 flex justify-end gap-2 relative group">
-                    {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins */}
-                    {isSuperAdmin ? (
-                      <SuperAdminDisabledActions />
-                    ) : (
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => openEditModal(user)}
-                          className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all text-xs font-semibold flex items-center gap-1">
-                          <Edit className="w-4 h-4" /> Edit
-                        </button>
-                        {isActive ? (
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2 relative group">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleExpand(id)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title={expandedRows[id] ? "Collapse history" : "View history"}
+                      >
+                        {expandedRows[id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      
+                      {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins */}
+                      {isRowSuperAdmin && !isSelfRow ? (
+                        <SuperAdminDisabledActions />
+                      ) : (
+                        <div className="flex items-center gap-2">
                           <button 
-                            onClick={() => handleDeactivate(id)}
-                            disabled={actionInProgress === `deactivate-${id}`}
-                            className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                            {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
+                            onClick={() => openEditModal(user)}
+                            className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all text-xs font-semibold flex items-center gap-1">
+                            <Edit className="w-4 h-4" /> Edit
                           </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleActivate(id)}
-                            disabled={actionInProgress === `activate-${id}`}
-                            className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                            {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
-                          </button>
-                        )}
-                      </div>
-                    )}
+                          {isActive ? (
+                            <button 
+                              onClick={() => handleDeactivate(id)}
+                              disabled={actionInProgress === `deactivate-${id}` || isSelfRow}
+                              className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
+                              {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleActivate(id)}
+                              disabled={actionInProgress === `activate-${id}` || isSelfRow}
+                              className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
+                              {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
+                            </button>
+                          )}
+                        </div>
+                      )}
                   </td>
                 </tr>
+                <UserStampHistoryPanel
+                  userId={id}
+                  isOpen={!!expandedRows[id]}
+                  colSpan={hasRight('STAMP') ? 6 : 5}
+                />
+                </React.Fragment>
               )})}
             </tbody>
           </table>
@@ -452,10 +481,11 @@ export default function UserManagementPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
-                <select value={preAuthRole} onChange={(e) => setPreAuthRole(e.target.value as any)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium">
+                <select value={preAuthRole} onChange={(e) => setPreAuthRole(e.target.value as any)} 
+                  disabled={isAdmin && !isSuperAdmin}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                   <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="SUPERADMIN">SUPERADMIN</option>
+                  {isSuperAdmin && <option value="ADMIN">ADMIN</option>}
                 </select>
               </div>
               <div className="pt-4 flex gap-3">
@@ -479,22 +509,32 @@ export default function UserManagementPage() {
               </button>
             </div>
             <form onSubmit={handleEditUser} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">User ID</label>
-                <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm text-slate-500 font-mono" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username</label>
-                <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
-                <select value={editUserType} onChange={(e) => setEditUserType(e.target.value as any)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium">
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="SUPERADMIN">SUPERADMIN</option>
-                </select>
-              </div>
+              {(() => {
+                const isSelfEdit = !!(currentUser && (editingUser.id === currentUser.id || editingUser.userid === currentUser.id || editingUser.email === currentUser.email));
+                const disableRoleDropdown = isSelfEdit || (isAdmin && !isSuperAdmin);
+                return (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">User ID</label>
+                      <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm text-slate-500 font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username</label>
+                      <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
+                      <select value={editUserType} onChange={(e) => setEditUserType(e.target.value as any)} 
+                        disabled={disableRoleDropdown}
+                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
+                        <option value="USER">USER</option>
+                        {(isSuperAdmin || editUserType === 'ADMIN') && <option value="ADMIN">ADMIN</option>}
+                        {editUserType === 'SUPERADMIN' && <option value="SUPERADMIN">SUPERADMIN</option>}
+                      </select>
+                    </div>
+                  </>
+                );
+              })()}
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
                 <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition-colors flex justify-center items-center">
