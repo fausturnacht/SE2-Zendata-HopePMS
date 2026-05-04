@@ -2,6 +2,8 @@
 
 A robust **Product Management System (PMS)** implementation based on the Hope Inc. sample database. Developed by the **Zendata** group (3BSCS-1) for SE2.
 
+🌐 **Live Demo:** [https://zendata-hope-pms.vercel.app/](https://zendata-hope-pms.vercel.app/)
+
 ---
 
 ## 🛠️ Tech Stack Considerations
