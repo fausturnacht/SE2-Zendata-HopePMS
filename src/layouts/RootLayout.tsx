@@ -16,11 +16,18 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  // Gated Reports and Admin links
   const navigationItems = [
     { name: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, href: '/dashboard' },
     { name: 'Products', icon: <Package className="w-5 h-5" />, href: '/products' },
-    { name: 'Reports', icon: <BarChart2 className="w-5 h-5" />, href: '/reports' },
+    
+    // Reports link gated: Shows if the user has either REP_001 or REP_002
+    ...(hasRight('REP_001') || hasRight('REP_002') ? [{ name: 'Reports', icon: <BarChart2 className="w-5 h-5" />, href: '/reports' }] : []),
+    
+    // Admin Module gated: Shows only if the user has the ADM_USER right
     ...(hasRight('ADM_USER') ? [{ name: 'Admin', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'Admin/SuperAdmin only' }] : []),
+    
+    // Deleted Items gated: Admin/SuperAdmin only
     ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: <Trash2 className="w-5 h-5" />, href: '/deleted', subtitle: 'Admin/SuperAdmin only' }] : []),
   ];
 
