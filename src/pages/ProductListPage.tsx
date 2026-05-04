@@ -6,6 +6,7 @@ import { AddProductModal } from '../components/products/AddProductModal';
 import { EditProductModal } from '../components/products/EditProductModal';
 import { SoftDeleteConfirmDialog } from '../components/products/SoftDeleteConfirmDialog';
 import { PriceHistoryPanel } from '../components/products/PriceHistoryPanel';
+import { StampHistoryPanel } from '../components/products/StampHistoryPanel';
 import { Search, ChevronDown, ChevronUp, Edit2, Trash2, ChevronLeft, ChevronRight, Info, History, Shield, Plus, Filter, ArrowUpDown } from 'lucide-react';
 import { SkeletonTable } from '../components/shared/SkeletonTable';
 import { EmptyState } from '../components/shared/EmptyState';
@@ -429,6 +430,13 @@ export const ProductListPage: React.FC = () => {
                     onPriceSaved={(unitPrice) => handlePriceSaved(product.prodcode, unitPrice)}
                     colSpan={hasRight('STAMP') ? 6 : 5}
                   />
+                  {hasRight('STAMP') && (
+                    <StampHistoryPanel
+                      productId={product.prodcode}
+                      isOpen={!!expandedRows[product.prodcode]}
+                      colSpan={hasRight('STAMP') ? 6 : 5}
+                    />
+                  )}
                   </React.Fragment>
                 ))
               )}
@@ -544,8 +552,12 @@ export const ProductListPage: React.FC = () => {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           product={selectedProductForEdit}
-          onProductSaved={(updatedProduct) => {
+          currentPrice={priceMap[selectedProductForEdit.prodcode]}
+          onProductSaved={(updatedProduct, newPrice) => {
             setProducts(products.map(p => p.prodcode === updatedProduct.prodcode ? updatedProduct : p));
+            if (newPrice !== undefined) {
+              setPriceMap(prev => ({ ...prev, [updatedProduct.prodcode]: newPrice }));
+            }
           }}
         />
       )}

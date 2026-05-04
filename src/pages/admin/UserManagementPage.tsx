@@ -1,11 +1,17 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
-import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { UserStampHistoryPanel } from '../../components/admin/UserStampHistoryPanel';
+
+const PAGE_SIZE = 10;
 
 export default function UserManagementPage() {
-  const { hasRight, loadingRights } = useRights();
+  const { currentUser } = useAuth();
+  const { hasRight, loadingRights, isAdmin, isSuperAdmin } = useRights();
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [loadingPending, setLoadingPending] = useState(true);
@@ -13,7 +19,10 @@ export default function UserManagementPage() {
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('All');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'SUSPENDED'>('ALL');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [activeCurrentPage, setActiveCurrentPage] = useState(1);
+  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
 
   const [showPreAuthModal, setShowPreAuthModal] = useState(false);
   const [preAuthEmail, setPreAuthEmail] = useState('');
@@ -50,9 +59,16 @@ export default function UserManagementPage() {
       });
     }
 
-    // Filter
+    // Filter by role
     if (filterRole !== 'All') {
       result = result.filter(user => user.user_type === filterRole);
+    }
+
+    // Filter by status
+    if (filterStatus === 'ACTIVE') {
+      result = result.filter(user => user.record_status === 'ACTIVE');
+    } else if (filterStatus === 'SUSPENDED') {
+      result = result.filter(user => user.record_status !== 'ACTIVE');
     }
 
     // Sort
@@ -67,7 +83,7 @@ export default function UserManagementPage() {
     }
 
     return result;
-  }, [activeUsers, searchTerm, filterRole, sortConfig]);
+  }, [activeUsers, searchTerm, filterRole, filterStatus, sortConfig]);
 
   const loadData = async () => {
     try {
@@ -96,6 +112,10 @@ export default function UserManagementPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    setActiveCurrentPage(1);
+  }, [searchTerm, filterRole, filterStatus, sortConfig]);
 
   const handlePreAuthorize = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +156,13 @@ export default function UserManagementPage() {
     setEditingUser(user);
     setEditUsername(user.username || user.email || '');
     setEditUserType(user.user_type || 'USER');
+  };
+
+  const handleToggleExpand = (userid: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [userid]: !prev[userid],
+    }));
   };
 
   const handleActivate = async (id: string) => {
@@ -218,78 +245,6 @@ export default function UserManagementPage() {
         </button>
       </header>
 
-      {/* Pending Authorization Section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
-          </div>
-          <button 
-            onClick={() => setShowPreAuthModal(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <UserPlus className="w-4 h-4" />
-            Pre-authorize
-          </button>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[700px]">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                <th className="px-6 py-4 font-medium">User ID</th>
-                <th className="px-6 py-4 font-medium">Username</th>
-                <th className="px-6 py-4 font-medium">Email</th>
-                <th className="px-6 py-4 font-medium">Requested Role</th>
-                <th className="px-6 py-4 font-medium">Date Requested</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm divide-y divide-slate-100">
-              {loadingPending ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading pending requests...</td>
-                </tr>
-              ) : pendingUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No pending authorization requests</td>
-                </tr>
-              ) : pendingUsers.map(user => {
-                const isSuperAdmin = user.user_type === 'SUPERADMIN';
-                const id = user.id || user.userid;
-                return (
-                <tr key={id} className={`hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? 'bg-slate-50/30' : ''}`}>
-                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
-                  <td className={`px-6 py-4 font-medium ${isSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>{user.username || '—'}</td>
-                  <td className="px-6 py-4 text-slate-500">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
-                      {user.user_type || '—'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
-                  <td className="px-6 py-4 flex justify-end gap-2 relative group">
-                    {/* Gating: Disable SuperAdmin modification in Pending table */}
-                    {isSuperAdmin ? (
-                      <SuperAdminDisabledActions />
-                    ) : (
-                      <div className="flex gap-2">
-                         <button 
-                          onClick={() => handleActivate(id)}
-                          disabled={actionInProgress === `activate-${id}`}
-                          className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                          {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Approve
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              )})}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       {/* Active Users Section */}
       <section>
@@ -306,6 +261,13 @@ export default function UserManagementPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <button
+              onClick={() => setFilterStatus(prev => prev === 'ALL' ? 'ACTIVE' : prev === 'ACTIVE' ? 'SUSPENDED' : 'ALL')}
+              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 font-medium hover:bg-slate-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap min-w-[140px]"
+            >
+              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-emerald-500' : filterStatus === 'SUSPENDED' ? 'border border-slate-400 bg-transparent' : 'bg-blue-500'}`}></div>
+              {filterStatus === 'ALL' ? 'All Users' : filterStatus === 'ACTIVE' ? 'Active Only' : 'Suspended Only'}
+            </button>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <select
@@ -367,20 +329,22 @@ export default function UserManagementPage() {
                 <tr>
                   <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No users match your criteria</td>
                 </tr>
-              ) : filteredActiveUsers.map((user: any) => {
-                const isSuperAdmin = user.user_type === 'SUPERADMIN';
+              ) : filteredActiveUsers.slice((activeCurrentPage - 1) * PAGE_SIZE, activeCurrentPage * PAGE_SIZE).map((user: any) => {
+                const isRowSuperAdmin = user.user_type === 'SUPERADMIN';
                 const isActive = user.record_status === 'ACTIVE';
                 const id = user.id || user.userid;
+                const isSelfRow = currentUser && (id === currentUser.id || user.email === currentUser.email);
                 
                 return (
-                <tr key={id} className={`hover:bg-slate-50/50 transition-colors ${isSuperAdmin ? 'bg-slate-50/30' : ''}`}>
+                <React.Fragment key={id}>
+                <tr className={`hover:bg-slate-50/50 transition-colors ${isRowSuperAdmin ? 'bg-slate-50/30' : ''}`}>
                   <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
-                  <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>
+                  <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isRowSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>
                     {user.username || user.email}
-                    {isSuperAdmin && <Shield className="w-4 h-4 text-blue-600" />}
+                    {isRowSuperAdmin && <Shield className="w-4 h-4 text-blue-600" />}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isRowSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
                       {user.user_type || '—'}
                     </span>
                   </td>
@@ -395,40 +359,163 @@ export default function UserManagementPage() {
                       {user.stamp || '—'}
                     </td>
                   )}
-                  <td className="px-6 py-4 flex justify-end gap-2 relative group">
-                    {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins */}
-                    {isSuperAdmin ? (
-                      <SuperAdminDisabledActions />
-                    ) : (
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => openEditModal(user)}
-                          className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all text-xs font-semibold flex items-center gap-1">
-                          <Edit className="w-4 h-4" /> Edit
-                        </button>
-                        {isActive ? (
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2 relative group">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleExpand(id)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title={expandedRows[id] ? "Collapse history" : "View history"}
+                      >
+                        {expandedRows[id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      
+                      {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins */}
+                      {isRowSuperAdmin && !isSelfRow ? (
+                        <SuperAdminDisabledActions />
+                      ) : (
+                        <div className="flex items-center gap-2">
                           <button 
-                            onClick={() => handleDeactivate(id)}
-                            disabled={actionInProgress === `deactivate-${id}`}
-                            className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                            {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
+                            onClick={() => openEditModal(user)}
+                            className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all text-xs font-semibold flex items-center gap-1">
+                            <Edit className="w-4 h-4" /> Edit
                           </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleActivate(id)}
-                            disabled={actionInProgress === `activate-${id}`}
-                            className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center gap-1 disabled:opacity-50">
-                            {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
-                          </button>
-                        )}
-                      </div>
-                    )}
+                          {isActive ? (
+                            <button 
+                              onClick={() => handleDeactivate(id)}
+                              disabled={actionInProgress === `deactivate-${id}` || !!isSelfRow}
+                              className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
+                              {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleActivate(id)}
+                              disabled={actionInProgress === `activate-${id}` || !!isSelfRow}
+                              className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
+                              {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
+                <UserStampHistoryPanel
+                  userId={id}
+                  isOpen={!!expandedRows[id]}
+                  colSpan={hasRight('STAMP') ? 6 : 5}
+                />
+                </React.Fragment>
               )})}
             </tbody>
           </table>
         </div>
+
+        {/* Active Users Pagination */}
+        {filteredActiveUsers.length > PAGE_SIZE && (
+          <div className="mt-4 flex items-center justify-between px-2">
+            <p className="text-xs font-medium text-slate-500">
+              Showing {(activeCurrentPage - 1) * PAGE_SIZE + 1}–{Math.min(activeCurrentPage * PAGE_SIZE, filteredActiveUsers.length)} of {filteredActiveUsers.length} users
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveCurrentPage(p => Math.max(1, p - 1))}
+                disabled={activeCurrentPage === 1}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm font-semibold text-slate-700 min-w-[3rem] text-center">
+                Page {activeCurrentPage} of {Math.ceil(filteredActiveUsers.length / PAGE_SIZE)}
+              </span>
+              <button
+                onClick={() => setActiveCurrentPage(p => Math.min(Math.ceil(filteredActiveUsers.length / PAGE_SIZE), p + 1))}
+                disabled={activeCurrentPage === Math.ceil(filteredActiveUsers.length / PAGE_SIZE)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Pending Authorization Section */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
+          </div>
+          <button 
+            onClick={() => setShowPreAuthModal(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <UserPlus className="w-4 h-4" />
+            Pre-authorize
+          </button>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
+                <th className="px-6 py-4 font-medium">User ID</th>
+                <th className="px-6 py-4 font-medium">Username</th>
+                <th className="px-6 py-4 font-medium">Email</th>
+                <th className="px-6 py-4 font-medium">Requested Role</th>
+                <th className="px-6 py-4 font-medium">Date Requested</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm divide-y divide-slate-100">
+              {loadingPending ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading pending requests...</td>
+                </tr>
+              ) : pendingUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No pending authorization requests</td>
+                </tr>
+              ) : pendingUsers.slice((pendingCurrentPage - 1) * PAGE_SIZE, pendingCurrentPage * PAGE_SIZE).map(user => (
+                <tr key={user.id || user.userid} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{user.id || user.userid || '—'}</td>
+                  <td className="px-6 py-4 font-medium text-slate-900">{user.username || '—'}</td>
+                  <td className="px-6 py-4 text-slate-500">{user.email}</td>
+                  <td className="px-6 py-4"><span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">{user.user_type || '—'}</span></td>
+                  <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pending Authorization Pagination */}
+        {pendingUsers.length > PAGE_SIZE && (
+          <div className="mt-4 flex items-center justify-between px-2">
+            <p className="text-xs font-medium text-slate-500">
+              Showing {(pendingCurrentPage - 1) * PAGE_SIZE + 1}–{Math.min(pendingCurrentPage * PAGE_SIZE, pendingUsers.length)} of {pendingUsers.length} requests
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPendingCurrentPage(p => Math.max(1, p - 1))}
+                disabled={pendingCurrentPage === 1}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm font-semibold text-slate-700 min-w-[3rem] text-center">
+                Page {pendingCurrentPage} of {Math.ceil(pendingUsers.length / PAGE_SIZE)}
+              </span>
+              <button
+                onClick={() => setPendingCurrentPage(p => Math.min(Math.ceil(pendingUsers.length / PAGE_SIZE), p + 1))}
+                disabled={pendingCurrentPage === Math.ceil(pendingUsers.length / PAGE_SIZE)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Modals */}
@@ -452,10 +539,11 @@ export default function UserManagementPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
-                <select value={preAuthRole} onChange={(e) => setPreAuthRole(e.target.value as any)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium">
+                <select value={preAuthRole} onChange={(e) => setPreAuthRole(e.target.value as any)} 
+                  disabled={isAdmin && !isSuperAdmin}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                   <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="SUPERADMIN">SUPERADMIN</option>
+                  {isSuperAdmin && <option value="ADMIN">ADMIN</option>}
                 </select>
               </div>
               <div className="pt-4 flex gap-3">
@@ -479,22 +567,32 @@ export default function UserManagementPage() {
               </button>
             </div>
             <form onSubmit={handleEditUser} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">User ID</label>
-                <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm text-slate-500 font-mono" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username</label>
-                <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
-                <select value={editUserType} onChange={(e) => setEditUserType(e.target.value as any)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium">
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="SUPERADMIN">SUPERADMIN</option>
-                </select>
-              </div>
+              {(() => {
+                const isSelfEdit = !!(currentUser && (editingUser.id === currentUser.id || editingUser.userid === currentUser.id || editingUser.email === currentUser.email));
+                const disableRoleDropdown = isSelfEdit || (isAdmin && !isSuperAdmin);
+                return (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">User ID</label>
+                      <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm text-slate-500 font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username</label>
+                      <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
+                      <select value={editUserType} onChange={(e) => setEditUserType(e.target.value as any)} 
+                        disabled={disableRoleDropdown}
+                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
+                        <option value="USER">USER</option>
+                        {(isSuperAdmin || editUserType === 'ADMIN') && <option value="ADMIN">ADMIN</option>}
+                        {editUserType === 'SUPERADMIN' && <option value="SUPERADMIN">SUPERADMIN</option>}
+                      </select>
+                    </div>
+                  </>
+                );
+              })()}
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
                 <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition-colors flex justify-center items-center">

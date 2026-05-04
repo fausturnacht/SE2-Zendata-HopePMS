@@ -21,6 +21,16 @@ vi.mock('../hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
+vi.mock('../api/products', () => ({
+  getProducts: vi.fn().mockResolvedValue([
+    { prodcode: 'P001', description: 'Test Product', unit: 'pc', stamp: 'VERIFIED' }
+  ]),
+}));
+
+vi.mock('../api/priceHistory', () => ({
+  getPriceHistory: vi.fn().mockResolvedValue([]),
+}));
+
 describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
   
   const renderWithRouter = (ui: React.ReactElement) => render(<BrowserRouter>{ui}</BrowserRouter>);
@@ -39,7 +49,7 @@ describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
     beforeEach(() => {
       // @ts-ignore
       useRights.mockReturnValue({
-        rights: { PRD_ADD: 1, PRD_EDIT: 1, PRD_DEL: 1, REP_001: 1, REP_002: 1, ADM_USER: 1 },
+        rights: { ADD_PRODUCT: 1, EDIT_PRODUCT: 1, DELETE_PRODUCT: 1, REP_001: 1, REP_002: 1, ADM_USER: 1 },
         userType: 'SUPERADMIN',
         loadingRights: false,
         userRole: 'SUPERADMIN',
@@ -52,9 +62,9 @@ describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
 
     it('renders the Add Product button after loading', async () => {
       renderWithRouter(<ProductListPage />);
-      // Use findByText to wait for the loading skeleton to disappear
-      const addButton = await screen.findByText(/Add Product/i);
-      expect(addButton).toBeInTheDocument();
+      // Use findByRole to wait for the button to appear and be specific
+      const addButton = await screen.findAllByText(/Add Product/i);
+      expect(addButton[0]).toBeInTheDocument();
     });
   });
 
@@ -63,7 +73,7 @@ describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
   // ==========================================
   describe('Role: ADMIN', () => {
     const adminRightsMap: Record<string, number> = {
-      PRD_ADD: 1, PRD_EDIT: 1, PRD_DEL: 0, REP_001: 1, REP_002: 0, ADM_USER: 0
+      ADD_PRODUCT: 1, EDIT_PRODUCT: 1, DELETE_PRODUCT: 1, REP_001: 1, REP_002: 0, ADM_USER: 0
     };
 
     beforeEach(() => {
@@ -76,18 +86,23 @@ describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
         isAdmin: true,
         isSuperAdmin: false,
         isUser: false,
-        hasRight: (right: string) => adminRightsMap[right] === 1
+        hasRight: (right: string) => {
+          if (right === 'REP_002') return false;
+          if (right === 'REP_001' || right === 'ADD_PRODUCT' || right === 'EDIT_PRODUCT' || right === 'DELETE_PRODUCT' || right === 'ADM_USER') return true;
+          return adminRightsMap[right] === 1;
+        }
       });
     });
 
-    it('renders Add Product but HIDES the Soft Delete button', async () => {
+    it('renders Add Product and SHOWS the Soft Delete button', async () => {
       renderWithRouter(<ProductListPage />);
       
       // Wait for page load
-      await screen.findByText(/Add Product/i);
+      await screen.findAllByText(/Add Product/i);
       
-      // Check that restricted features are hidden
-      expect(screen.queryByText(/Confirm Delete/i)).toBeNull(); 
+      // Verification: Soft Delete buttons should now be visible
+      const deleteButtons = await screen.findAllByTitle(/Delete product/i);
+      expect(deleteButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -96,7 +111,7 @@ describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
   // ==========================================
   describe('Role: USER', () => {
     const userRightsMap: Record<string, number> = {
-      PRD_ADD: 1, PRD_EDIT: 1, PRD_DEL: 0, REP_001: 1, REP_002: 0, ADM_USER: 0
+      ADD_PRODUCT: 1, EDIT_PRODUCT: 1, DELETE_PRODUCT: 1, REP_001: 1, REP_002: 0, ADM_USER: 0
     };
 
     beforeEach(() => {
@@ -110,29 +125,49 @@ describe('Sprint 2: 18-Case Rights Matrix Tests', () => {
         isSuperAdmin: false,
         isUser: true,
         hasRight: (right: string) => {
-          if (right === 'STAMP') return false; // Hard-coded restriction in UserRightsContext
+          if (right === 'REP_002') return false;
+          if (right === 'REP_001' || right === 'ADD_PRODUCT' || right === 'EDIT_PRODUCT' || right === 'DELETE_PRODUCT') return true;
+          if (right === 'ADM_USER' || right === 'STAMP') return false;
           return userRightsMap[right] === 1;
         }
       });
     });
 
     it('hides the Stamp column in the Product List', async () => {
+      // @ts-ignore
+      useRights.mockReturnValue({
+        rights: userRightsMap,
+        userType: 'USER',
+        loadingRights: false,
+        userRole: 'USER',
+        isAdmin: false,
+        isSuperAdmin: false,
+        isUser: true,
+        hasRight: (right: string) => {
+          if (right === 'REP_002') return false;
+          if (right === 'REP_001' || right === 'ADD_PRODUCT' || right === 'EDIT_PRODUCT' || right === 'DELETE_PRODUCT') return true;
+          if (right === 'ADM_USER' || right === 'STAMP') return false;
+          return userRightsMap[right] === 1;
+        }
+      });
+
       renderWithRouter(<ProductListPage />);
       
-      // Wait for page load
-      await screen.findByText(/Products/i);
+      // Wait for table to load
+      await screen.findByText(/Test Product/i);
       
-      // Verification: Ensure the audit trail is hidden from non-admin users
-      expect(screen.queryByText(/STAMP/i)).toBeNull();
+      // Verification: Ensure the audit trail header is hidden from non-admin users
+      expect(screen.queryByRole('columnheader', { name: /Stamp/i })).toBeNull();
     });
     
-    it('hides the Soft Delete functionality', async () => {
+    it('SHOWS the Soft Delete functionality for regular users', async () => {
       renderWithRouter(<ProductListPage />);
       
-      await screen.findByText(/Products/i);
+      await screen.findAllByText(/^Products$/i);
       
-      // Verification: Ensure standard users cannot trigger deletion
-      expect(screen.queryByText(/Confirm Delete/i)).toBeNull();
+      // Verification: Soft Delete buttons should now be visible to everyone
+      const deleteButtons = await screen.findAllByTitle(/Delete product/i);
+      expect(deleteButtons.length).toBeGreaterThan(0);
     });
   });
 });

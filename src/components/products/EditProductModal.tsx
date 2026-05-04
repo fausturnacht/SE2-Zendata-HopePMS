@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { updateProduct, type Product } from '../../api/products';
+import { addPriceEntry } from '../../api/priceHistory';
 
 export interface EditProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: Product;
-  onProductSaved?: (product: Product) => void;
+  currentPrice?: number;
+  onProductSaved?: (product: Product, newPrice?: number) => void;
 }
 
 export const EditProductModal: React.FC<EditProductModalProps> = ({
   isOpen,
   onClose,
   product,
+  currentPrice,
   onProductSaved,
 }) => {
   const [formData, setFormData] = useState({
     description: '',
     unit: 'pc',
+    price: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -30,10 +34,11 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
       setFormData({
         description: product.description || '',
         unit: product.unit || 'pc',
+        price: currentPrice !== undefined ? String(currentPrice) : '',
       });
       setErrors({});
     }
-  }, [isOpen, product]);
+  }, [isOpen, product, currentPrice]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -44,6 +49,13 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
 
     if (!formData.unit) {
       newErrors.unit = 'Unit is required';
+    }
+
+    const priceValue = parseFloat(formData.price);
+    if (formData.price.trim() === '') {
+      newErrors.price = 'Price is required';
+    } else if (isNaN(priceValue) || priceValue <= 0) {
+      newErrors.price = 'Price must be a positive number';
     }
 
     setErrors(newErrors);
@@ -82,16 +94,30 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
 
     setIsLoading(true);
     try {
+      // 1. Update core product fields
       const updatedProduct = await updateProduct(product.prodcode, {
         description: formData.description || null,
         unit: formData.unit || null,
       });
 
+      // 2. If price changed, insert a new pricehist entry with today's date
+      const newPrice = parseFloat(formData.price);
+      const priceChanged = newPrice !== currentPrice;
+
+      if (priceChanged) {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        await addPriceEntry({
+          prodcode: product.prodcode,
+          effdate: today,
+          unitprice: newPrice,
+        });
+      }
+
       setErrors({});
 
-      // Notify parent component
+      // Notify parent component with updated product and new price (if changed)
       if (onProductSaved) {
-        onProductSaved(updatedProduct);
+        onProductSaved(updatedProduct, priceChanged ? newPrice : undefined);
       }
 
       onClose();
@@ -269,6 +295,49 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
                   {errors.unit}
                 </p>
               )}
+            </div>
+
+            {/* Price Field */}
+            <div>
+              <label
+                className="block text-sm font-medium text-on-surface mb-1.5"
+                htmlFor="price"
+              >
+                Price
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant text-sm font-medium">
+                  $
+                </span>
+                <input
+                  id="price"
+                  name="price"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  aria-invalid={!!errors.price}
+                  aria-describedby={errors.price ? 'price-error' : undefined}
+                  className={`block w-full rounded-lg bg-surface-container-highest text-on-surface shadow-sm focus:ring focus:ring-opacity-20 sm:text-sm outline-none transition-all pl-8 pr-4 py-2.5 ${
+                    errors.price
+                      ? 'border-error focus:border-error focus:ring-error'
+                      : 'border-outline-variant/10 focus:border-primary focus:ring-primary'
+                  }`}
+                  placeholder="0.00"
+                />
+              </div>
+              {errors.price && (
+                <p
+                  id="price-error"
+                  className="mt-2 text-xs text-error font-medium"
+                >
+                  {errors.price}
+                </p>
+              )}
+              <p className="mt-1.5 text-xs text-on-surface-variant">
+                Changing the price will create a new entry in the price history dated today.
+              </p>
             </div>
 
             {/* Submit error message */}

@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { createStamp } from '../utils/stamp';
+import { addUserStampEntry } from './userStampHistory';
 
 export interface User {
   userid: string;
@@ -44,6 +45,7 @@ export const updateUser = async (userid: string, userData: Partial<User>) => {
   if (!data || data.length === 0) {
     throw new Error('User not found or you do not have permission to edit it. Check if the User ID is correct.');
   }
+  await addUserStampEntry(userid, stamp);
   return data[0] as User;
 };
 
@@ -65,6 +67,7 @@ export const softDeleteUser = async (userid: string) => {
   if (!data || data.length === 0) {
     throw new Error('User not found or you do not have permission to delete it.');
   }
+  await addUserStampEntry(userid, stamp);
   return data[0] as User;
 };
 
@@ -86,6 +89,7 @@ export const restoreUser = async (userid: string) => {
   if (!data || data.length === 0) {
     throw new Error('User not found or you do not have permission to restore it.');
   }
+  await addUserStampEntry(userid, stamp);
   return data[0] as User;
 };
 
@@ -130,23 +134,11 @@ export const fetchAllUsers = async () => {
   return data || [];
 };
 
-export const approveUser = async (id: string) => {
-  const stamp = await createStamp('APPROVED');
-  const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE', stamp }).eq('userid', id);
-  if (error) throw error;
-  return data;
-};
-
-export const rejectUser = async (id: string) => {
-  const { data, error } = await supabase.from('users').delete().eq('userid', id);
-  if (error) throw error;
-  return data;
-};
-
 export const activateUser = async (id: string) => {
   const stamp = await createStamp('ACTIVATED');
   const { data, error } = await supabase.from('users').update({ record_status: 'ACTIVE', stamp }).eq('userid', id);
   if (error) throw error;
+  await addUserStampEntry(id, stamp);
   return data;
 };
 
@@ -154,6 +146,7 @@ export const deactivateUser = async (id: string) => {
   const stamp = await createStamp('DEACTIVATED');
   const { data, error } = await supabase.from('users').update({ record_status: 'INACTIVE', stamp }).eq('userid', id);
   if (error) throw error;
+  await addUserStampEntry(id, stamp);
   return data;
 };
 
