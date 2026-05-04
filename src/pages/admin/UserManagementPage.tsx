@@ -5,6 +5,7 @@ import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
 import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { UserStampHistoryPanel } from '../../components/admin/UserStampHistoryPanel';
+import { getTodayGMT8 } from '../../utils/dateUtils';
 
 const PAGE_SIZE = 10;
 
@@ -208,7 +209,7 @@ export default function UserManagementPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `User_Export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `User_Export_${getTodayGMT8()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };

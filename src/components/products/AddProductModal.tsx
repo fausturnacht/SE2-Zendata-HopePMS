@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { addProduct, type Product } from '../../api/products';
+import { addPriceEntry } from '../../api/priceHistory';
+import { getTodayGMT8 } from '../../utils/dateUtils';
 
 export interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onProductAdded?: (product: Product) => void;
+  onProductAdded?: (product: Product, initialPrice?: number) => void;
 }
 
 export const AddProductModal: React.FC<AddProductModalProps> = ({
@@ -16,6 +18,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
     prodcode: '',
     description: '',
     unit: 'pc',
+    price: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -39,6 +42,13 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
 
     if (!formData.unit) {
       newErrors.unit = 'Unit is required';
+    }
+    
+    const priceValue = parseFloat(formData.price);
+    if (formData.price.trim() === '') {
+      newErrors.price = 'Price is required';
+    } else if (isNaN(priceValue) || priceValue <= 0) {
+      newErrors.price = 'Price must be a positive number';
     }
 
     setErrors(newErrors);
@@ -80,11 +90,22 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
 
     setIsLoading(true);
     try {
+      // 1. Add core product
       const newProduct = await addProduct({
-        prodcode: formData.prodcode,
+        prodcode: formData.prodcode.toUpperCase(),
         description: formData.description || null,
         unit: formData.unit || null,
         record_status: 'ACTIVE',
+      });
+
+      // 2. Add initial price history entry
+      const initialPrice = parseFloat(formData.price);
+      const today = getTodayGMT8();
+      
+      await addPriceEntry({
+        prodcode: newProduct.prodcode,
+        effdate: today,
+        unitprice: initialPrice,
       });
 
       // Reset form
@@ -92,12 +113,13 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
         prodcode: '',
         description: '',
         unit: 'pc',
+        price: '',
       });
       setErrors({});
 
       // Notify parent component
       if (onProductAdded) {
-        onProductAdded(newProduct);
+        onProductAdded(newProduct, initialPrice);
       }
 
       onClose();
@@ -288,6 +310,46 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
                   className="mt-2 text-xs text-error font-medium"
                 >
                   {errors.unit}
+                </p>
+              )}
+            </div>
+
+            {/* Price Field */}
+            <div>
+              <label
+                className="block text-sm font-medium text-on-surface mb-1.5"
+                htmlFor="price"
+              >
+                Initial Price
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 text-sm font-medium">
+                  $
+                </span>
+                <input
+                  id="price"
+                  name="price"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  aria-invalid={!!errors.price}
+                  aria-describedby={errors.price ? 'price-error' : undefined}
+                  className={`block w-full rounded-2xl bg-slate-50 text-slate-950 shadow-sm focus:ring-2 focus:ring-primary/20 sm:text-sm outline-none transition-shadow pl-8 pr-4 py-3 ${
+                    errors.price
+                      ? 'border-error focus:border-error focus:ring-error'
+                      : 'border-slate-200 focus:border-primary border focus:ring-primary/20'
+                  }`}
+                  placeholder="0.00"
+                />
+              </div>
+              {errors.price && (
+                <p
+                  id="price-error"
+                  className="mt-2 text-xs text-error font-medium"
+                >
+                  {errors.price}
                 </p>
               )}
             </div>
