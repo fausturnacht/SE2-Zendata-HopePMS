@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useRights } from '../contexts/UserRightsContext';
 import { 
   getProducts, 
   addProduct, 
@@ -18,11 +20,25 @@ type ReportTabType = 'REP-001' | 'REP-002';
 type UserTabType = 'FETCH' | 'EDIT' | 'DELETE' | 'RESTORE' | 'PRE_AUTH';
 
 const ApiDebug: React.FC = () => {
+  const { hasRight, loadingRights } = useRights();
   const [mainTab, setMainTab] = useState<MainTabType>('PRODUCTS');
   const [productTab, setProductTab] = useState<ProductTabType>('LIST');
   const [priceTab, setPriceTab] = useState<PriceTabType>('LIST');
   const [reportTab, setReportTab] = useState<ReportTabType>('REP-001');
   const [userMgtTab, setUserMgtTab] = useState<UserTabType>('FETCH');
+
+  if (loadingRights) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mb-4"></div>
+        <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Checking Authorization...</p>
+      </div>
+    );
+  }
+
+  if (!hasRight('REP_002')) {
+    return <Navigate to="/dashboard" replace />;
+  }
   
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -468,7 +484,6 @@ const ApiDebug: React.FC = () => {
                               >
                                 <option value="USER">USER</option>
                                 <option value="ADMIN">ADMIN</option>
-                                <option value="SUPERADMIN">SUPERADMIN</option>
                               </select>
                               <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-light">expand_more</span>
                             </div>
@@ -514,7 +529,6 @@ const ApiDebug: React.FC = () => {
                                   >
                                     <option value="USER">USER</option>
                                     <option value="ADMIN">ADMIN</option>
-                                    <option value="SUPERADMIN">SUPERADMIN</option>
                                   </select>
                                   <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-light">expand_more</span>
                                 </div>

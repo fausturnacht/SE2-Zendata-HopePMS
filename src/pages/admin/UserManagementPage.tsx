@@ -543,7 +543,7 @@ export default function UserManagementPage() {
                   disabled={isAdmin && !isSuperAdmin}
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                   <option value="USER">USER</option>
-                  {isSuperAdmin && <option value="ADMIN">ADMIN</option>}
+                  <option value="ADMIN">ADMIN</option>
                 </select>
               </div>
               <div className="pt-4 flex gap-3">
@@ -586,8 +586,7 @@ export default function UserManagementPage() {
                         disabled={disableRoleDropdown}
                         className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                         <option value="USER">USER</option>
-                        {(isSuperAdmin || editUserType === 'ADMIN') && <option value="ADMIN">ADMIN</option>}
-                        {editUserType === 'SUPERADMIN' && <option value="SUPERADMIN">SUPERADMIN</option>}
+                        <option value="ADMIN">ADMIN</option>
                       </select>
                     </div>
                   </>
