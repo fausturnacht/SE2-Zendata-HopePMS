@@ -25,6 +25,15 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Reset cached data whenever the panel is closed so the next open always
+  // triggers a fresh fetch from the API.
+  useEffect(() => {
+    if (!isOpen) {
+      setHistory(null);
+      setFetchError(null);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen || history !== null) {
       return;
