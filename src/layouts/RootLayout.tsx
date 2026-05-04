@@ -20,8 +20,8 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
     { name: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, href: '/dashboard' },
     { name: 'Products', icon: <Package className="w-5 h-5" />, href: '/products' },
     { name: 'Reports', icon: <BarChart2 className="w-5 h-5" />, href: '/reports' },
-    ...(hasRight('ADM_USER') ? [{ name: 'Admin', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'Admin/SuperAdmin only' }] : []),
     ...(isAdmin || isSuperAdmin ? [{ name: 'Deleted Items', icon: <Trash2 className="w-5 h-5" />, href: '/deleted', subtitle: 'Admin/SuperAdmin only' }] : []),
+    ...(hasRight('ADM_USER') ? [{ name: 'Manage Users', icon: <ShieldAlert className="w-5 h-5" />, href: '/admin', subtitle: 'Admin/SuperAdmin only' }] : []),
   ];
 
   const userInitials = currentUser?.email?.substring(0, 2).toUpperCase() || 'U';
