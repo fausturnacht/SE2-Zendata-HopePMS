@@ -9,6 +9,8 @@
 
 **HopePMS** is a robust, modern **Product Management System** designed for scalability and ease of use. Developed by the **Zendata** group (3BSCS-1) as part of the Software Engineering 2 curriculum, this application provides a comprehensive suite of tools for inventory tracking, user management, and detailed reporting.
 
+🌐 **Live Demo:** [https://zendata-hope-pms.vercel.app/](https://zendata-hope-pms.vercel.app/)
+
 ---
 
 ## ✨ Key Features
