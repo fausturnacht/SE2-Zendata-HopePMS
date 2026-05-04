@@ -1,42 +1,101 @@
-# SE2-Zendata-HopePMS - General Documentation
-This branch will serve as the repository for all types of documentation. 
-* The M5 (QA/Docs) will be the primary contributor and maintainer of this branch.
-* Members M1 to M5 will document their prompts in their respective .md documents in /prompt-logs.
+# SE2-Zendata-HopePMS 🚀
 
-## How to Contribute
-### Setting up your code editor to edit documentation
-* Ensure your work has been saved and comitted.
-* With this project folder (in your code editor) open, input the following commands into the terminal:
+A robust **Product Management System (PMS)** implementation based on the Hope Inc. sample database. Developed by the **Zendata** group (3BSCS-1) for SE2.
 
-`git switch docs/all` | replaces your working directory (the files that is in your folder) with the contents of docs/all.
+---
 
-* Here, you can freely contribute to the documentation, like including another entry to your prompt log.
-* Once you're finished: save, commit, and push. Your edits are then uploaded to the remote repository. 
-* You can then switch back to your original working directory by entering: 
+## 🛠️ Tech Stack Considerations
 
-`git switch [branch-name]`
+This project leverages a modern, high-performance tech stack designed for scalability, maintainability, and developer efficiency.
 
-WARNING: If you have recently worked with the fullstack branches (e.g. dev or any feature branch) DO NOT COMMIT WHEN 1K+ FILES ARE BEING COMMITTED! This means that build artifacts or dependencies (like node_modules) are still present in your working directory. Refer to your AI assistant of choice to ensure these files are not committed.
+### **Core Frontend**
+*   **[React 19](https://react.dev/)**: Used as the primary library for building the user interface.
+    *   *Purpose:* To build a component-based, reactive UI that handles complex state management efficiently.
+    *   *Why:* React 19 offers the latest advancements in performance, better hook management, and seamless integration with modern web standards.
+*   **[TypeScript](https://www.typescriptlang.org/)**: A strongly typed superset of JavaScript.
+    *   *Purpose:* To provide static type checking across the codebase.
+    *   *Why:* Reduces runtime errors, improves code readability, and provides superior IDE support (intellisense), which is critical for a team-based PMS project.
+*   **[Vite 8](https://vitejs.dev/)**: The next-generation frontend tool.
+    *   *Purpose:* Serves as the development server and build tool.
+    *   *Why:* Offers near-instant hot module replacement (HMR) and extremely fast build times compared to traditional tools like Webpack.
 
-### /prompt-logs (M1-M5)
-* Follow the provided template. One entry has been provided for every member.
-* There is no need to log every single prompt.
-    * If you have an initial prompt and follow-up prompts that remedy the issues the initial prompt brought up, group them all into a single entry.
-    * Prompt Given to AI: Initial prompt
-    * What I changed/improved: Follow-up prompts
+### **Styling & UI**
+*   **[TailwindCSS 4](https://tailwindcss.com/)**: A utility-first CSS framework.
+    *   *Purpose:* For rapid UI development and maintaining a consistent design system.
+    *   *Why:* Version 4 provides enhanced performance, a smaller footprint, and a more intuitive syntax, allowing for highly customized designs without writing complex CSS.
 
-### /standups (M5 - QA/Docs)
-* Summaries of meetings. Format each .md per meeting accordingly, but follow this rough guide:
-    * Header: Sprint #, Week #
-    * Date:
-    * Time:
-    * Duration:
-    * Summary: 
+### **Backend & Database**
+*   **[Supabase](https://supabase.com/)**: An open-source Firebase alternative.
+    *   *Purpose:* Handles the database (PostgreSQL), Authentication, and Real-time data syncing.
+    *   *Why:* It provides a powerful PostgreSQL backend with an easy-to-use API, built-in Auth, and real-time capabilities, making it perfect for managing product data and user roles.
 
-### test-cases.md (M5 - QA/Docs)
-* Save your docs file as .md and paste the contents inside.
+### **Navigation**
+*   **[React Router 7](https://reactrouter.com/)**: The standard routing library for React.
+    *   *Purpose:* Manages client-side routing and navigation between different views (e.g., Dashboard, Product List, Inventory).
+    *   *Why:* It allows for a single-page application (SPA) experience with deep linking and nested routes.
 
-### user-stories.md (M4 - RA)
-* Save your docs file as .md and paste the contents inside.
+---
 
+## ✨ Features
 
+- 📦 **Inventory Management**: Track product levels, categories, and suppliers.
+- 🔐 **Secure Authentication**: Managed via Supabase Auth with role-based access.
+- 🎨 **Responsive Design**: Fully optimized for desktop and mobile viewports.
+- ⚡ **Real-time Updates**: Instant data synchronization across clients.
+- 📊 **Dashboard Analytics**: Visual insights into product performance and stock status.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or pnpm
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/fausturnacht/SE2-Zendata-HopePMS.git
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables:**
+   Create a `.env.local` file in the root directory and add your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 📂 Project Structure
+
+```text
+src/
+├── components/   # Reusable UI components
+├── pages/        # Main application views/pages
+├── hooks/        # Custom React hooks
+├── lib/          # External library configurations (e.g., supabase.ts)
+├── styles/       # Global styles and Tailwind configuration
+└── types/        # TypeScript interfaces and types
+```
+
+---
+
+## 👥 Meet the Team: Zendata (3BSCS-1)
+*Member list can be added here*
+
+---
+
+## 📄 License
+This project is for educational purposes as part of the SE2 curriculum.
