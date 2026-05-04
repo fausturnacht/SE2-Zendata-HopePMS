@@ -24,12 +24,21 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
     const [rights, setRights] = useState<RightsMap>({});
     const [userType, setUserType] = useState<string | null>(null);
     const [loadingRights, setLoadingRights] = useState(true);
+    const [fetchedUserId, setFetchedUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchAccessData = async () => {
             if (!currentUser) {
                 setRights({});
                 setUserType(null);
+                setFetchedUserId(null);
+                setLoadingRights(false);
+                return;
+            }
+
+            // If we already have rights for this user, don't show loading again
+            // unless we specifically want to refresh. This prevents flickering.
+            if (fetchedUserId === currentUser.id) {
                 setLoadingRights(false);
                 return;
             }
@@ -63,6 +72,7 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
                 }
 
                 setRights(rightsMap);
+                setFetchedUserId(currentUser.id);
             } catch (error) {
                 console.error('Error fetching user access data:', error);
             } finally {
@@ -71,7 +81,7 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
         };
 
         fetchAccessData();
-    }, [currentUser]);
+    }, [currentUser, fetchedUserId]);
 
     // Role Boolean Helpers
     const isAdmin = userType === 'ADMIN';
@@ -86,17 +96,19 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
         return rights[right] === 1;
     };
 
+    const contextValue = React.useMemo(() => ({
+        rights,
+        userType,
+        loadingRights: loadingRights || (!!currentUser && fetchedUserId !== currentUser.id),
+        userRole,
+        isAdmin,
+        isSuperAdmin,
+        isUser,
+        hasRight
+    }), [rights, userType, loadingRights, currentUser, fetchedUserId, isAdmin, isSuperAdmin, isUser]);
+
     return (
-        <UserRightsContext.Provider value={{
-            rights,
-            userType,
-            loadingRights,
-            userRole,
-            isAdmin,
-            isSuperAdmin,
-            isUser,
-            hasRight
-        }}>
+        <UserRightsContext.Provider value={contextValue}>
             {children}
         </UserRightsContext.Provider>
     );
