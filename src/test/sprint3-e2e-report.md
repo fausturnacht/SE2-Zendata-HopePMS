@@ -1,8 +1,11 @@
 # Sprint 3: Final Production E2E Test Report
 
 **Tester:** Julius Albert D. Ortiz
+
 **Date:** May 5, 2026
+
 **Live URL:** https://zendata-hope-pms.vercel.app/
+
 **Environment:** PRODUCTION
 
 ## 1. Authentication & Access (Live Environment)
@@ -13,10 +16,10 @@
 | Rights Loading | All | Matrix permissions loaded correctly | Correct routing and dashboard access granted | [✓] PASS |
 
 **Evidence: Authentication Flow**
-![Google Login Button](images/login-google-button.png)
+![Google Login Button](../docs/images/login-google-button.png)
 *Fig 1.1: Live Production Login Screen*
 
-![Google OAuth Chooser](images/login-oauth-chooser.png)
+![Google OAuth Chooser](../docs/images/login-oauth-chooser.png)
 *Fig 1.2: Successful trigger of Google OAuth provisioning*
 
 ---
@@ -30,10 +33,10 @@
 | Recovery | Restore deleted item | SUPERADMIN | Successfully recovered deleted product from the archive. | [✓] PASS |
 
 **Evidence: Product Management**
-![Products List Admin](images/products-list-admin.png)
+![Products List Admin](../docs/images/products-list-admin.png)
 *Fig 2.1: Default Admin Products View*
 
-![Products Action Hover](images/products-action-hover.png)
+![Products Action Hover](../docs/images/products-action-hover.png)
 *Fig 2.2: Edit and Delete actions properly rendering on row hover*
 
 ---
@@ -46,13 +49,13 @@
 * **Pass/Fail:** [✓] PASS
 
 **Evidence: User Management & Security Gates**
-![User Management List](images/user-management-list.png)
+![User Management List](../docs/images/user-management-list.png)
 *Fig 3.1: Active Users overview table*
 
-![Standard User Edit](images/user-edit-modal.png)
+![Standard User Edit](../docs/images/user-edit-modal.png)
 *Fig 3.2: Successful Edit Modal trigger for standard/admin users*
 
-![Superadmin Protection](images/superadmin-protection-toast.png)
+![Superadmin Protection](../docs/images/superadmin-protection-toast.png)
 *Fig 3.3: CRITICAL PASS - System blocks Admin from editing a Superadmin account*
 
 ---
