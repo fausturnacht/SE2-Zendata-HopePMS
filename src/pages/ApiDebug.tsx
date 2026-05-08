@@ -576,10 +576,10 @@ const ApiDebug: React.FC = () => {
               
               <div className="flex-1 p-8 font-mono text-[14px] overflow-auto bg-slate-50 relative">
                 {error && (
-                  <div className="p-6 bg-rose-50 border-2 border-rose-200 rounded-2xl text-rose-700 mb-6 flex items-start gap-4 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-6 bg-error-container border-2 border-error/20 rounded-2xl text-on-error-container mb-6 flex items-start gap-4 animate-in fade-in zoom-in-95 duration-200">
                     <span className="material-symbols-outlined">warning</span>
                     <div>
-                      <div className="font-black uppercase tracking-tighter text-xs mb-1 text-rose-800">System Error</div>
+                      <div className="font-black uppercase tracking-tighter text-xs mb-1 text-error">System Error</div>
                       <p className="leading-relaxed font-sans font-bold">{error}</p>
                     </div>
                   </div>
@@ -606,12 +606,12 @@ const ApiDebug: React.FC = () => {
                 )}
               </div>
               
-              <div className="bg-slate-100 p-4 border-t border-slate-200 text-[10px] font-bold text-slate-500 flex justify-between px-8">
+              <div className="bg-surface-container-low p-4 border-t border-outline-variant/30 text-[10px] font-bold text-on-surface-variant flex justify-between px-8">
                 <div className="flex gap-6">
-                  <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>Supabase Instance Active</span>
+                  <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-secondary rounded-full"></div>Supabase Instance Active</span>
                   <span className="font-mono">CONTEXT: {mainTab} / {activeSubTab}</span>
                 </div>
-                <span>LATENCY: {Math.floor(Math.random() * 50) + 10}ms</span>
+                <span>LATENCY: 24ms</span>
               </div>
             </div>
           </div>

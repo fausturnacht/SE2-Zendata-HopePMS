@@ -172,7 +172,8 @@ export default function UserManagementPage() {
   const openEditModal = (user: any) => {
     setEditingUser(user);
     setEditUsername(user.username || user.email || '');
-    setEditUserType(user.user_type || 'USER');
+    // Standardize role to uppercase for robust dropdown binding
+    setEditUserType((user.user_type || 'USER').toUpperCase() as any);
   };
 
   const handleToggleExpand = (userid: string) => {
@@ -548,9 +549,9 @@ export default function UserManagementPage() {
                 </select>
               </div>
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setShowPreAuthModal(false)} className="flex-1 px-4 py-2 text-on-surface-variant bg-surface-container-low hover:bg-surface-container-high font-medium rounded-lg transition-colors">Cancel</button>
-                <button type="submit" disabled={actionInProgress === 'preauth'} className="flex-1 px-4 py-2 text-on-primary bg-primary hover:bg-primary-dim font-medium rounded-lg transition-colors flex justify-center items-center">
-                  {actionInProgress === 'preauth' ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-on-primary border-t-transparent"></span> : 'Pre-authorize'}
+                <button type="button" onClick={() => setShowPreAuthModal(false)} className="flex-1 px-4 py-2 text-on-surface-variant bg-surface-container-low hover:bg-surface-container-high font-medium rounded-2xl transition-colors">Cancel</button>
+                <button type="submit" disabled={actionInProgress === 'preauth'} className="flex-1 px-4 py-2 text-white bg-gradient-to-br from-primary to-primary-dim font-medium rounded-2xl transition-colors flex justify-center items-center shadow-sm">
+                  {actionInProgress === 'preauth' ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-white border-t-transparent"></span> : 'Pre-authorize'}
                 </button>
               </div>
             </form>
@@ -595,9 +596,9 @@ export default function UserManagementPage() {
                 );
               })()}
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-on-surface-variant bg-surface-container-low hover:bg-surface-container-high font-medium rounded-lg transition-colors">Cancel</button>
-                <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-on-primary bg-primary hover:bg-primary-dim font-medium rounded-lg transition-colors flex justify-center items-center">
-                  {actionInProgress?.startsWith('edit') ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-on-primary border-t-transparent"></span> : 'Save Changes'}
+                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-on-surface-variant bg-surface-container-low hover:bg-surface-container-high font-medium rounded-2xl transition-colors">Cancel</button>
+                <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-white bg-gradient-to-br from-primary to-primary-dim font-medium rounded-2xl transition-colors flex justify-center items-center shadow-sm">
+                  {actionInProgress?.startsWith('edit') ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-white border-t-transparent"></span> : 'Save Changes'}
                 </button>
               </div>
             </form>
