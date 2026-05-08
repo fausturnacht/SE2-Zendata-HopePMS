@@ -95,8 +95,8 @@ export default function Login() {
 
       <main className="w-full max-w-md z-10 animate-in fade-in zoom-in duration-700">
         <div className="rounded-[32px] bg-surface-container-lowest p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20">
-          <h2 className="text-2xl font-bold text-on-surface tracking-tight">Welcome Back</h2>
-          <p className="mt-2 text-sm text-on-surface-variant mb-8">Sign in to access the Product Management System</p>
+          <h2 className="text-2xl font-bold text-on-surface tracking-tight text-center">Welcome Back</h2>
+          <p className="mt-2 text-sm text-on-surface-variant mb-8 text-center">Sign in to access the Product Management System</p>
 
           {/* Warning Banner for Inactive Users */}
           {inactiveError && (
@@ -112,21 +112,11 @@ export default function Login() {
             onClick={handleGoogleLogin}
           />
           
-          <div className="mt-8 pt-8 border-t border-outline-variant/20 flex flex-col items-center">
-            <p className="text-[10px] font-bold tracking-[0.2em] text-outline uppercase">
-              SECURE ACADEMIC ENVIRONMENT
-            </p>
-          </div>
         </div>
       </main>
 
       <footer className="absolute bottom-0 left-0 w-full flex flex-col sm:flex-row items-center justify-between px-8 py-6 text-[10px] sm:text-xs text-on-surface-variant/60 font-medium">
-        <div className="mb-4 sm:mb-0 text-center sm:text-left">New Era University © 2026</div>
-        <div className="flex gap-6">
-          <a href="#" className="hover:text-primary transition-colors uppercase tracking-wider">Privacy Policy</a>
-          <a href="#" className="hover:text-primary transition-colors uppercase tracking-wider">Institutional Terms</a>
-          <a href="#" className="hover:text-primary transition-colors uppercase tracking-wider">Research Archive</a>
-        </div>
+        <div className="mb-4 sm:mb-0 text-center sm:text-left">HOPE INC. © 2026</div>
       </footer>
     </div>
   );
