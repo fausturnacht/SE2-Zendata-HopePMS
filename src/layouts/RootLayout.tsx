@@ -49,9 +49,17 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
       {/* Sidebar */}
       <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-surface-container-low border-r border-outline-variant/30 flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Sidebar Header */}
-        <div className="p-6">
-          <h1 className="text-xl font-bold text-primary tracking-tight">HOPE PMS</h1>
-          <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold mt-1">Product Management</p>
+        <div className="p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/HOPE INC LOGO.png" 
+              alt="Logo" 
+              className="w-14 h-14 object-contain" 
+              referrerPolicy="no-referrer"
+            />
+            <h1 className="text-2xl font-black text-primary tracking-tighter">HOPE PMS</h1>
+          </div>
+          <div className="h-px bg-outline-variant/20 w-full"></div>
         </div>
 
         {/* Navigation */}
@@ -111,6 +119,10 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
+            <div className="flex items-center gap-2 md:hidden">
+              <img src="/HOPE INC LOGO.png" alt="Logo" className="w-10 h-10 object-contain" referrerPolicy="no-referrer" />
+              <span className="text-base font-black text-primary tracking-tighter">HOPE PMS</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">

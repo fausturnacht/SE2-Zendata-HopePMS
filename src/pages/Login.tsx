@@ -87,14 +87,30 @@ export default function Login() {
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
       </div>
 
-      <header className="absolute top-0 left-0 w-full flex items-center border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md px-6 py-4 z-10">
-        <h1 className="text-xl font-bold tracking-tight text-primary">HOPE INC.</h1>
-        <div className="mx-4 h-6 border-l border-outline-variant/50"></div>
-        <span className="text-sm font-medium text-on-surface-variant">Product Management System</span>
+      <header className="absolute top-0 left-0 w-full flex items-center border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md px-6 py-3 z-10">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/HOPE INC LOGO.png" 
+            alt="Logo" 
+            className="w-14 h-14 object-contain" 
+            referrerPolicy="no-referrer"
+          />
+          <h1 className="text-2xl font-black text-primary tracking-tighter">HOPE PMS</h1>
+        </div>
+        <div className="mx-4 h-6 border-l border-outline-variant/30"></div>
+        <span className="text-sm font-medium text-on-surface-variant hidden sm:inline">Product Management System</span>
       </header>
 
       <main className="w-full max-w-md z-10 animate-in fade-in zoom-in duration-700">
         <div className="rounded-[32px] bg-surface-container-lowest p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20">
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/HOPE INC LOGO.png" 
+              alt="HOPE INC. Logo" 
+              className="h-20 object-contain"
+              referrerPolicy="no-referrer"
+            />
+          </div>
           <h2 className="text-2xl font-bold text-on-surface tracking-tight text-center">Welcome Back</h2>
           <p className="mt-2 text-sm text-on-surface-variant mb-8 text-center">Sign in to access the Product Management System</p>
 
