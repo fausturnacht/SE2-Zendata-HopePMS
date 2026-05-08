@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../contexts/UserRightsContext';
-import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, LogOut, Menu } from 'lucide-react';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface RootLayoutProps {
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const { currentUser, signOut } = useAuth();
   const { isAdmin, isSuperAdmin, hasRight } = useRights();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -36,46 +36,68 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const roleLabel = isSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin' : 'Staff Member';
 
   return (
-    <div className="flex bg-[#f7f9fb] min-h-screen font-sans text-slate-800">
+    <div className="flex bg-surface min-h-screen font-sans text-on-surface">
       
-      {/* Sidebar Overlay */}
+      {/* Sidebar Overlay (Mobile) */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/50 z-40 md:hidden"
-          onClick={toggleSidebar}
+          onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-[#f8fafc] border-r border-slate-200 flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen bg-[#0a1628] border-r border-white/5 flex flex-col transition-all duration-300 shadow-2xl md:shadow-none ${
+        sidebarOpen 
+          ? 'w-72 translate-x-0 opacity-100' 
+          : 'w-0 -translate-x-full opacity-0 pointer-events-none'
+      }`}>
         {/* Sidebar Header */}
-        <div className="p-6">
-          <h1 className="text-xl font-bold text-slate-900">HOPE PMS</h1>
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Product Management</p>
+        <div className="p-8 flex flex-col gap-6 min-w-[288px]">
+          <div className="flex items-center gap-4">
+            <div className="p-1 bg-white rounded-xl shadow-lg shadow-white/5 shrink-0">
+              <img 
+                src="/HOPE INC LOGO.png" 
+                alt="Logo" 
+                className="w-16 h-16 object-contain" 
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-black text-white tracking-tighter leading-tight italic">HOPE, Inc.</h1>
+              <span className="text-[10px] text-blue-400/80 font-bold uppercase tracking-[0.2em]">Product Management</span>
+            </div>
+          </div>
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-full"></div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto custom-scrollbar min-w-[288px]">
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-start gap-3 px-3 py-3 rounded-lg transition-colors group ${
+                className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 group relative ${
                   isActive 
-                    ? 'bg-blue-50 text-blue-700' 
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30 ring-1 ring-white/20' 
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                 }`}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  if (window.innerWidth < 768) setSidebarOpen(false);
+                }}
               >
-                <div className={`mt-0.5 ${isActive ? 'text-blue-700' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                {isActive && (
+                  <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-white rounded-r-full"></div>
+                )}
+                <div className={`mt-0.5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-400'}`}>
                   {item.icon}
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-sm font-medium ${isActive ? 'font-semibold' : ''}`}>{item.name}</span>
+                  <span className={`text-[15px] ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
                   {item.subtitle && (
-                    <span className="text-[10px] text-slate-400 mt-0.5">{item.subtitle}</span>
+                    <span className={`text-[10px] mt-0.5 ${isActive ? 'text-blue-100/60' : 'text-slate-500'}`}>{item.subtitle}</span>
                   )}
                 </div>
               </Link>
@@ -84,17 +106,19 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         </nav>
 
         {/* Sidebar Footer / User Profile */}
-        <div className="p-4 m-4 rounded-xl bg-slate-100/80 flex items-center gap-3">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover shrink-0 border border-white" referrerPolicy="no-referrer" />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
-              {userInitials}
+        <div className="p-4 border-t border-white/5 mt-auto min-w-[288px]">
+          <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-3 group hover:bg-white/10 transition-colors cursor-default">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-primary/30 shadow-sm" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/30">
+                {userInitials}
+              </div>
+            )}
+            <div className="flex flex-col truncate">
+              <span className="text-sm font-bold truncate capitalize text-white">{userName}</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{roleLabel}</span>
             </div>
-          )}
-          <div className="flex flex-col truncate">
-            <span className="text-sm font-semibold truncate capitalize">{userName}</span>
-            <span className="text-xs text-slate-500">{roleLabel}</span>
           </div>
         </div>
       </aside>
@@ -106,11 +130,18 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 shrink-0">
           <div className="flex items-center gap-4">
             <button 
-              className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md"
+              className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center"
               onClick={toggleSidebar}
+              title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
             >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Menu className={`w-5 h-5 transition-transform duration-300 ${sidebarOpen ? 'rotate-90 text-primary' : ''}`} />
             </button>
+            <div className={`flex items-center gap-3 md:hidden transition-opacity duration-300 ${sidebarOpen ? 'opacity-0' : 'opacity-100'}`}>
+              <div className="p-1 bg-white rounded-lg shadow-sm shrink-0">
+                <img src="/HOPE INC LOGO.png" alt="Logo" className="w-8 h-8 object-contain" referrerPolicy="no-referrer" />
+              </div>
+              <span className="text-base font-black text-primary tracking-tighter italic">HOPE, Inc.</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
