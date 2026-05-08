@@ -157,7 +157,7 @@ export default function Home() {
             <div className="text-right hidden sm:block">
               <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">System Status</div>
               <div className="flex items-center gap-1.5 justify-end mt-0.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div>
                 <span className="text-sm font-semibold text-slate-700">Online</span>
               </div>
             </div>
@@ -182,10 +182,10 @@ export default function Home() {
         {hasRight('ADM_USER') && (
           <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-secondary-container text-secondary rounded-xl group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
+              <div className="p-3 bg-tertiary-container text-tertiary rounded-xl group-hover:bg-tertiary group-hover:text-on-tertiary transition-colors">
                 <Users className="w-6 h-6" />
               </div>
-              <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-secondary transition-all group-hover:translate-x-1" />
+              <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-tertiary transition-all group-hover:translate-x-1" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{activeUsersCount}</div>
             <div className="text-sm text-slate-500 mt-1">Active Users</div>
@@ -195,10 +195,10 @@ export default function Home() {
         {hasRight('ADM_USER') && (
           <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-surface-container-high text-on-surface-variant rounded-xl group-hover:bg-on-surface-variant group-hover:text-surface transition-colors">
+              <div className="p-3 bg-error-container text-error rounded-xl group-hover:bg-error group-hover:text-on-error transition-colors">
                 <UserPlus className="w-6 h-6" />
               </div>
-              <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-on-surface-variant transition-all group-hover:translate-x-1" />
+              <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-error transition-all group-hover:translate-x-1" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{pendingUsersCount}</div>
             <div className="text-sm text-slate-500 mt-1">Pending Pre-auth</div>
@@ -304,14 +304,14 @@ export default function Home() {
               
               {hasRight('ADM_USER') && (
                 <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20 group">
-                  <div className="w-10 h-10 rounded-lg bg-secondary-container text-secondary flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-tertiary-container text-tertiary flex items-center justify-center">
                     <Users className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-bold text-on-surface">Manage Users</div>
                     <div className="text-[10px] text-on-surface-variant uppercase tracking-tighter">Review permissions</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-outline-variant group-hover:text-secondary group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-outline-variant group-hover:text-tertiary group-hover:translate-x-1 transition-all" />
                 </Link>
               )}
 

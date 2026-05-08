@@ -56,6 +56,18 @@
   --color-on-secondary: #f7f9ff;
   --color-on-secondary-container: #435368;
 
+  --color-tertiary: #2e7d32;
+  --color-tertiary-dim: #1b5e20;
+  --color-tertiary-container: #c8e6c9;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #1b5e20;
+
+  --color-warning: #9b4d00;
+  --color-warning-dim: #6d3500;
+  --color-warning-container: #ffdcbe;
+  --color-on-warning: #ffffff;
+  --color-on-warning-container: #331500;
+
   --color-error: #9e3f4e;
   --color-error-dim: #4f0116;
   --color-on-error: #fff7f7;

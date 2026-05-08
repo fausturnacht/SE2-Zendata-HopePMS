@@ -267,7 +267,7 @@ export default function UserManagementPage() {
               onClick={() => setFilterStatus(prev => prev === 'ALL' ? 'ACTIVE' : prev === 'ACTIVE' ? 'SUSPENDED' : 'ALL')}
               className="px-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm text-on-surface font-medium hover:bg-surface-container-low focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap min-w-[140px]"
             >
-              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-secondary' : filterStatus === 'SUSPENDED' ? 'border border-outline-variant bg-transparent' : 'bg-primary'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-tertiary' : filterStatus === 'SUSPENDED' ? 'border border-outline-variant bg-transparent' : 'bg-primary'}`}></div>
               {filterStatus === 'ALL' ? 'All Users' : filterStatus === 'ACTIVE' ? 'Active Only' : 'Suspended Only'}
             </button>
             <div className="relative">
@@ -352,8 +352,8 @@ export default function UserManagementPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-secondary' : 'border border-outline-variant bg-transparent'}`}></div>
-                      <span className={isActive ? 'text-on-surface font-bold' : 'text-on-surface-variant'}>{isActive ? 'Active' : 'Suspended'}</span>
+                      <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-tertiary' : 'border border-outline-variant bg-transparent'}`}></div>
+                      <span className={isActive ? 'text-tertiary font-bold' : 'text-on-surface-variant'}>{isActive ? 'Active' : 'Suspended'}</span>
                     </div>
                   </td>
                   {hasRight('STAMP') && (
@@ -447,7 +447,7 @@ export default function UserManagementPage() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <h3 className="text-lg font-bold text-on-surface">Pending Authorization</h3>
-            <span className="px-3 py-1 bg-primary-container text-on-primary-container text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
+            <span className="px-3 py-1 bg-error-container text-on-error-container text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
           </div>
           <button 
             onClick={() => setShowPreAuthModal(true)}

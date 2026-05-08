@@ -70,7 +70,7 @@ export default function ReportsPage() {
                 : 'text-outline hover:text-on-surface'
             }`}
           >
-            REP-001: Full Product Listing
+            Full Product Listing
           </button>
         )}
 
@@ -84,7 +84,7 @@ export default function ReportsPage() {
                 : 'text-outline hover:text-on-surface'
             }`}
           >
-            REP-002: Top Selling Products
+            Top Selling Products
           </button>
         )}
       </div>
