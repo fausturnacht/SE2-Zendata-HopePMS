@@ -95,7 +95,7 @@ export default function Login() {
             className="w-14 h-14 object-contain" 
             referrerPolicy="no-referrer"
           />
-          <h1 className="text-2xl font-black text-primary tracking-tighter">HOPE PMS</h1>
+          <h1 className="text-2xl font-black text-primary tracking-tighter italic">HOPE, Inc.</h1>
         </div>
         <div className="mx-4 h-6 border-l border-outline-variant/30"></div>
         <span className="text-sm font-medium text-on-surface-variant hidden sm:inline">Product Management System</span>
