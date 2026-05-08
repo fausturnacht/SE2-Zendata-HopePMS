@@ -15,7 +15,7 @@ const SuperAdminDisabledActions = () => (
     <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
       <Edit className="w-4 h-4" /> Edit
     </button>
-    <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+    <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
       <BanIcon className="w-4 h-4" /> Deactivate
     </button>
     {/* Tooltip on Hover */}
@@ -234,8 +234,8 @@ export default function UserManagementPage() {
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 max-w-full">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-4">
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-[0.05em] mb-2">Administration Console</p>
-          <h2 className="text-3xl md:text-[2.75rem] font-bold text-slate-900 leading-tight tracking-tight">User Management</h2>
+          <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-[0.05em] mb-2">Administration Console</p>
+          <h2 className="text-3xl md:text-[2.75rem] font-bold text-on-surface leading-tight tracking-tight">User Management</h2>
         </div>
         <button 
           onClick={handleExportCSV}
@@ -250,10 +250,10 @@ export default function UserManagementPage() {
       {/* Active Users Section */}
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-          <h3 className="text-lg font-bold text-slate-900">Active Users</h3>
+          <h3 className="text-lg font-bold text-on-surface">Active Users</h3>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4" />
               <input 
                 className="pl-9 pr-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none w-full sm:w-64 placeholder:text-outline transition-all shadow-sm" 
                 placeholder="Search ID or Name" 
@@ -266,11 +266,11 @@ export default function UserManagementPage() {
               onClick={() => setFilterStatus(prev => prev === 'ALL' ? 'ACTIVE' : prev === 'ACTIVE' ? 'SUSPENDED' : 'ALL')}
               className="px-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm text-on-surface font-medium hover:bg-surface-container-low focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap min-w-[140px]"
             >
-              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-emerald-500' : filterStatus === 'SUSPENDED' ? 'border border-outline-variant bg-transparent' : 'bg-primary'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-secondary' : filterStatus === 'SUSPENDED' ? 'border border-outline-variant bg-transparent' : 'bg-primary'}`}></div>
               {filterStatus === 'ALL' ? 'All Users' : filterStatus === 'ACTIVE' ? 'Active Only' : 'Suspended Only'}
             </button>
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4" />
               <select
                 className="pl-9 pr-8 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none w-full sm:w-40 appearance-none cursor-pointer shadow-sm"
                 value={filterRole}
@@ -281,10 +281,10 @@ export default function UserManagementPage() {
                 <option value="ADMIN">ADMIN</option>
                 <option value="SUPERADMIN">SUPERADMIN</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4 pointer-events-none" />
             </div>
             <div className="relative">
-              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4" />
               <select
                 className="pl-9 pr-8 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none w-full sm:w-48 appearance-none cursor-pointer shadow-sm"
                 value={sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''}
@@ -304,15 +304,15 @@ export default function UserManagementPage() {
                 <option value="user_type-asc">Role (A-Z)</option>
                 <option value="user_type-desc">Role (Z-A)</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4 pointer-events-none" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
+              <tr className="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider font-bold border-b border-outline-variant/30">
                 <th className="px-6 py-4 font-medium">User ID</th>
                 <th className="px-6 py-4 font-medium">Username</th>
                 <th className="px-6 py-4 font-medium">User Type</th>
@@ -324,11 +324,11 @@ export default function UserManagementPage() {
             <tbody className="text-sm divide-y divide-surface-container-low">
               {loadingActive ? (
                 <tr>
-                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">Loading users...</td>
+                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-on-surface-variant">Loading users...</td>
                 </tr>
               ) : filteredActiveUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">No users match your criteria</td>
+                  <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-on-surface-variant">No users match your criteria</td>
                 </tr>
               ) : filteredActiveUsers.slice((activeCurrentPage - 1) * PAGE_SIZE, activeCurrentPage * PAGE_SIZE).map((user: any) => {
                 const isRowSuperAdmin = user.user_type === 'SUPERADMIN';
@@ -338,8 +338,8 @@ export default function UserManagementPage() {
                 
                 return (
                 <React.Fragment key={id}>
-                <tr className={`hover:bg-slate-50/50 transition-colors ${isRowSuperAdmin ? 'bg-slate-50/30' : ''}`}>
-                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
+                <tr className={`hover:bg-surface-container-low/50 transition-colors ${isRowSuperAdmin ? 'bg-surface-container-low/30' : ''}`}>
+                  <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">{id || '—'}</td>
                   <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isRowSuperAdmin ? 'text-on-surface font-bold' : 'text-on-surface'}`}>
                     {user.username || user.email}
                     {isRowSuperAdmin && <Shield className="w-4 h-4 text-primary" />}
@@ -351,12 +351,12 @@ export default function UserManagementPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'border border-slate-400 bg-transparent'}`}></div>
-                      <span className={isActive ? 'text-slate-900' : 'text-slate-500'}>{isActive ? 'Active' : 'Suspended'}</span>
+                      <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-secondary' : 'border border-outline-variant bg-transparent'}`}></div>
+                      <span className={isActive ? 'text-on-surface font-bold' : 'text-on-surface-variant'}>{isActive ? 'Active' : 'Suspended'}</span>
                     </div>
                   </td>
                   {hasRight('STAMP') && (
-                    <td className="px-6 py-4 text-xs text-slate-500 font-mono">
+                    <td className="px-6 py-4 text-xs text-on-surface-variant font-mono">
                       {user.stamp || '—'}
                     </td>
                   )}
@@ -365,7 +365,7 @@ export default function UserManagementPage() {
                       <button
                         type="button"
                         onClick={() => handleToggleExpand(id)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/20 rounded transition-colors"
                         title={expandedRows[id] ? "Collapse history" : "View history"}
                       >
                         {expandedRows[id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -385,8 +385,8 @@ export default function UserManagementPage() {
                             <button 
                               onClick={() => handleDeactivate(id)}
                               disabled={actionInProgress === `deactivate-${id}` || !!isSelfRow}
-                              className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
-                              {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <BanIcon className="w-4 h-4" />} Deactivate
+                              className="px-3 py-1.5 text-error hover:bg-error-container/20 rounded border border-transparent hover:border-error/20 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
+                              {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-error border-t-transparent"></span> : <BanIcon className="w-4 h-4" />} Deactivate
                             </button>
                           ) : (
                             <button 
@@ -414,25 +414,25 @@ export default function UserManagementPage() {
 
         {/* Active Users Pagination */}
         {filteredActiveUsers.length > PAGE_SIZE && (
-          <div className="mt-4 flex items-center justify-between px-2">
-            <p className="text-xs font-medium text-slate-500">
+            <div className="mt-4 flex items-center justify-between px-2">
+            <p className="text-xs font-medium text-on-surface-variant">
               Showing {(activeCurrentPage - 1) * PAGE_SIZE + 1}–{Math.min(activeCurrentPage * PAGE_SIZE, filteredActiveUsers.length)} of {filteredActiveUsers.length} users
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveCurrentPage(p => Math.max(1, p - 1))}
                 disabled={activeCurrentPage === 1}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="text-sm font-semibold text-slate-700 min-w-[3rem] text-center">
+              <span className="text-sm font-semibold text-on-surface min-w-[3rem] text-center">
                 Page {activeCurrentPage} of {Math.ceil(filteredActiveUsers.length / PAGE_SIZE)}
               </span>
               <button
                 onClick={() => setActiveCurrentPage(p => Math.min(Math.ceil(filteredActiveUsers.length / PAGE_SIZE), p + 1))}
                 disabled={activeCurrentPage === Math.ceil(filteredActiveUsers.length / PAGE_SIZE)}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -457,10 +457,10 @@ export default function UserManagementPage() {
           </button>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
+              <tr className="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider font-bold border-b border-outline-variant/30">
                 <th className="px-6 py-4 font-medium">User ID</th>
                 <th className="px-6 py-4 font-medium">Username</th>
                 <th className="px-6 py-4 font-medium">Email</th>
@@ -468,22 +468,22 @@ export default function UserManagementPage() {
                 <th className="px-6 py-4 font-medium">Date Requested</th>
               </tr>
             </thead>
-            <tbody className="text-sm divide-y divide-slate-100">
+            <tbody className="text-sm divide-y divide-surface-container-low">
               {loadingPending ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading pending requests...</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant">Loading pending requests...</td>
                 </tr>
               ) : pendingUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">No pending authorization requests</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant">No pending authorization requests</td>
                 </tr>
               ) : pendingUsers.slice((pendingCurrentPage - 1) * PAGE_SIZE, pendingCurrentPage * PAGE_SIZE).map(user => (
-                <tr key={user.id || user.userid} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{user.id || user.userid || '—'}</td>
-                  <td className="px-6 py-4 font-medium text-slate-900">{user.username || '—'}</td>
-                  <td className="px-6 py-4 text-slate-500">{user.email}</td>
-                  <td className="px-6 py-4"><span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">{user.user_type || '—'}</span></td>
-                  <td className="px-6 py-4 text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
+                <tr key={user.id || user.userid} className="hover:bg-surface-container-low/50 transition-colors">
+                  <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">{user.id || user.userid || '—'}</td>
+                  <td className="px-6 py-4 font-bold text-on-surface">{user.username || '—'}</td>
+                  <td className="px-6 py-4 text-on-surface-variant">{user.email}</td>
+                  <td className="px-6 py-4"><span className="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-full font-medium">{user.user_type || '—'}</span></td>
+                  <td className="px-6 py-4 text-on-surface-variant">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -493,24 +493,24 @@ export default function UserManagementPage() {
         {/* Pending Authorization Pagination */}
         {pendingUsers.length > PAGE_SIZE && (
           <div className="mt-4 flex items-center justify-between px-2">
-            <p className="text-xs font-medium text-slate-500">
+            <p className="text-xs font-medium text-on-surface-variant">
               Showing {(pendingCurrentPage - 1) * PAGE_SIZE + 1}–{Math.min(pendingCurrentPage * PAGE_SIZE, pendingUsers.length)} of {pendingUsers.length} requests
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPendingCurrentPage(p => Math.max(1, p - 1))}
                 disabled={pendingCurrentPage === 1}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="text-sm font-semibold text-slate-700 min-w-[3rem] text-center">
+              <span className="text-sm font-semibold text-on-surface min-w-[3rem] text-center">
                 Page {pendingCurrentPage} of {Math.ceil(pendingUsers.length / PAGE_SIZE)}
               </span>
               <button
                 onClick={() => setPendingCurrentPage(p => Math.min(Math.ceil(pendingUsers.length / PAGE_SIZE), p + 1))}
                 disabled={pendingCurrentPage === Math.ceil(pendingUsers.length / PAGE_SIZE)}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -521,34 +521,34 @@ export default function UserManagementPage() {
 
       {/* Modals */}
       {showPreAuthModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">Pre-authorize User</h3>
-              <button onClick={() => setShowPreAuthModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="fixed inset-0 z-50 bg-on-surface/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-2xl w-full max-w-md shadow-2xl border border-outline-variant/20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
+              <h3 className="text-xl font-bold text-on-surface">Pre-authorize User</h3>
+              <button onClick={() => setShowPreAuthModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handlePreAuthorize} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Email</label>
+                <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">Email</label>
                 <input required type="email" value={preAuthEmail} onChange={(e) => setPreAuthEmail(e.target.value)} className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium" placeholder="user@example.com" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username / Name</label>
-                <input required type="text" value={preAuthName} onChange={(e) => setPreAuthName(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" placeholder="John Doe" />
+                <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">Username / Name</label>
+                <input required type="text" value={preAuthName} onChange={(e) => setPreAuthName(e.target.value)} className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium" placeholder="John Doe" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
+                <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">Role</label>
                 <select value={preAuthRole} onChange={(e) => setPreAuthRole(e.target.value as any)} 
                   disabled={isAdmin && !isSuperAdmin}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
+                  className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                   <option value="USER">USER</option>
                   {isSuperAdmin && <option value="ADMIN">ADMIN</option>}
                 </select>
               </div>
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setShowPreAuthModal(false)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
+                <button type="button" onClick={() => setShowPreAuthModal(false)} className="flex-1 px-4 py-2 text-on-surface-variant bg-surface-container-low hover:bg-surface-container-high font-medium rounded-lg transition-colors">Cancel</button>
                 <button type="submit" disabled={actionInProgress === 'preauth'} className="flex-1 px-4 py-2 text-on-primary bg-primary hover:bg-primary-dim font-medium rounded-lg transition-colors flex justify-center items-center">
                   {actionInProgress === 'preauth' ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-on-primary border-t-transparent"></span> : 'Pre-authorize'}
                 </button>
@@ -559,11 +559,11 @@ export default function UserManagementPage() {
       )}
 
       {editingUser && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">Edit User</h3>
-              <button onClick={() => setEditingUser(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="fixed inset-0 z-50 bg-on-surface/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-2xl w-full max-w-md shadow-2xl border border-outline-variant/20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
+              <h3 className="text-xl font-bold text-on-surface">Edit User</h3>
+              <button onClick={() => setEditingUser(null)} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -574,21 +574,21 @@ export default function UserManagementPage() {
                 return (
                   <>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">User ID</label>
-                      <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm text-slate-500 font-mono" />
+                      <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">User ID</label>
+                      <input type="text" value={editingUser.id || editingUser.userid} disabled className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg outline-none text-sm text-on-surface-variant font-mono" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username</label>
-                      <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" />
+                      <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">Username</label>
+                      <input required type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Role</label>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">Role</label>
                       <select value={editUserType} onChange={(e) => setEditUserType(e.target.value as any)} 
                         disabled={disableRoleDropdown}
-                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium disabled:opacity-60 disabled:cursor-not-allowed">
+                        className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                         <option value="USER">USER</option>
                         {(isSuperAdmin || editUserType === 'ADMIN') && <option value="ADMIN">ADMIN</option>}
-                        {editUserType === 'SUPERADMIN' && <option value="SUPERADMIN">SUPERADMIN</option>}
+                        {(isSuperAdmin || editUserType === 'SUPERADMIN') && <option value="SUPERADMIN">SUPERADMIN</option>}
                       </select>
                     </div>
                   </>
