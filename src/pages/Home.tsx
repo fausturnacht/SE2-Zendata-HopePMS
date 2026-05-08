@@ -133,7 +133,7 @@ export default function Home() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm mb-1">
+          <div className="flex items-center gap-2 text-primary font-bold text-sm mb-1 uppercase tracking-wider">
             <LayoutDashboard className="w-4 h-4" />
             <span>SYSTEM OVERVIEW</span>
           </div>
@@ -148,7 +148,7 @@ export default function Home() {
               <button 
                 onClick={handleVerifyAll}
                 disabled={isVerifying}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary-dim text-on-secondary text-xs font-bold rounded-xl transition-all shadow-lg shadow-secondary/20 disabled:opacity-50"
               >
                 {isVerifying ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                 {isVerifying ? 'Verifying...' : 'Verify All Products'}
@@ -170,10 +170,10 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link to="/products" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
           <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div className="p-3 bg-primary-container text-primary rounded-xl group-hover:bg-primary group-hover:text-on-primary transition-colors">
               <Package className="w-6 h-6" />
             </div>
-            <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-all group-hover:translate-x-1" />
+            <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-primary transition-all group-hover:translate-x-1" />
           </div>
           <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
           <div className="text-sm text-slate-500 mt-1">Total Products</div>
@@ -182,10 +182,10 @@ export default function Home() {
         {hasRight('ADM_USER') && (
           <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <div className="p-3 bg-secondary-container text-secondary rounded-xl group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
                 <Users className="w-6 h-6" />
               </div>
-              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-600 transition-all group-hover:translate-x-1" />
+              <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-secondary transition-all group-hover:translate-x-1" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{activeUsersCount}</div>
             <div className="text-sm text-slate-500 mt-1">Active Users</div>
@@ -195,10 +195,10 @@ export default function Home() {
         {hasRight('ADM_USER') && (
           <Link to="/admin" className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <div className="p-3 bg-surface-container-high text-on-surface-variant rounded-xl group-hover:bg-on-surface-variant group-hover:text-surface transition-colors">
                 <UserPlus className="w-6 h-6" />
               </div>
-              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-amber-600 transition-all group-hover:translate-x-1" />
+              <ArrowRight className="w-5 h-5 text-outline-variant group-hover:text-on-surface-variant transition-all group-hover:translate-x-1" />
             </div>
             <div className="text-2xl font-bold text-slate-900">{pendingUsersCount}</div>
             <div className="text-sm text-slate-500 mt-1">Pending Pre-auth</div>
@@ -259,7 +259,7 @@ export default function Home() {
                   <h3 className="text-lg font-bold text-slate-900">Top Selling Products</h3>
                   <p className="text-xs text-slate-400 mt-1">Quantity sold by product code</p>
                 </div>
-                <Link to="/reports" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-wider">
+                <Link to="/reports" className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">
                   Full Report <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -291,40 +291,40 @@ export default function Home() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-slate-900 mb-6">Quick Actions</h3>
             <div className="grid grid-cols-1 gap-3">
-              <Link to="/products" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Link to="/products" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20 group">
+                <div className="w-10 h-10 rounded-lg bg-primary-container text-primary flex items-center justify-center">
                   <Package className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-bold text-slate-800">New Product</div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-tighter">Add to catalog</div>
+                  <div className="text-sm font-bold text-on-surface">New Product</div>
+                  <div className="text-[10px] text-on-surface-variant uppercase tracking-tighter">Add to catalog</div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-4 h-4 text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </Link>
               
               {hasRight('ADM_USER') && (
-                <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20 group">
+                  <div className="w-10 h-10 rounded-lg bg-secondary-container text-secondary flex items-center justify-center">
                     <Users className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-bold text-slate-800">Manage Users</div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-tighter">Review permissions</div>
+                    <div className="text-sm font-bold text-on-surface">Manage Users</div>
+                    <div className="text-[10px] text-on-surface-variant uppercase tracking-tighter">Review permissions</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-outline-variant group-hover:text-secondary group-hover:translate-x-1 transition-all" />
                 </Link>
               )}
 
               {hasRight('REP_001') && (
-                <Link to="/reports" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                  <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Link to="/reports" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant/20 group">
+                  <div className="w-10 h-10 rounded-lg bg-surface-container-high text-on-surface-variant flex items-center justify-center">
                     <TrendingUp className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-bold text-slate-800">Export Reports</div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-tighter">Generate PDF/Excl</div>
+                    <div className="text-sm font-bold text-on-surface">Export Reports</div>
+                    <div className="text-[10px] text-on-surface-variant uppercase tracking-tighter">Generate PDF/Excl</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-outline-variant group-hover:text-on-surface-variant group-hover:translate-x-1 transition-all" />
                 </Link>
               )}
             </div>

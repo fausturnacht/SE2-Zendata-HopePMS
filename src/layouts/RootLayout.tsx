@@ -36,7 +36,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const roleLabel = isSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin' : 'Staff Member';
 
   return (
-    <div className="flex bg-[#f7f9fb] min-h-screen font-sans text-slate-800">
+    <div className="flex bg-surface min-h-screen font-sans text-on-surface">
       
       {/* Sidebar Overlay */}
       {sidebarOpen && (
@@ -47,11 +47,11 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-[#f8fafc] border-r border-slate-200 flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-surface-container-low border-r border-outline-variant/30 flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Sidebar Header */}
         <div className="p-6">
-          <h1 className="text-xl font-bold text-slate-900">HOPE PMS</h1>
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-1">Product Management</p>
+          <h1 className="text-xl font-bold text-primary tracking-tight">HOPE PMS</h1>
+          <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold mt-1">Product Management</p>
         </div>
 
         {/* Navigation */}
@@ -64,12 +64,12 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
                 to={item.href}
                 className={`flex items-start gap-3 px-3 py-3 rounded-lg transition-colors group ${
                   isActive 
-                    ? 'bg-blue-50 text-blue-700' 
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-primary-container text-on-primary-container' 
+                    : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
-                <div className={`mt-0.5 ${isActive ? 'text-blue-700' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                <div className={`mt-0.5 ${isActive ? 'text-on-primary-container' : 'text-outline group-hover:text-on-surface-variant'}`}>
                   {item.icon}
                 </div>
                 <div className="flex flex-col">
@@ -84,7 +84,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         </nav>
 
         {/* Sidebar Footer / User Profile */}
-        <div className="p-4 m-4 rounded-xl bg-slate-100/80 flex items-center gap-3">
+        <div className="p-4 m-4 rounded-xl bg-surface-container flex items-center gap-3">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Profile" className="w-9 h-9 rounded-full object-cover shrink-0 border border-white" referrerPolicy="no-referrer" />
           ) : (

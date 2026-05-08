@@ -587,7 +587,7 @@ const ApiDebug: React.FC = () => {
                 
                 {result ? (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="flex items-center gap-2 mb-4 text-emerald-600 font-black text-xs uppercase tracking-widest">
+                    <div className="flex items-center gap-2 mb-4 text-secondary font-black text-xs uppercase tracking-widest">
                       <span className="material-symbols-outlined text-sm">check_circle</span>
                       Operation Successful
                     </div>

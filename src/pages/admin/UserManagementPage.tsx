@@ -3,11 +3,27 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useRights } from '../../contexts/UserRightsContext';
 import { getPendingUsers, fetchAllUsers, activateUser, deactivateUser, preAuthorizeUser, updateUser } from '../../api/users';
-import { Download, Search, Filter, Shield, Ban, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, Search, Filter, Shield, Ban as BanIcon, Power, Edit, UserPlus, X, ChevronDown, ArrowUpDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { UserStampHistoryPanel } from '../../components/admin/UserStampHistoryPanel';
 import { getTodayGMT8 } from '../../utils/dateUtils';
 
 const PAGE_SIZE = 10;
+
+// Helper component for disabled SuperAdmin actions
+const SuperAdminDisabledActions = () => (
+  <div className="relative group/tooltip flex gap-2">
+    <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+      <Edit className="w-4 h-4" /> Edit
+    </button>
+    <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+      <BanIcon className="w-4 h-4" /> Deactivate
+    </button>
+    {/* Tooltip on Hover */}
+    <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-48 bg-on-surface text-surface text-xs p-2 rounded shadow-lg text-center z-10 pointer-events-none">
+      SUPERADMIN accounts cannot be modified
+    </div>
+  </div>
+);
 
 export default function UserManagementPage() {
   const { currentUser } = useAuth();
@@ -34,18 +50,29 @@ export default function UserManagementPage() {
   const [editUsername, setEditUsername] = useState('');
   const [editUserType, setEditUserType] = useState<'USER' | 'ADMIN' | 'SUPERADMIN'>('USER');
 
-  if (loadingRights) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-slate-500 font-medium">Checking permissions...</p>
-      </div>
-    );
-  }
+  const loadData = async () => {
+    try {
+      setLoadingPending(true);
+      const pending = await getPendingUsers();
+      setPendingUsers(pending || []);
+    } catch (e) {
+      console.error(e);
+      setPendingUsers([]);
+    } finally {
+      setLoadingPending(false);
+    }
 
-  if (!hasRight('ADM_USER')) {
-    return <Navigate to="/dashboard" replace />;
-  }
+    try {
+      setLoadingActive(true);
+      const all = await fetchAllUsers();
+      setActiveUsers(all || []);
+    } catch (e) {
+      console.error(e);
+      setActiveUsers([]);
+    } finally {
+      setLoadingActive(false);
+    }
+  };
 
   const filteredActiveUsers = useMemo(() => {
     let result = [...activeUsers];
@@ -86,30 +113,6 @@ export default function UserManagementPage() {
     return result;
   }, [activeUsers, searchTerm, filterRole, filterStatus, sortConfig]);
 
-  const loadData = async () => {
-    try {
-      setLoadingPending(true);
-      const pending = await getPendingUsers();
-      setPendingUsers(pending || []);
-    } catch (e) {
-      console.error(e);
-      setPendingUsers([]);
-    } finally {
-      setLoadingPending(false);
-    }
-
-    try {
-      setLoadingActive(true);
-      const all = await fetchAllUsers();
-      setActiveUsers(all || []);
-    } catch (e) {
-      console.error(e);
-      setActiveUsers([]);
-    } finally {
-      setLoadingActive(false);
-    }
-  };
-
   useEffect(() => {
     loadData();
   }, []);
@@ -117,6 +120,19 @@ export default function UserManagementPage() {
   useEffect(() => {
     setActiveCurrentPage(1);
   }, [searchTerm, filterRole, filterStatus, sortConfig]);
+
+  if (loadingRights) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+        <p className="text-on-surface-variant font-medium">Checking permissions...</p>
+      </div>
+    );
+  }
+
+  if (!hasRight('ADM_USER')) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handlePreAuthorize = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,22 +230,6 @@ export default function UserManagementPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Helper component for disabled SuperAdmin actions
-  const SuperAdminDisabledActions = () => (
-    <div className="relative group/tooltip flex gap-2">
-      <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
-        <Edit className="w-4 h-4" /> Edit
-      </button>
-      <button disabled className="px-3 py-1.5 text-slate-400 bg-slate-50 border border-slate-200 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
-        <Ban className="w-4 h-4" /> Deactivate
-      </button>
-      {/* Tooltip on Hover */}
-      <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-48 bg-slate-900 text-white text-xs p-2 rounded shadow-lg text-center z-10 pointer-events-none">
-        SUPERADMIN accounts cannot be modified
-      </div>
-    </div>
-  );
-
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 max-w-full">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-4">
@@ -239,7 +239,7 @@ export default function UserManagementPage() {
         </div>
         <button 
           onClick={handleExportCSV}
-          className="px-5 py-2.5 bg-white text-slate-700 font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm"
+          className="px-5 py-2.5 bg-surface-container-lowest text-on-surface font-medium rounded-lg border border-outline-variant/30 hover:bg-surface-container-low transition-colors flex items-center gap-2 shadow-sm"
         >
           <Download className="w-5 h-5" />
           Export List
@@ -255,7 +255,7 @@ export default function UserManagementPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <input 
-                className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-64 placeholder:text-slate-400 transition-all shadow-sm" 
+                className="pl-9 pr-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none w-full sm:w-64 placeholder:text-outline transition-all shadow-sm" 
                 placeholder="Search ID or Name" 
                 type="text"
                 value={searchTerm}
@@ -264,15 +264,15 @@ export default function UserManagementPage() {
             </div>
             <button
               onClick={() => setFilterStatus(prev => prev === 'ALL' ? 'ACTIVE' : prev === 'ACTIVE' ? 'SUSPENDED' : 'ALL')}
-              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 font-medium hover:bg-slate-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap min-w-[140px]"
+              className="px-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm text-on-surface font-medium hover:bg-surface-container-low focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap min-w-[140px]"
             >
-              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-emerald-500' : filterStatus === 'SUSPENDED' ? 'border border-slate-400 bg-transparent' : 'bg-blue-500'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${filterStatus === 'ACTIVE' ? 'bg-emerald-500' : filterStatus === 'SUSPENDED' ? 'border border-outline-variant bg-transparent' : 'bg-primary'}`}></div>
               {filterStatus === 'ALL' ? 'All Users' : filterStatus === 'ACTIVE' ? 'Active Only' : 'Suspended Only'}
             </button>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <select
-                className="pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-40 appearance-none cursor-pointer shadow-sm"
+                className="pl-9 pr-8 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none w-full sm:w-40 appearance-none cursor-pointer shadow-sm"
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
               >
@@ -286,7 +286,7 @@ export default function UserManagementPage() {
             <div className="relative">
               <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <select
-                className="pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none w-full sm:w-48 appearance-none cursor-pointer shadow-sm"
+                className="pl-9 pr-8 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none w-full sm:w-48 appearance-none cursor-pointer shadow-sm"
                 value={sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -321,7 +321,7 @@ export default function UserManagementPage() {
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="text-sm divide-y divide-slate-100">
+            <tbody className="text-sm divide-y divide-surface-container-low">
               {loadingActive ? (
                 <tr>
                   <td colSpan={hasRight('STAMP') ? 6 : 5} className="px-6 py-8 text-center text-slate-500">Loading users...</td>
@@ -340,12 +340,12 @@ export default function UserManagementPage() {
                 <React.Fragment key={id}>
                 <tr className={`hover:bg-slate-50/50 transition-colors ${isRowSuperAdmin ? 'bg-slate-50/30' : ''}`}>
                   <td className="px-6 py-4 text-slate-500 font-mono text-xs">{id || '—'}</td>
-                  <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isRowSuperAdmin ? 'text-slate-900 font-bold' : 'text-slate-900'}`}>
+                  <td className={`px-6 py-4 font-medium flex items-center gap-2 ${isRowSuperAdmin ? 'text-on-surface font-bold' : 'text-on-surface'}`}>
                     {user.username || user.email}
-                    {isRowSuperAdmin && <Shield className="w-4 h-4 text-blue-600" />}
+                    {isRowSuperAdmin && <Shield className="w-4 h-4 text-primary" />}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isRowSuperAdmin ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`px-2.5 py-1 text-xs justify-center rounded-full font-medium inline-flex ${isRowSuperAdmin ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant'}`}>
                       {user.user_type || '—'}
                     </span>
                   </td>
@@ -378,7 +378,7 @@ export default function UserManagementPage() {
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => openEditModal(user)}
-                            className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent hover:border-blue-200 transition-all text-xs font-semibold flex items-center gap-1">
+                            className="px-3 py-1.5 text-primary hover:bg-primary-container/20 rounded border border-transparent hover:border-primary/20 transition-all text-xs font-semibold flex items-center gap-1">
                             <Edit className="w-4 h-4" /> Edit
                           </button>
                           {isActive ? (
@@ -386,14 +386,14 @@ export default function UserManagementPage() {
                               onClick={() => handleDeactivate(id)}
                               disabled={actionInProgress === `deactivate-${id}` || !!isSelfRow}
                               className="px-3 py-1.5 text-rose-600 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
-                              {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <Ban className="w-4 h-4" />} Deactivate
+                              {actionInProgress === `deactivate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-rose-600 border-t-transparent"></span> : <BanIcon className="w-4 h-4" />} Deactivate
                             </button>
                           ) : (
                             <button 
                               onClick={() => handleActivate(id)}
                               disabled={actionInProgress === `activate-${id}` || !!isSelfRow}
-                              className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded border border-transparent hover:border-emerald-200 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
-                              {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-emerald-600 border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
+                              className="px-3 py-1.5 text-secondary hover:bg-secondary-container/20 rounded border border-transparent hover:border-secondary/20 transition-all text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed min-w-[110px]">
+                              {actionInProgress === `activate-${id}` ? <span className="w-4 h-4 block animate-spin rounded-full border border-secondary border-t-transparent"></span> : <Power className="w-4 h-4" />} Activate
                             </button>
                           )}
                         </div>
@@ -445,12 +445,12 @@ export default function UserManagementPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h3 className="text-lg font-bold text-slate-900">Pending Authorization</h3>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
+            <h3 className="text-lg font-bold text-on-surface">Pending Authorization</h3>
+            <span className="px-3 py-1 bg-primary-container text-on-primary-container text-xs font-semibold rounded-full">{pendingUsers.length} Requests</span>
           </div>
           <button 
             onClick={() => setShowPreAuthModal(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+            className="px-4 py-2 bg-primary hover:bg-primary-dim text-on-primary text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
             Pre-authorize
@@ -532,7 +532,7 @@ export default function UserManagementPage() {
             <form onSubmit={handlePreAuthorize} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Email</label>
-                <input required type="email" value={preAuthEmail} onChange={(e) => setPreAuthEmail(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm text-slate-900 font-medium" placeholder="user@example.com" />
+                <input required type="email" value={preAuthEmail} onChange={(e) => setPreAuthEmail(e.target.value)} className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium" placeholder="user@example.com" />
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Username / Name</label>
@@ -549,8 +549,8 @@ export default function UserManagementPage() {
               </div>
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setShowPreAuthModal(false)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
-                <button type="submit" disabled={actionInProgress === 'preauth'} className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition-colors flex justify-center items-center">
-                  {actionInProgress === 'preauth' ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-white border-t-transparent"></span> : 'Pre-authorize'}
+                <button type="submit" disabled={actionInProgress === 'preauth'} className="flex-1 px-4 py-2 text-on-primary bg-primary hover:bg-primary-dim font-medium rounded-lg transition-colors flex justify-center items-center">
+                  {actionInProgress === 'preauth' ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-on-primary border-t-transparent"></span> : 'Pre-authorize'}
                 </button>
               </div>
             </form>
@@ -595,9 +595,9 @@ export default function UserManagementPage() {
                 );
               })()}
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors">Cancel</button>
-                <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg transition-colors flex justify-center items-center">
-                  {actionInProgress?.startsWith('edit') ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-white border-t-transparent"></span> : 'Save Changes'}
+                <button type="button" onClick={() => setEditingUser(null)} className="flex-1 px-4 py-2 text-on-surface-variant bg-surface-container-low hover:bg-surface-container-high font-medium rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={actionInProgress?.startsWith('edit')} className="flex-1 px-4 py-2 text-on-primary bg-primary hover:bg-primary-dim font-medium rounded-lg transition-colors flex justify-center items-center">
+                  {actionInProgress?.startsWith('edit') ? <span className="w-5 h-5 block animate-spin rounded-full border-2 border-on-primary border-t-transparent"></span> : 'Save Changes'}
                 </button>
               </div>
             </form>

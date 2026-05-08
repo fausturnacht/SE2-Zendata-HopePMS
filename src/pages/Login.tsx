@@ -80,22 +80,29 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F8F9FA] font-sans">
-      <header className="flex items-center border-b border-gray-200 bg-white px-6 py-4">
-        <h1 className="text-xl font-bold tracking-tight text-blue-600">HOPE, INC.</h1>
-        <div className="mx-4 h-6 border-l border-gray-300"></div>
-        <span className="text-sm font-medium text-gray-500">Product Management System</span>
+    <div className="relative flex min-h-screen items-center justify-center bg-surface p-4 font-sans overflow-hidden">
+      {/* Decorative Background Element */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+      </div>
+
+      <header className="absolute top-0 left-0 w-full flex items-center border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md px-6 py-4 z-10">
+        <h1 className="text-xl font-bold tracking-tight text-primary">HOPE INC.</h1>
+        <div className="mx-4 h-6 border-l border-outline-variant/50"></div>
+        <span className="text-sm font-medium text-on-surface-variant">Product Management System</span>
       </header>
 
-      <main className="flex flex-grow flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[24px] bg-white p-10 shadow-[0_2px_10px_rgb(0,0,0,0.04)]">
-          <h2 className="text-2xl font-semibold text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-500 mb-8">Sign in to access your research portal</p>
+      <main className="w-full max-w-md z-10 animate-in fade-in zoom-in duration-700">
+        <div className="rounded-[32px] bg-surface-container-lowest p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20">
+          <h2 className="text-2xl font-bold text-on-surface tracking-tight">Welcome Back</h2>
+          <p className="mt-2 text-sm text-on-surface-variant mb-8">Sign in to access the Product Management System</p>
 
-          {/* Yellow Warning Banner for Inactive Users */}
+          {/* Warning Banner for Inactive Users */}
           {inactiveError && (
-            <div className="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-              {inactiveError}
+            <div className="mb-6 rounded-2xl border border-error/20 bg-error-container/10 p-4 text-sm text-error flex gap-3">
+              <span className="text-lg">⚠</span>
+              <span>{inactiveError}</span>
             </div>
           )}
 
@@ -104,19 +111,21 @@ export default function Login() {
             error={localError || undefined}
             onClick={handleGoogleLogin}
           />
+          
+          <div className="mt-8 pt-8 border-t border-outline-variant/20 flex flex-col items-center">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-outline uppercase">
+              SECURE ACADEMIC ENVIRONMENT
+            </p>
+          </div>
         </div>
-        
-        <p className="mt-8 text-xs font-semibold tracking-widest text-gray-400">
-          SECURE ACADEMIC ENVIRONMENT
-        </p>
       </main>
 
-      <footer className="flex items-center justify-between px-8 py-6 text-xs text-gray-400">
-        <div>New Era University © 2026</div>
+      <footer className="absolute bottom-0 left-0 w-full flex flex-col sm:flex-row items-center justify-between px-8 py-6 text-[10px] sm:text-xs text-on-surface-variant/60 font-medium">
+        <div className="mb-4 sm:mb-0 text-center sm:text-left">New Era University © 2026</div>
         <div className="flex gap-6">
-          <a href="#" className="hover:text-gray-600 transition-colors">PRIVACY POLICY</a>
-          <a href="#" className="hover:text-gray-600 transition-colors">INSTITUTIONAL TERMS</a>
-          <a href="#" className="hover:text-gray-600 transition-colors">RESEARCH ARCHIVE</a>
+          <a href="#" className="hover:text-primary transition-colors uppercase tracking-wider">Privacy Policy</a>
+          <a href="#" className="hover:text-primary transition-colors uppercase tracking-wider">Institutional Terms</a>
+          <a href="#" className="hover:text-primary transition-colors uppercase tracking-wider">Research Archive</a>
         </div>
       </footer>
     </div>
