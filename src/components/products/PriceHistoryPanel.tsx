@@ -26,7 +26,7 @@ const ChartTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg text-xs">
       <p className="font-semibold text-slate-700 mb-0.5">{label}</p>
-      <p className="text-[#1a56db] font-bold">${Number(payload[0].value).toFixed(2)}</p>
+      <p className="text-primary font-bold">${Number(payload[0].value).toFixed(2)}</p>
     </div>
   );
 };
@@ -181,7 +181,7 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
                   </div>
                 ) : fetchError ? (
-                  <div className="px-6 py-6 text-sm text-red-700">{fetchError}</div>
+                  <div className="px-6 py-6 text-sm text-error">{fetchError}</div>
                 ) : (
                   <table className="min-w-full text-left text-sm text-slate-700">
                     <thead className="bg-slate-100 text-xs uppercase tracking-[0.22em] text-slate-500">
@@ -248,7 +248,7 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
                       type="button"
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-dim transition disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSaving ? 'Saving...' : 'Save'}
                     </button>
@@ -257,8 +257,8 @@ export const PriceHistoryPanel: React.FC<PriceHistoryPanelProps> = ({
 
                 {(saveError || saveSuccess) && (
                   <div className="mt-4 text-sm">
-                    {saveError && <p className="text-red-700">{saveError}</p>}
-                    {saveSuccess && <p className="text-emerald-700">Price entry saved successfully.</p>}
+                    {saveError && <p className="text-error">{saveError}</p>}
+                    {saveSuccess && <p className="text-tertiary">Price entry saved successfully.</p>}
                   </div>
                 )}
               </div>

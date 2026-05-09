@@ -26,8 +26,8 @@ export default function ReportsPage() {
     return (
       <main className="flex-1 p-6 md:p-8 lg:p-12 max-w-7xl w-full mx-auto flex flex-col gap-8 bg-slate-50/50 min-h-screen">
         <div className="flex flex-col items-center justify-center h-64">
-           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-           <p className="text-slate-500 font-medium">Loading reports access...</p>
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+           <p className="text-on-surface-variant font-medium">Loading reports access...</p>
         </div>
       </main>
     );
@@ -47,8 +47,8 @@ export default function ReportsPage() {
     <main className="flex-1 p-6 md:p-8 lg:p-12 max-w-7xl w-full mx-auto flex flex-col gap-8 bg-slate-50/50 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-            <BarChart3 className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
+            <BarChart3 className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h2 className="text-3xl md:text-3xl font-bold tracking-tight text-slate-900 mb-2">Reports Overview</h2>
@@ -66,11 +66,11 @@ export default function ReportsPage() {
             onClick={() => setActiveTab('REP_001')}
             className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
               activeTab === 'REP_001'
-                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'text-primary font-bold border-b-2 border-primary'
+                : 'text-outline hover:text-on-surface'
             }`}
           >
-            REP-001: Full Product Listing
+            Full Product Listing
           </button>
         )}
 
@@ -80,11 +80,11 @@ export default function ReportsPage() {
             onClick={() => setActiveTab('REP_002')}
             className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
               activeTab === 'REP_002'
-                ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'text-primary font-bold border-b-2 border-primary'
+                : 'text-outline hover:text-on-surface'
             }`}
           >
-            REP-002: Top Selling Products
+            Top Selling Products
           </button>
         )}
       </div>

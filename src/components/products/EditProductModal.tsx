@@ -392,7 +392,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
             type="submit"
             disabled={isLoading}
             onClick={handleSubmit}
-            className="inline-flex justify-center items-center px-4 py-2 text-sm font-semibold text-surface-container-lowest bg-gradient-to-b from-primary to-primary-dim rounded-md hover:brightness-110 transition-all shadow-sm active:scale-95 duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:brightness-100 gap-2"
+            className="inline-flex justify-center items-center px-4 py-2 text-sm font-semibold text-white bg-gradient-to-br from-primary to-primary-dim rounded-2xl hover:brightness-105 transition-all shadow-sm active:scale-95 duration-200 disabled:opacity-50 disabled:cursor-not-allowed gap-2"
           >
             {isLoading && (
               <svg

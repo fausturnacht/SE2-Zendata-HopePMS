@@ -18,18 +18,18 @@ export default function GoogleAuthButton({
 
   const getButtonClasses = () => {
     if (error) {
-      return `${buttonBaseClasses} py-3 px-4 bg-[#f0f4f7] text-[#2a3439] border border-[#9e3f4e]/20`;
+      return `${buttonBaseClasses} py-3 px-4 bg-surface-container-low text-on-surface border border-error/20`;
     }
 
     if (loading) {
-      return `${buttonBaseClasses} py-3 px-4 bg-[#f0f4f7] text-[#566166]/50 cursor-wait opacity-80`;
+      return `${buttonBaseClasses} py-3 px-4 bg-surface-container-low text-on-surface-variant/50 cursor-wait opacity-80`;
     }
 
     if (isHovered) {
-      return `${buttonBaseClasses} py-3 px-4 bg-[#d9e4ea] text-[#2a3439] font-semibold ring-2 ring-[#1353d8]/10 scale-[1.02]`;
+      return `${buttonBaseClasses} py-3 px-4 bg-surface-container-high text-on-surface font-semibold ring-2 ring-primary/10 scale-[1.02] shadow-sm`;
     }
 
-    return `${buttonBaseClasses} py-3 px-4 bg-[#f0f4f7] text-[#2a3439] hover:bg-[#e1e9ee] active:scale-[0.98]`;
+    return `${buttonBaseClasses} py-3 px-4 bg-surface-container-low text-on-surface hover:bg-surface-container-high active:scale-[0.98]`;
   };
 
   return (
@@ -44,7 +44,7 @@ export default function GoogleAuthButton({
         {loading ? (
           <>
             <svg
-              className="animate-spin h-4 w-4 text-[#1353d8]"
+              className="animate-spin h-4 w-4 text-primary"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -97,8 +97,8 @@ export default function GoogleAuthButton({
       {/* Error Message Display */}
       {error && (
         <div className="flex items-center gap-2 px-1">
-          <span className="text-[#9e3f4e] text-base">⚠</span>
-          <span className="text-[11px] text-[#9e3f4e] font-medium">{error}</span>
+          <span className="text-error text-base">⚠</span>
+          <span className="text-[11px] text-error font-medium">{error}</span>
         </div>
       )}
     </div>
