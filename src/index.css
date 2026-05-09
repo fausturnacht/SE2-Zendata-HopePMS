@@ -43,12 +43,47 @@
   --font-body: "Inter", sans-serif;
   --font-label: "Inter", sans-serif;
 
-  --color-primary: #1a56db;
-  --color-primary-dim: #1e40af;
-  --color-error: #dc2626;
-  --color-error-dim: #991b1b;
-  --color-surface: #ffffff;
+  --color-primary: #1353d8;
+  --color-primary-dim: #0047c5;
+  --color-primary-container: #dbe1ff;
+  --color-on-primary: #f8f7ff;
+  --color-on-primary-container: #0046c3;
+  --color-on-primary-fixed-variant: #0b50d5;
+  
+  --color-secondary: #506076;
+  --color-secondary-dim: #44546a;
+  --color-secondary-container: #d3e4fe;
+  --color-on-secondary: #f7f9ff;
+  --color-on-secondary-container: #435368;
+
+  --color-tertiary: #2e7d32;
+  --color-tertiary-dim: #1b5e20;
+  --color-tertiary-container: #c8e6c9;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #1b5e20;
+
+  --color-warning: #9b4d00;
+  --color-warning-dim: #6d3500;
+  --color-warning-container: #ffdcbe;
+  --color-on-warning: #ffffff;
+  --color-on-warning-container: #331500;
+
+  --color-error: #9e3f4e;
+  --color-error-dim: #4f0116;
+  --color-on-error: #fff7f7;
+  --color-error-container: #ff8b9a;
+
+  --color-surface: #f7f9fb;
+  --color-surface-dim: #cfdce3;
+  --color-surface-bright: #f7f9fb;
   --color-on-surface: #2a3439;
-  --color-on-surface-variant: #64748b;
-  --color-surface-container-low: #f8fafc;
+  --color-on-surface-variant: #566166;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f4f7;
+  --color-surface-container: #e8eff3;
+  --color-surface-container-high: #e1e9ee;
+  --color-surface-container-highest: #d9e4ea;
+  
+  --color-outline: #717c82;
+  --color-outline-variant: #a9b4b9;
 }

@@ -191,7 +191,7 @@ export const ProductListPage: React.FC = () => {
           <div className="flex flex-col items-start gap-2 sm:items-end">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-primary text-on-primary hover:bg-primary-dim transition-colors"
             >
               <Plus className="w-5 h-5" />
               Add Product
@@ -233,7 +233,7 @@ export const ProductListPage: React.FC = () => {
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-[#1a56db] text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium bg-primary text-on-primary hover:bg-primary-dim transition-colors"
           >
             <Plus className="w-5 h-5" />
             Add Product
@@ -247,7 +247,7 @@ export const ProductListPage: React.FC = () => {
       {/* Main Content Area: Search + Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Search Bar */}
-        <div className="p-4 border-b border-slate-100 bg-[#f8fafc]">
+        <div className="p-4 border-b border-slate-100 bg-surface-container-low">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -259,7 +259,7 @@ export const ProductListPage: React.FC = () => {
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm placeholder:text-slate-400"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-sm placeholder:text-slate-400"
               />
             </div>
             <div className="relative sm:w-64">
@@ -270,7 +270,7 @@ export const ProductListPage: React.FC = () => {
                   setFilterCategory(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 text-sm text-slate-700 appearance-none cursor-pointer"
+                className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-sm text-slate-700 appearance-none cursor-pointer"
               >
                 {availableCategories.map(cat => (
                   <option key={cat} value={cat}>{cat === 'All' ? 'All Units' : cat}</option>
@@ -374,7 +374,7 @@ export const ProductListPage: React.FC = () => {
                 currentProducts.map((product) => (
                   <React.Fragment key={product.prodcode}>
                     <tr className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-5 text-sm font-semibold text-[#1a56db]">
+                      <td className="px-6 py-5 text-sm font-semibold text-primary">
                       {product.prodcode}
                     </td>
                     <td className="px-6 py-5">
@@ -400,7 +400,7 @@ export const ProductListPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleToggleExpand(product.prodcode)}
-                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary-container/20 rounded transition-colors"
                           aria-label={expandedRows[product.prodcode] ? 'Collapse price history' : 'Expand price history'}
                         >
                           {expandedRows[product.prodcode] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -408,7 +408,7 @@ export const ProductListPage: React.FC = () => {
                         {hasRight('EDIT_PRODUCT') && (
                           <button
                             onClick={() => handleEdit(product.prodcode)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary-container/20 rounded transition-colors"
                             title="Edit product"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -481,8 +481,8 @@ export const ProductListPage: React.FC = () => {
                         onClick={() => setCurrentPage(page)}
                         className={`w-7 h-7 flex items-center justify-center rounded text-xs font-medium transition-colors ${
                           currentPage === page
-                            ? 'bg-[#1a56db] text-white'
-                            : 'text-slate-600 hover:bg-slate-100'
+                            ? 'bg-primary text-on-primary'
+                            : 'text-outline hover:bg-surface-container-low'
                         }`}
                       >
                         {page}
@@ -505,14 +505,14 @@ export const ProductListPage: React.FC = () => {
 
       {/* Bottom Info Boxes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-        <div className="p-6 bg-[#f0f4ff] rounded-2xl">
+        <div className="p-6 bg-primary-container/30 rounded-2xl">
           <div className="flex items-center gap-3 mb-3">
-            <div className="bg-[#1a56db] text-white p-1 rounded-full">
+            <div className="bg-primary text-on-primary p-1 rounded-full">
               <Info className="w-4 h-4" />
             </div>
-            <h3 className="font-bold text-sm text-[#1e3a8a]">Inventory Status</h3>
+            <h3 className="font-bold text-sm text-on-primary-container">Inventory Status</h3>
           </div>
-          <p className="text-xs text-[#1e40af] leading-relaxed">
+          <p className="text-xs text-on-primary-fixed-variant leading-relaxed">
             All product data is synced with the Central Repository. Pricing reflects current institutional contracts.
           </p>
         </div>

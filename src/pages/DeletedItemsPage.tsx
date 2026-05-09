@@ -107,8 +107,8 @@ export default function DeletedItemsPage() {
   if (loadingRights) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-slate-500 font-medium">Checking permissions...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+        <p className="text-on-surface-variant font-medium">Checking permissions...</p>
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function DeletedItemsPage() {
   return (
     <div className="space-y-8 w-full max-w-6xl mx-auto">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-blue-100 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-primary-container/30 pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
             Archived Products
