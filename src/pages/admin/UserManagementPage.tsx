@@ -545,7 +545,7 @@ export default function UserManagementPage() {
                   disabled={isAdmin && !isSuperAdmin}
                   className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-on-surface font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                   <option value="USER">USER</option>
-                  {isSuperAdmin && <option value="ADMIN">ADMIN</option>}
+                  <option value="ADMIN">ADMIN</option>
                 </select>
               </div>
               <div className="pt-4 flex gap-3">

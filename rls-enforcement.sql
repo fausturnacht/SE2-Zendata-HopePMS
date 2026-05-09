@@ -1,0 +1,14 @@
+-- Enable RLS
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.usermodule_rights ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pricehist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_module ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.module ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rights ENABLE ROW LEVEL SECURITY;
+
+-- Optional but recommended: force RLS so even table owners must follow policies
+ALTER TABLE public.users FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.usermodule_rights FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.product FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.pricehist FORCE ROW LEVEL SECURITY;
