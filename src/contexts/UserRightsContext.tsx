@@ -160,8 +160,9 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
         // 4. Admin console requires at least ADMIN role
         if (right === 'ADM_USER' && (isAdmin || isSuperAdmin)) return true;
 
-        // 5. Standard users cannot see audit STAMP columns
-        if (isUser && right === 'STAMP') return false;
+        // 5. Stamp column visibility: ADMIN and SUPERADMIN can see it; standard USERs cannot.
+        //    SUPERADMIN is already handled by the bypass at step 1.
+        if (right === 'STAMP') return isAdmin; // true for ADMIN, false for USER
 
         // 6. Fallback: check the database rights map (1 = granted)
         return rights[right] === 1;
