@@ -1,14 +1,40 @@
+/**
+ * @file components/products/EditProductModal.tsx
+ * @description Modal dialog for editing an existing product's description, unit, and price.
+ *
+ * Price-conflict detection flow:
+ *   1. On submit, if the price has changed, checks whether a price entry
+ *      already exists for today via `checkPriceEntryExists()`
+ *   2. If a conflict exists, shows the OverwritePriceModal for confirmation
+ *   3. If confirmed, overwrites today's entry via `updatePriceEntry()`
+ *   4. If no conflict, inserts a new price entry via `addPriceEntry()`
+ *
+ * The product code is displayed as read-only (immutable after creation).
+ * Form pre-fills with the product's current values when the modal opens.
+ *
+ * @see {@link ../../api/products.ts} — updateProduct()
+ * @see {@link ../../api/priceHistory.ts} — addPriceEntry(), checkPriceEntryExists(), updatePriceEntry()
+ * @see {@link ./OverwritePriceModal.tsx} — Confirmation dialog for price conflicts
+ */
 import React, { useState, useEffect } from 'react';
 import { updateProduct, type Product } from '../../api/products';
 import { addPriceEntry, checkPriceEntryExists, updatePriceEntry } from '../../api/priceHistory';
 import { OverwritePriceModal } from './OverwritePriceModal';
 import { getTodayGMT8 } from '../../utils/dateUtils';
 
+/**
+ * Props for the EditProductModal component.
+ */
 export interface EditProductModalProps {
+  /** Controls modal visibility. */
   isOpen: boolean;
+  /** Callback to close the modal. */
   onClose: () => void;
+  /** The product being edited (used to pre-fill form and identify the record). */
   product: Product;
+  /** The product's current price (used to detect price changes). */
   currentPrice?: number;
+  /** Called after successful save with the updated product and optional new price. */
   onProductSaved?: (product: Product, newPrice?: number) => void;
 }
 

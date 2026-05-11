@@ -1,3 +1,18 @@
+/**
+ * @file pages/reports/ReportsPage.tsx
+ * @description Central hub for all application reports.
+ *
+ * Implements a tabbed interface for switching between different reports.
+ * Report visibility is controlled by role-specific rights:
+ *   - `REP_001` → Full Product Listing (General access)
+ *   - `REP_002` → Top Selling Products (SuperAdmin restricted)
+ *
+ * If a user has no report rights, they are blocked by the `ProtectedRoute`
+ * guard before reaching this page.
+ *
+ * @see {@link ./FullProductListingReport.tsx} — REP-001
+ * @see {@link ./TopSellingProductsReport.tsx} — REP-002
+ */
 import { useState, useEffect } from 'react';
 import { useRights } from '../../contexts/UserRightsContext';
 import FullProductListingReport from './FullProductListingReport';

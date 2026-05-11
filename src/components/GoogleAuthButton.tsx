@@ -1,9 +1,28 @@
+/**
+ * @file components/GoogleAuthButton.tsx
+ * @description Styled Google OAuth sign-in button with multiple visual states.
+ *
+ * Visual states:
+ *   - Default: White button with Google "G" logo and "Sign in with Google" text
+ *   - Hover: Slight background tint change
+ *   - Loading: Spinner replaces text while auth is in progress
+ *   - Error: Red-tinted button with error styling to indicate failure
+ *
+ * Used exclusively by the Login page.
+ */
 import { useState } from 'react';
 
+/**
+ * Props for the GoogleAuthButton component.
+ */
 interface GoogleAuthButtonProps {
+  /** Whether an auth request is currently in progress (shows spinner). */
   loading: boolean;
+  /** If set, renders the button in error state with red tint. */
   error?: string;
+  /** Callback fired when the user clicks the sign-in button. */
   onClick: () => void;
+  /** Reserved for responsive layout adjustments (currently unused). */
   isMobile?: boolean;
 }
 

@@ -1,3 +1,31 @@
+/**
+ * @file pages/ProductListPage.tsx
+ * @description Primary product management interface with full CRUD capabilities.
+ *
+ * This is the most complex page in the application. Key features:
+ *
+ * Data pipeline (search → filter → sort → paginate):
+ *   1. Search: text-match against prodcode OR description (case-insensitive)
+ *   2. Filter: by unit type (optional dropdown)
+ *   3. Sort: by prodcode, description, unit, or price (asc/desc toggle)
+ *   4. Paginate: 10 items per page with prev/next navigation
+ *
+ * State management:
+ *   - Products are fetched once on mount and stored in local state
+ *   - Prices are fetched separately and merged via a prodcode→price map
+ *   - Expandable rows (price history, stamp history) are tracked per product
+ *   - Modal state (add/edit/delete) is managed via useState flags
+ *
+ * Role-gated UI elements (via hasRight()):
+ *   - ADD_PRODUCT: "Add Product" button visibility
+ *   - EDIT_PRODUCT: Edit button per row
+ *   - DELETE_PRODUCT: Delete button per row
+ *   - STAMP: Stamp column visibility in the table
+ *
+ * @see {@link ../api/products.ts} — Product CRUD
+ * @see {@link ../api/priceHistory.ts} — Price data
+ * @see {@link ../components/products/} — All product modal/panel components
+ */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProducts, type Product } from '../api/products';
 import { getPriceHistory, type PriceEntry } from '../api/priceHistory';
@@ -12,6 +40,7 @@ import { SkeletonTable } from '../components/shared/SkeletonTable';
 import { EmptyState } from '../components/shared/EmptyState';
 import { ErrorBanner } from '../components/shared/ErrorBanner';
 
+/** Number of products displayed per page in the data table. */
 const ITEMS_PER_PAGE = 10;
 
 export const ProductListPage: React.FC = () => {

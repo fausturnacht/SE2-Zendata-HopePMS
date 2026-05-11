@@ -1,3 +1,26 @@
+/**
+ * @file pages/admin/UserManagementPage.tsx
+ * @description Administrative interface for managing system users and roles.
+ *
+ * Core features:
+ *   - User Lifecycle: Activate pending users, deactivate current users
+ *   - RBAC: Edit user roles (USER, ADMIN, SUPERADMIN)
+ *   - Pre-Auth: Whitelist emails for automatic role assignment on sign-up
+ *   - Audit: Expandable stamp history for every user mutation
+ *
+ * Safety & Security:
+ *   - Access Control: Only accessible if hasRight('ADM_USER') is true
+ *   - Self-Protection: Admins cannot deactivate their own accounts
+ *   - SuperAdmin Guard: SUPERADMIN accounts are immutable (cannot be edited
+ *     or deactivated by standard Admins)
+ *
+ * Data Pipeline:
+ *   - Fetches users from `users` (main) and `pre_auth_users` (pending)
+ *   - Client-side search (email/username), role filtering, and status filtering
+ *
+ * @see {@link ../../api/users.ts} — User API logic
+ * @see {@link ../../components/admin/UserStampHistoryPanel.tsx} — Audit trail display
+ */
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -7,6 +30,7 @@ import { Download, Search, Filter, Shield, Ban as BanIcon, Power, Edit, UserPlus
 import { UserStampHistoryPanel } from '../../components/admin/UserStampHistoryPanel';
 import { getTodayGMT8 } from '../../utils/dateUtils';
 
+/** Number of users displayed per page in the management table. */
 const PAGE_SIZE = 10;
 
 // Helper component for disabled SuperAdmin actions

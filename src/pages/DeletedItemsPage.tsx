@@ -1,9 +1,32 @@
+/**
+ * @file pages/DeletedItemsPage.tsx
+ * @description Admin/SuperAdmin page for viewing and recovering soft-deleted products.
+ *
+ * Access control:
+ *   - Only accessible to ADMIN and SUPERADMIN roles
+ *   - Regular users who navigate here are redirected to `/products`
+ *
+ * Features:
+ *   - Displays products where `record_status = 'DELETED'`
+ *   - Search by product code or description
+ *   - Filter by unit type
+ *   - Sort by any column (asc/desc)
+ *   - "Recover" action per row: resets status to 'ACTIVE' via recoverProduct()
+ *
+ * Recovery flow:
+ *   1. User clicks "Recover" on a row
+ *   2. `recoverProduct()` sets `record_status` back to 'ACTIVE' with a RECOVERED stamp
+ *   3. Product disappears from this page and reappears in ProductListPage
+ *
+ * @see {@link ../api/products.ts} — getDeletedProducts(), recoverProduct()
+ */
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDeletedProducts, recoverProduct, type Product } from '../api/products';
 import { useRights } from '../contexts/UserRightsContext';
 import { Search, Filter, ArrowUpDown, ChevronDown, Info } from 'lucide-react';
 
+/** Number of deleted products displayed per page. */
 const ITEMS_PER_PAGE = 10;
 
 export default function DeletedItemsPage() {

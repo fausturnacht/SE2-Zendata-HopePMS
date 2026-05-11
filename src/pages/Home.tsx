@@ -1,3 +1,26 @@
+/**
+ * @file pages/Home.tsx
+ * @description System dashboard displaying aggregate metrics, charts, and quick actions.
+ *
+ * Layout sections:
+ *   - Header:       Page title with refresh button
+ *   - Metrics row:  4 stat cards (Total Products, Total Users, Pending Users, Top Product)
+ *   - Chart:        Top 5 sellers bar chart (recharts) — visible to all roles
+ *   - Quick actions: Links to Products, Reports, Admin, Deleted Items
+ *     - "Verify All" button: bulk-stamps all active products as VERIFIED
+ *
+ * Data fetching:
+ *   - Fetches products, all users, pending users, and top 5 sellers in parallel
+ *   - Uses useCallback + dependency-free refresh to prevent stale closures
+ *
+ * Role gating:
+ *   - Admin/SuperAdmin: see user counts, Admin link, Deleted Items link
+ *   - All roles: see product counts, reports link, verify-all action
+ *
+ * @see {@link ../api/products.ts} — getProducts(), verifyAllProducts()
+ * @see {@link ../api/users.ts} — fetchAllUsers(), getPendingUsers()
+ * @see {@link ../api/reports.ts} — getTopSellers()
+ */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Package, 
