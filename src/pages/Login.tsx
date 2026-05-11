@@ -1,3 +1,23 @@
+/**
+ * @file pages/Login.tsx
+ * @description Authentication entry page with Google OAuth sign-in.
+ *
+ * Authentication flow (popup-based):
+ *   1. User clicks the Google sign-in button
+ *   2. A popup window opens to the Supabase OAuth provider
+ *   3. After authentication, the popup redirects to `/auth/callback`
+ *   4. AuthCallback processes the session and posts a message back to this page
+ *   5. This page listens for `AUTH_COMPLETE` or `AUTH_ERROR` messages
+ *   6. On success, navigates to `/dashboard`
+ *
+ * Error handling:
+ *   - If the user's account is INACTIVE, AuthCallback redirects back here
+ *     with `location.state.error` set (the "LOGIN GUARD" rejection).
+ *   - Any OAuth errors from the popup are received via `window.postMessage`.
+ *
+ * @see {@link ./AuthCallback.tsx} — Processes the OAuth redirect
+ * @see {@link ../components/GoogleAuthButton.tsx} — The sign-in button component
+ */
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -8,7 +28,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   
-  // Catch the error state sent from the AuthCallback guard
+  // Catch the error state sent from the AuthCallback LOGIN GUARD
+  // when an INACTIVE user is rejected during the auth flow
   const location = useLocation();
   const inactiveError = location.state?.error || localError;
 

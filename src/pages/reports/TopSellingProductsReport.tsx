@@ -1,3 +1,16 @@
+/**
+ * @file pages/reports/TopSellingProductsReport.tsx
+ * @description REP-002: Top 10 selling products by quantity.
+ *
+ * This report visualizes sales performance using a dual-mode display:
+ *   - Chart view: Recharts BarChart showing quantity sold per product code.
+ *   - Table view: Data table listing the top sellers with their ranks and totals.
+ *
+ * Data is aggregated client-side from the `salesdetail` table.
+ * Restricted to SUPERADMIN role only.
+ *
+ * @see {@link ../../api/reports.ts} — getTopSellers() aggregation logic
+ */
 import { useState, useEffect } from 'react';
 import { getTopSellers } from '../../api/reports';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';

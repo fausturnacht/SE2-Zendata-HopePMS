@@ -1,10 +1,29 @@
+/**
+ * @file components/products/SoftDeleteConfirmDialog.tsx
+ * @description Confirmation dialog for soft-deleting a product.
+ *
+ * On confirmation, calls `softDeleteProduct()` and notifies the parent
+ * via `onConfirmed` callback. The product is NOT permanently removed —
+ * it transitions to `record_status = 'DELETED'` and can be recovered
+ * from the Deleted Items page.
+ *
+ * @see {@link ../../api/products.ts} — softDeleteProduct()
+ * @see {@link ../../pages/DeletedItemsPage.tsx} — Recovery interface
+ */
 import React, { useState } from 'react';
 import { softDeleteProduct } from '../../api/products';
 
+/**
+ * Props for the SoftDeleteConfirmDialog component.
+ */
 export interface SoftDeleteConfirmDialogProps {
+  /** Controls dialog visibility. */
   isOpen: boolean;
+  /** Callback to close the dialog without deleting. */
   onClose: () => void;
+  /** The product code of the product to be soft-deleted. */
   prodCode: string;
+  /** Called after successful soft-deletion to trigger parent state refresh. */
   onConfirmed?: () => void;
 }
 

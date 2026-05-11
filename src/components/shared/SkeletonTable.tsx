@@ -1,5 +1,24 @@
+/**
+ * @file components/shared/SkeletonTable.tsx
+ * @description Animated loading placeholder that mimics a data table's layout.
+ *
+ * Renders a skeleton with:
+ *   - A header row with pulsing column placeholders
+ *   - 5 body rows with staggered animation delays (creates a shimmer wave)
+ *   - A footer pagination skeleton
+ *
+ * The column count is configurable to match the target table's structure.
+ * Used by ProductListPage and DeletedItemsPage during data fetching.
+ */
+
+/**
+ * Renders an animated skeleton loader shaped like a data table.
+ *
+ * @param {object} props
+ * @param {number} [props.columns=6] - Number of columns to render in the skeleton.
+ */
 export function SkeletonTable({ columns = 6 }: { columns?: number }) {
-  // Generate an array for rows
+  // Generate arrays for row/column iteration
   const rows = Array.from({ length: 5 });
   const colsArray = Array.from({ length: columns });
 

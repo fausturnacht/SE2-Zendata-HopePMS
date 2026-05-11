@@ -1,9 +1,29 @@
+/**
+ * @file components/products/OverwritePriceModal.tsx
+ * @description Confirmation dialog shown when a price change conflicts with
+ * an existing entry for today's date.
+ *
+ * This is a purely presentational component — it displays a warning message
+ * and two actions (Cancel / Yes, Overwrite). The actual overwrite logic
+ * is handled by the parent EditProductModal.
+ *
+ * Rendered at z-index 60 (above EditProductModal's z-50) to layer correctly.
+ *
+ * @see {@link ./EditProductModal.tsx} — Parent that controls this modal
+ */
 import React from 'react';
 
+/**
+ * Props for the OverwritePriceModal component.
+ */
 interface OverwritePriceModalProps {
+  /** Controls modal visibility. */
   isOpen: boolean;
+  /** Called when the user cancels the overwrite. */
   onClose: () => void;
+  /** Called when the user confirms the overwrite. */
   onConfirm: () => void;
+  /** Whether the overwrite operation is in progress (disables buttons, shows spinner). */
   isLoading: boolean;
 }
 

@@ -1,6 +1,25 @@
+/**
+ * @file components/shared/EmptyState.tsx
+ * @description Full-page empty state placeholder shown when a data table has no records.
+ *
+ * Features a multi-layered visual design with:
+ *   - A faint architectural background element (large Box icon at 2% opacity)
+ *   - A central card with animated icon, message, and optional CTA button
+ *   - Framer Motion entrance animation (fade-in + slide-up)
+ *
+ * Used by ProductListPage when no products exist in the catalog.
+ */
 import { PackageSearch, Plus, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+/**
+ * Renders an empty state placeholder with an optional call-to-action button.
+ *
+ * @param {object} props
+ * @param {string} props.message - Descriptive text explaining why the view is empty.
+ * @param {string} [props.ctaLabel] - Label for the action button (e.g. "Add Product").
+ * @param {() => void} [props.onCtaClick] - Click handler for the action button.
+ */
 export function EmptyState({ 
   message, 
   ctaLabel, 

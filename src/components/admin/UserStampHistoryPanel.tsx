@@ -1,12 +1,36 @@
+/**
+ * @file components/admin/UserStampHistoryPanel.tsx
+ * @description Expandable inline panel that displays a user's stamp audit log.
+ *
+ * Mirrors the structure of `StampHistoryPanel` but for the `user_stamp_hist` table.
+ * Shows a paginated list of all stamp entries (ACTIVATED, DEACTIVATED, EDITED, etc.)
+ * for a specific user, sorted newest-first.
+ *
+ * Data lifecycle:
+ *   - On open: fetches stamp history from API (lazy loading)
+ *   - On close: clears cached data and resets pagination so next open is fresh
+ *
+ * Rendered as a `<tr>` element for inline expansion within the user management table.
+ *
+ * @see {@link ../../api/userStampHistory.ts} — getUserStampHistory()
+ * @see {@link ../products/StampHistoryPanel.tsx} — Equivalent for product stamps
+ */
 import React, { useEffect, useState } from 'react';
 import { getUserStampHistory, type UserStampEntry } from '../../api/userStampHistory';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+/** Number of stamp entries displayed per page. */
 const PAGE_SIZE = 10;
 
+/**
+ * Props for the UserStampHistoryPanel component.
+ */
 interface UserStampHistoryPanelProps {
+  /** The user ID to display stamp history for. */
   userId: string;
+  /** Whether the panel is currently expanded/visible. */
   isOpen: boolean;
+  /** Number of columns in the parent table (for proper `colspan` rendering). */
   colSpan: number;
 }
 

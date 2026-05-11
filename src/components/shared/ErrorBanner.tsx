@@ -1,6 +1,28 @@
+/**
+ * @file components/shared/ErrorBanner.tsx
+ * @description Dismissible error notification banner with optional retry action.
+ *
+ * Renders as a horizontal card with a rose-colored accent bar, error icon,
+ * message text, and an optional "Retry" button. Uses Framer Motion for
+ * a slide-in entrance animation.
+ *
+ * The `error` prop is polymorphic — it accepts strings, Error objects,
+ * or unknown values and coerces them to a display message.
+ *
+ * Used by ProductListPage and other data-loading views.
+ */
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+/**
+ * Renders an error notification banner.
+ *
+ * @param {object} props
+ * @param {Error | string | unknown | null} props.error - The error to display.
+ *   Accepts Error objects (uses .message), strings (displayed as-is),
+ *   or unknown values (falls back to a generic message). Renders nothing if null.
+ * @param {() => void} [props.onRetry] - If provided, shows a "Retry" button.
+ */
 export function ErrorBanner({ 
   error, 
   onRetry 
@@ -10,6 +32,7 @@ export function ErrorBanner({
 }) {
   if (!error) return null;
   
+  // Coerce the polymorphic error prop to a displayable string
   const errorMessage = typeof error === 'string' 
     ? error 
     : error instanceof Error ? error.message : 'An unknown error occurred';

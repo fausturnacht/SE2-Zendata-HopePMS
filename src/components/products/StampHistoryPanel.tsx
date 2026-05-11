@@ -1,12 +1,35 @@
+/**
+ * @file components/products/StampHistoryPanel.tsx
+ * @description Expandable inline panel that displays a product's stamp audit log.
+ *
+ * Shows a paginated list of all stamp entries (ADDED, EDITED, DELETED, RECOVERED)
+ * for a specific product, sorted newest-first. Each entry displays the full
+ * stamp string and the server-side `created_at` timestamp.
+ *
+ * Data lifecycle:
+ *   - On open: fetches stamp history from API (lazy loading)
+ *   - On close: clears cached data and resets pagination so next open is fresh
+ *
+ * Rendered as a `<tr>` element for inline expansion within the product table.
+ *
+ * @see {@link ../../api/stampHistory.ts} — getStampHistory()
+ */
 import React, { useEffect, useState } from 'react';
 import { getStampHistory, type StampEntry } from '../../api/stampHistory';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+/** Number of stamp entries displayed per page. */
 const PAGE_SIZE = 10;
 
+/**
+ * Props for the StampHistoryPanel component.
+ */
 interface StampHistoryPanelProps {
+  /** The product code to display stamp history for. */
   productId: string;
+  /** Whether the panel is currently expanded/visible. */
   isOpen: boolean;
+  /** Number of columns in the parent table (for proper `colspan` rendering). */
   colSpan: number;
 }
 

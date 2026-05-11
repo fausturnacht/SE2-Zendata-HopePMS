@@ -1,3 +1,23 @@
+/**
+ * @file pages/ApiDebug.tsx
+ * @description Developer-only diagnostic tool for testing Supabase API endpoints.
+ *
+ * This utility provides a raw, visual interface to every data access function
+ * in the application. It is used to verify database connectivity, schema
+ * integrity, and business logic (like stamps) without going through the main UI.
+ *
+ * Features:
+ *   - Tabbed interface covering Products, Price History, Reports, and Users
+ *   - Live JSON output for all API responses
+ *   - Input forms for testing parameter-dependent functions (CRUD)
+ *
+ * Security:
+ *   - Gated by the ADM_USER right. Only Admins/SuperAdmins can access this.
+ *   - In production, this route should ideally be disabled or further restricted.
+ *
+ * @see {@link ../api/products.ts} — Products testing
+ * @see {@link ../api/users.ts} — Users testing
+ */
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useRights } from '../contexts/UserRightsContext';
@@ -13,10 +33,15 @@ import { getPriceHistory, addPriceEntry } from '../api/priceHistory';
 import { getProductListing, getTopSellers } from '../api/reports';
 import { getUsers, updateUser, softDeleteUser, restoreUser, preAuthorizeUser } from '../api/users';
 
+/** Navigation categories in the debugger. */
 type MainTabType = 'PRODUCTS' | 'PRICE_HISTORY' | 'REPORTS' | 'USERS';
+/** CRUD operation sub-tabs for products. */
 type ProductTabType = 'LIST' | 'ADD' | 'UPDATE' | 'DELETE' | 'RECOVER';
+/** Sub-tabs for price history. */
 type PriceTabType = 'LIST' | 'ADD';
+/** Report identifiers matching the spec (REP-001/002). */
 type ReportTabType = 'REP-001' | 'REP-002';
+/** User management operations. */
 type UserTabType = 'FETCH' | 'EDIT' | 'DELETE' | 'RESTORE' | 'PRE_AUTH';
 
 const ApiDebug: React.FC = () => {
