@@ -1,3 +1,23 @@
+/**
+ * @file components/products/PriceHistoryPanel.tsx
+ * @description Expandable inline panel that displays a product's price history.
+ *
+ * Layout (two-column on large screens):
+ *   LEFT:  Chronological price table (newest first) + "Add Entry" form
+ *   RIGHT: Recharts line chart showing price trend over time
+ *
+ * Data lifecycle:
+ *   - On open: fetches price history from API (lazy loading)
+ *   - On close: clears cached data so next open always gets fresh data
+ *   - On save: optimistically updates the local history array and
+ *     conditionally updates the parent's displayed "current price" only
+ *     if the new entry's effective date is the latest across all entries
+ *
+ * Rendered as a `<tr>` element so it can be inserted directly into
+ * the ProductListPage's `<tbody>` as an expandable row.
+ *
+ * @see {@link ../../api/priceHistory.ts} — getPriceHistory(), addPriceEntry()
+ */
 import React, { useEffect, useState } from 'react';
 import { addPriceEntry, getPriceHistory, type PriceEntry } from '../../api/priceHistory';
 import { getTodayGMT8 } from '../../utils/dateUtils';
@@ -12,15 +32,26 @@ import {
   Dot,
 } from 'recharts';
 
+/**
+ * Props for the PriceHistoryPanel component.
+ */
 interface PriceHistoryPanelProps {
+  /** The product code to display price history for. */
   productId: string;
+  /** Whether the panel is currently expanded/visible. */
   isOpen: boolean;
+  /** Callback to toggle the panel open/closed. */
   onToggle: () => void;
+  /** Called when a new price is saved that becomes the latest effective price. */
   onPriceSaved?: (unitPrice: number) => void;
+  /** Number of columns in the parent table (for proper `colspan` rendering). */
   colSpan: number;
 }
 
-// Custom tooltip for the chart
+/**
+ * Custom tooltip component for the Recharts price trend line chart.
+ * Displays the date and formatted unit price on hover.
+ */
 const ChartTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null;
   return (

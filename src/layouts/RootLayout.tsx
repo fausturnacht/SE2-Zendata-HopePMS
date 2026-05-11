@@ -1,10 +1,35 @@
+/**
+ * @file layouts/RootLayout.tsx
+ * @description Application shell providing the sidebar navigation and top bar.
+ *
+ * Layout structure:
+ *   - Sidebar (left): Collapsible navigation with role-gated menu items
+ *   - Top bar: Displays current user email, role badge, and sign-out button
+ *   - Content area: Renders the child page component
+ *
+ * Navigation items and their permission gates:
+ *   - Dashboard     — Always visible
+ *   - Products      — Always visible
+ *   - Reports       — Visible if hasRight('REP_001')
+ *   - Admin         — Visible if hasRight('ADM_USER') (Admin/SuperAdmin only)
+ *   - Deleted Items — Visible to Admin/SuperAdmin only (direct role check)
+ *
+ * The sidebar is toggleable on all screen sizes via a hamburger menu button.
+ *
+ * @see {@link ../contexts/UserRightsContext.tsx} — hasRight() permission checks
+ * @see {@link ../hooks/useAuth.ts} — currentUser and signOut
+ */
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../contexts/UserRightsContext';
 import { LayoutDashboard, Package, BarChart2, ShieldAlert, Trash2, LogOut, Menu } from 'lucide-react';
 
+/**
+ * Props for the RootLayout component.
+ */
 interface RootLayoutProps {
+  /** The page content to render inside the layout's main area. */
   children: React.ReactNode;
 }
 

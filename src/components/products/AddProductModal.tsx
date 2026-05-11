@@ -1,11 +1,37 @@
+/**
+ * @file components/products/AddProductModal.tsx
+ * @description Modal dialog for creating a new product with an initial price.
+ *
+ * Two-step save flow:
+ *   1. Insert the product record into the `product` table (via addProduct API)
+ *   2. Insert the initial price entry into the `pricehist` table (via addPriceEntry API)
+ *
+ * Validation rules:
+ *   - Product code: exactly 6 characters, required
+ *   - Description: required, max 30 characters
+ *   - Unit: required (defaults to 'pc')
+ *   - Price: required, must be a positive number
+ *
+ * The product code is automatically uppercased before submission.
+ * On success, the parent is notified via `onProductAdded` and the modal closes.
+ *
+ * @see {@link ../../api/products.ts} — addProduct()
+ * @see {@link ../../api/priceHistory.ts} — addPriceEntry()
+ */
 import React, { useState } from 'react';
 import { addProduct, type Product } from '../../api/products';
 import { addPriceEntry } from '../../api/priceHistory';
 import { getTodayGMT8 } from '../../utils/dateUtils';
 
+/**
+ * Props for the AddProductModal component.
+ */
 export interface AddProductModalProps {
+  /** Controls modal visibility. */
   isOpen: boolean;
+  /** Callback to close the modal. */
   onClose: () => void;
+  /** Called after successful product creation with the new product and optional initial price. */
   onProductAdded?: (product: Product, initialPrice?: number) => void;
 }
 

@@ -1,3 +1,24 @@
+/**
+ * @file pages/AuthCallback.tsx
+ * @description OAuth redirect handler and LOGIN GUARD for inactive users.
+ *
+ * This page is loaded after Google OAuth completes. It processes the auth
+ * session and performs a critical security check:
+ *
+ * Auth processing flow:
+ *   1. Extract the session from the URL hash via `supabase.auth.getSession()`
+ *   2. Look up the user's `record_status` in the `users` table
+ *   3. LOGIN GUARD: If `record_status !== 'ACTIVE'`, sign the user out
+ *      immediately and redirect to `/login` with an error message
+ *   4. If active, notify the opener window (popup flow) or navigate directly
+ *
+ * Popup vs redirect behavior:
+ *   - If `window.opener` exists (popup flow): posts an `AUTH_COMPLETE` or
+ *     `AUTH_ERROR` message to the parent window and closes itself
+ *   - If no opener (direct navigation): redirects to `/dashboard` directly
+ *
+ * @see {@link ./Login.tsx} — Opens the popup and listens for messages
+ */
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -6,8 +27,12 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    /**
+     * Processes the OAuth callback: extracts session, validates user status,
+     * and communicates the result back to the Login page.
+     */
     const processAuth = async () => {
-      // Get the session from Google
+      // Step 1: Extract the authenticated session from the URL hash
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {

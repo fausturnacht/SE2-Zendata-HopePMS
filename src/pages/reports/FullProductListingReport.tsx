@@ -1,3 +1,16 @@
+/**
+ * @file pages/reports/FullProductListingReport.tsx
+ * @description REP-001: Master Product List with current prices.
+ *
+ * This report provides a comprehensive view of the catalog.
+ * Key features:
+ *   - Data pipeline: Fetches products merged with their latest prices (REP-001 strategy)
+ *   - Client-side features: Search (code/desc), Sortable headers, Pagination
+ *   - PDF Export: Generates a professional PDF using `jsPDF` and `jspdf-autotable`,
+ *     including a header with the generated timestamp (GMT+8).
+ *
+ * @see {@link ../../api/reports.ts} — getProductListing() aggregation logic
+ */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getProductListing } from '../../api/reports';
 import { type Product } from '../../api/products';
@@ -10,6 +23,7 @@ import { EmptyState } from '../../components/shared/EmptyState';
 import { ErrorBanner } from '../../components/shared/ErrorBanner';
 import { getTodayGMT8 } from '../../utils/dateUtils';
 
+/** Number of rows displayed per page in the report table. */
 const ITEMS_PER_PAGE = 10;
 
 export default function FullProductListingReport() {
