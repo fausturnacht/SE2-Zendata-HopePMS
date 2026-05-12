@@ -121,7 +121,7 @@ export default function Login() {
           setLocalError(msg);
           
           try {
-            const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/"/g, '').trim();
+            const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").replace(/"/g, "").trim().replace(/\/$/, "");
             const ping = await fetch(`${baseUrl}/auth/v1/health`);
             if (ping.ok) {
               console.log('[Supabase] Server is reachable. The error is likely in Auth settings.');

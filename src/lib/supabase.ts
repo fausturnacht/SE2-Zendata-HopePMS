@@ -13,8 +13,15 @@ import { createClient } from '@supabase/supabase-js'
 
 // Read Supabase credentials from Vite environment variables.
 // These must be set in a `.env.local` file at the project root.
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/"/g, '').trim()
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.replace(/"/g, '').trim()
+// Aggressive cleanup: Remove quotes, hidden control characters, and whitespace
+const sanitize = (val: string | undefined) => 
+  val?.replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
+     .replace(/"/g, "")                            // Remove quotes
+     .trim()                                       // Remove surrounding spaces
+     .replace(/\/$/, "");                          // Remove trailing slash
+
+const supabaseUrl = sanitize(import.meta.env.VITE_SUPABASE_URL);
+const supabaseAnonKey = sanitize(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 // Log initialization (Safe for debug, URL is public, Key is masked)
 console.log('[Supabase] Initializing with URL:', supabaseUrl);
