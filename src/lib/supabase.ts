@@ -13,16 +13,15 @@ import { createClient } from '@supabase/supabase-js'
 
 // Read Supabase credentials from Vite environment variables.
 // These must be set in a `.env.local` file at the project root.
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/"/g, '').trim()
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.replace(/"/g, '').trim()
 
-/**
- * Singleton Supabase client instance shared across the entire application.
- *
- * Fallback placeholder values prevent crashes when env vars are missing
- * (e.g. during CI builds or initial setup), but the app will NOT be
- * functional without real credentials.
- */
+// Log initialization (Safe for debug, URL is public, Key is masked)
+console.log('[Supabase] Initializing with URL:', supabaseUrl);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('[Supabase] Missing environment variables! Check .env.local');
+}
+
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co', 
   supabaseAnonKey || 'placeholder'

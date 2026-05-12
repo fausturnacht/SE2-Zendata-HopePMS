@@ -34,20 +34,6 @@ import { getTodayGMT8 } from '../../utils/dateUtils';
 const PAGE_SIZE = 10;
 
 // Helper component for disabled SuperAdmin actions
-const SuperAdminDisabledActions = () => (
-  <div className="relative group/tooltip flex gap-2">
-    <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
-      <Edit className="w-4 h-4" /> Edit
-    </button>
-    <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
-      <BanIcon className="w-4 h-4" /> Deactivate
-    </button>
-    {/* Tooltip on Hover */}
-    <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-48 bg-on-surface text-surface text-xs p-2 rounded shadow-lg text-center z-10 pointer-events-none">
-      SUPERADMIN accounts cannot be modified
-    </div>
-  </div>
-);
 
 export default function UserManagementPage() {
   const { currentUser } = useAuth();
@@ -359,6 +345,7 @@ export default function UserManagementPage() {
                 const isRowSuperAdmin = user.user_type === 'SUPERADMIN';
                 const isActive = user.record_status === 'ACTIVE';
                 const id = user.id || user.userid;
+                const isDemoTarget = user.email?.endsWith('@demo.hope.com');
                 const isSelfRow = currentUser && (id === currentUser.id || user.email === currentUser.email);
                 
                 return (
@@ -396,9 +383,19 @@ export default function UserManagementPage() {
                         {expandedRows[id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
                       
-                      {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins */}
-                      {isRowSuperAdmin && !isSelfRow ? (
-                        <SuperAdminDisabledActions />
+                      {/* SPRINT 3 GATING: Disabled Actions with Tooltip for SuperAdmins or Demo Accounts */}
+                      {(isRowSuperAdmin || isDemoTarget) && !isSelfRow ? (
+                        <div className="relative group/tooltip flex gap-2">
+                          <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+                            <Edit className="w-4 h-4" /> Edit
+                          </button>
+                          <button disabled className="px-3 py-1.5 text-outline bg-surface-container-low border border-outline-variant/30 rounded cursor-not-allowed opacity-60 flex items-center gap-1 text-xs font-semibold">
+                            <BanIcon className="w-4 h-4" /> Deactivate
+                          </button>
+                          <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block w-48 bg-on-surface text-surface text-xs p-2 rounded shadow-lg text-center z-10 pointer-events-none">
+                            {isRowSuperAdmin ? 'SUPERADMIN accounts cannot be modified' : 'Demo accounts cannot be modified'}
+                          </div>
+                        </div>
                       ) : (
                         <div className="flex items-center gap-2">
                           <button 

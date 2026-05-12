@@ -29,6 +29,7 @@ import DeletedItemsPage from './pages/DeletedItemsPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import { RootLayout } from './layouts/RootLayout';
+import DemoBanner from './components/DemoBanner';
 
 import { useRights } from './contexts/UserRightsContext';
 
@@ -66,57 +67,60 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
  */
 function App() {
   return (
-    <Routes>
-      {/* Default route redirects to Login */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    <>
+      <Routes>
+        {/* Default route redirects to Login */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      {/* Public Routes — accessible without authentication */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
+        {/* Public Routes — accessible without authentication */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
-      {/* Protected Routes — require authenticated session + resolved rights */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <RootLayout>
-            <Home />
-          </RootLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/products" element={
-        <ProtectedRoute>
-          <RootLayout>
-            <ProductListPage />
-          </RootLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/deleted" element={
-        <ProtectedRoute>
-          <RootLayout>
-            <DeletedItemsPage />
-          </RootLayout>
-        </ProtectedRoute>
-      } />
-      {/* ApiDebug intentionally omits RootLayout — it has its own full-page chrome */}
-      <Route path="/api" element={
-        <ProtectedRoute>
-          <ApiDebug />
-        </ProtectedRoute>
-      } />
-      <Route path="/reports" element={
-        <ProtectedRoute>
-          <RootLayout>
-            <ReportsPage />
-          </RootLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin" element={
-        <ProtectedRoute>
-          <RootLayout>
-            <UserManagementPage />
-          </RootLayout>
-        </ProtectedRoute>
-      } />
-    </Routes>
+        {/* Protected Routes — require authenticated session + resolved rights */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <RootLayout>
+              <Home />
+            </RootLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/products" element={
+          <ProtectedRoute>
+            <RootLayout>
+              <ProductListPage />
+            </RootLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/deleted" element={
+          <ProtectedRoute>
+            <RootLayout>
+              <DeletedItemsPage />
+            </RootLayout>
+          </ProtectedRoute>
+        } />
+        {/* ApiDebug intentionally omits RootLayout — it has its own full-page chrome */}
+        <Route path="/api" element={
+          <ProtectedRoute>
+            <ApiDebug />
+          </ProtectedRoute>
+        } />
+        <Route path="/reports" element={
+          <ProtectedRoute>
+            <RootLayout>
+              <ReportsPage />
+            </RootLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <RootLayout>
+              <UserManagementPage />
+            </RootLayout>
+          </ProtectedRoute>
+        } />
+      </Routes>
+      <DemoBanner />
+    </>
   );
 }
 

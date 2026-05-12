@@ -45,6 +45,8 @@ type UserRightsContextType = {
     userType: string | null;
     /** True while rights are being fetched (used by ProtectedRoute to prevent flicker). */
     loadingRights: boolean;
+    /** True if the current session belongs to a demo account (@demo.hope.com). */
+    isDemoMode: boolean;
     /** Alias for userType. */
     userRole: string | null;
     /** True if the user's role is exactly 'ADMIN'. */
@@ -86,28 +88,38 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
 
             setLoadingRights(true);
             try {
+                console.log(`[UserRights] Fetching access for user: ${currentUser.id}`);
                 // Step 1: Fetch the user's role from the users table.
-                // Uses maybeSingle() instead of single() to avoid 406 errors
-                // when the user record doesn't exist yet (first-time login).
                 const { data: userData, error: userError } = await supabase
                     .from('users')
                     .select('user_type')
                     .eq('userid', currentUser.id)
                     .maybeSingle();
 
-                if (!userError && userData) {
+                if (userError) {
+                    console.error('[UserRights] Error fetching user role:', userError);
+                }
+                
+                if (userData) {
+                    console.log(`[UserRights] User role identified: ${userData.user_type}`);
                     setUserType(userData.user_type);
+                } else {
+                    console.warn('[UserRights] No user record found in public.users table.');
                 }
 
                 // Step 2: Fetch per-user module rights from the rights table.
-                // Each row maps a right_id (e.g. 'REP_001') to a right_value (0 or 1).
                 const { data: rightsData, error: rightsError } = await supabase
                     .from('usermodule_rights')
                     .select('right_id, right_value')
                     .eq('userid', currentUser.id);
 
-                if (rightsError) throw rightsError;
+                if (rightsError) {
+                    console.error('[UserRights] Error fetching module rights:', rightsError);
+                    throw rightsError;
+                }
 
+                console.log(`[UserRights] Rights fetched: ${rightsData?.length || 0} rows`);
+                
                 // Build the rights lookup map from database rows
                 const rightsMap: RightsMap = {};
                 if (rightsData) {
@@ -119,9 +131,10 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
                 setRights(rightsMap);
                 setFetchedUserId(currentUser.id);
             } catch (error) {
-                console.error('Error fetching user access data:', error);
+                console.error('[UserRights] Critical error in fetchAccessData:', error);
             } finally {
                 setLoadingRights(false);
+                console.log('[UserRights] Fetch complete, loading state cleared.');
             }
         };
 
@@ -179,6 +192,7 @@ export function UserRightsProvider({ children }: { children: React.ReactNode }) 
         isAdmin,
         isSuperAdmin,
         isUser,
+        isDemoMode: !!currentUser?.email?.endsWith('@demo.hope.com'),
         hasRight
     }), [rights, userType, loadingRights, currentUser, fetchedUserId, isAdmin, isSuperAdmin, isUser]);
 

@@ -100,6 +100,58 @@ export default function Login() {
     }
   };
 
+  const handleDemoLogin = async (email: string) => {
+    console.log(`[DemoLogin] Attempting login for: ${email}`);
+    setLocalError(null);
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'demo-password-123', 
+      });
+
+      if (error) {
+        console.error('[DemoLogin] Supabase Auth Error:', error.message);
+        let msg = `Login failed: ${error.message}`;
+        
+        // Connectivity Check
+        if (error.message.includes('fetch') || error.message.includes('NetworkError')) {
+          msg = 'Connection Error: Attempting to ping Supabase server...';
+          setLocalError(msg);
+          
+          try {
+            const baseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/"/g, '').trim();
+            const ping = await fetch(`${baseUrl}/auth/v1/health`);
+            if (ping.ok) {
+              console.log('[Supabase] Server is reachable. The error is likely in Auth settings.');
+              setLocalError('Auth Error: Server is reachable but the request was blocked. Check if Email login is enabled.');
+            } else {
+              setLocalError('Network Error: Supabase server returned an error. Check project status.');
+            }
+          } catch (pingErr) {
+            console.error('[Supabase] Server is NOT reachable:', pingErr);
+            setLocalError('Network Error: Cannot reach Supabase server. Check your internet or ad-blocker.');
+          }
+        } else {
+          setLocalError(msg);
+        }
+        setLoading(false);
+        return;
+      }
+
+      console.log('[DemoLogin] Success! User authenticated:', data.user?.id);
+      
+      // Explicitly set loading false before navigating to avoid UI hang
+      setLoading(false);
+      navigate('/products');
+    } catch (err: any) {
+      console.error('[DemoLogin] Unexpected Exception:', err);
+      setLocalError('An unexpected error occurred. Check browser console.');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-surface p-4 font-sans overflow-hidden">
       {/* Decorative Background Element */}
@@ -148,6 +200,58 @@ export default function Login() {
             error={localError || undefined}
             onClick={handleGoogleLogin}
           />
+
+          <div className="mt-10">
+            <div className="relative flex items-center mb-6">
+              <div className="flex-grow border-t border-outline-variant/30"></div>
+              <span className="flex-shrink mx-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">Or Explore Demo</span>
+              <div className="flex-grow border-t border-outline-variant/30"></div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                onClick={() => handleDemoLogin('admin@demo.hope.com')}
+                disabled={loading}
+                className="flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-high hover:bg-primary/5 border border-outline-variant/20 transition-all group active:scale-[0.98]"
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-sm font-bold text-on-surface">Super Admin</span>
+                  <span className="text-[10px] text-on-surface-variant">Full access & user management</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleDemoLogin('manager@demo.hope.com')}
+                disabled={loading}
+                className="flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-high hover:bg-primary/5 border border-outline-variant/20 transition-all group active:scale-[0.98]"
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-sm font-bold text-on-surface">Product Manager</span>
+                  <span className="text-[10px] text-on-surface-variant">Edit products & view reports</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleDemoLogin('staff@demo.hope.com')}
+                disabled={loading}
+                className="flex items-center justify-between px-6 py-4 rounded-2xl bg-surface-container-high hover:bg-primary/5 border border-outline-variant/20 transition-all group active:scale-[0.98]"
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-sm font-bold text-on-surface">General Staff</span>
+                  <span className="text-[10px] text-on-surface-variant">Standard view-only access</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+              </button>
+            </div>
+          </div>
           
         </div>
       </main>
