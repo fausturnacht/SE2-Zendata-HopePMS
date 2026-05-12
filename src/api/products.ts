@@ -136,6 +136,9 @@ export const updateProduct = async (prodcode: string, product: Partial<Product>)
     throw error;
   }
   const updated = data?.[0] as Product;
+  if (!updated) {
+    throw new Error('Product not found or you do not have permission to edit it.');
+  }
   await addStampEntry(prodcode, stamp);
   return updated;
 };
