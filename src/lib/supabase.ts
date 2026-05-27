@@ -84,7 +84,6 @@ interface Order {
 class MockQueryBuilder {
   private tableName: string;
   private operation: 'select' | 'insert' | 'update' = 'select';
-  private selectColumns: string = '*';
   private insertValues: any[] = [];
   private updateValues: any = null;
   private filters: Filter[] = [];
@@ -96,11 +95,7 @@ class MockQueryBuilder {
     this.tableName = tableName;
   }
 
-  select(columns: string = '*') {
-    // Only set operation to 'select' if we aren't performing a mutation
-    if (this.operation === 'select') {
-      this.selectColumns = columns;
-    }
+  select(_columns: string = '*') {
     return this;
   }
 
