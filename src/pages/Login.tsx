@@ -18,13 +18,15 @@
  * @see {@link ./AuthCallback.tsx} — Processes the OAuth redirect
  * @see {@link ../components/GoogleAuthButton.tsx} — The sign-in button component
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import GoogleAuthButton from '../components/GoogleAuthButton';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { currentUser, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   
@@ -32,6 +34,13 @@ export default function Login() {
   // when an INACTIVE user is rejected during the auth flow
   const location = useLocation();
   const inactiveError = location.state?.error || localError;
+
+  // Auto-redirect authenticated users away from the login page
+  useEffect(() => {
+    if (!isLoading && currentUser) {
+      navigate('/products', { replace: true });
+    }
+  }, [currentUser, isLoading, navigate]);
 
   const handleGoogleLogin = async () => {
     setLocalError(null);
