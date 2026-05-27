@@ -6,12 +6,20 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Users, User, LogOut, ChevronUp, ChevronDown } from 'lucide-react';
+import { Shield, Users, User, LogOut, ChevronUp, ChevronDown, RotateCcw } from 'lucide-react';
 
 export default function DemoBanner() {
   const { currentUser, signOut } = useAuth();
   const [switching, setSwitching] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
+
+  const handleResetSandbox = () => {
+    if (confirm('Are you sure you want to reset all sandbox changes? This will clear all products, prices, and user modifications you made during this session.')) {
+      const keysToClear = Object.keys(localStorage).filter(key => key.startsWith('hope_pms_table_'));
+      keysToClear.forEach(key => localStorage.removeItem(key));
+      window.location.reload();
+    }
+  };
 
   // Only show if the user is a demo user
   const isDemoUser = currentUser?.email?.endsWith('@demo.hope.com');
@@ -162,6 +170,15 @@ export default function DemoBanner() {
             </div>
 
             <div className="h-px bg-white/10"></div>
+
+            <button
+              onClick={handleResetSandbox}
+              disabled={switching}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-xs font-bold bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition-all border border-white/10 text-white cursor-pointer mb-2"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
+              Reset Sandbox Data
+            </button>
 
             <button
               onClick={() => signOut()}
