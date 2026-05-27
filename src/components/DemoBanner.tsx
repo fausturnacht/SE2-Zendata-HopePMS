@@ -24,7 +24,7 @@ export default function DemoBanner() {
       // Sign in directly as the new role to avoid intermediate null session state which triggers /login redirect
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password: 'demo-password-123',
+        password: import.meta.env.VITE_DEMO_PASSWORD || '',
       });
 
       if (error) throw error;

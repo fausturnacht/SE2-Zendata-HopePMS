@@ -117,7 +117,7 @@ export default function Login() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: 'demo-password-123', 
+        password: import.meta.env.VITE_DEMO_PASSWORD || '', 
       });
 
       if (error) {
